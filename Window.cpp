@@ -3,6 +3,7 @@
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram;
+OBJObject* bunny;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
@@ -21,8 +22,9 @@ glm::mat4 Window::V;
 
 void Window::initialize_objects()
 {
+	bunny = new OBJObject("myCube.obj");
 	cube = new Cube();
-
+	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 }
@@ -31,6 +33,7 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete(cube);
+	delete(bunny);
 	glDeleteProgram(shaderProgram);
 }
 
@@ -101,7 +104,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// Call the update function the cube
-	cube->update();
+	//cube->update();
+	bunny->update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -113,7 +117,8 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(shaderProgram);
 	
 	// Render the cube
-	cube->draw(shaderProgram);
+	//cube->draw(shaderProgram);
+	bunny->draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
