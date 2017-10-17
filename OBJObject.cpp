@@ -16,48 +16,23 @@ OBJObject::OBJObject(const char *filepath)
 
 	//read in geometry data disk
 	parse(filepath);
-	/*
-	//Find Object Center
-	float lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
-	lowestX = highestX = vertices[0].x;
-	lowestY = highestY = vertices[0].y;
-	lowestZ = highestZ = vertices[0].z;
-
-	for (int i = 0; i < vertices.size(); ++i) {
-		if (vertices[i].x > highestX)	highestX = vertices[i].x;
-		if (vertices[i].x < lowestX)	lowestX =  vertices[i].x;
-		if (vertices[i].y > highestY)	highestY = vertices[i].y;
-		if (vertices[i].y < lowestY)	lowestY = vertices[i].y;
-		if (vertices[i].z > highestZ)	highestZ = vertices[i].z;
-		if (vertices[i].z < lowestZ)	lowestZ = vertices[i].z;
-	}
-	objectCenterOffset.x = (highestX + lowestX) / 2.0f;
-	objectCenterOffset.y = (highestY + lowestY) / 2.0f;
-	objectCenterOffset.z = (highestZ + lowestZ) / 2.0f;
 	
-
+	
 	//initialize Object Properties
 	this->position = glm::vec3(0, 0, 0);
-	this->size = 1.0f;
+	this->scale = 1.0f;
 	this->modelAngle = 0.0f;
-	this->orientation = 0;
 	
 	//Initialize transformation matrices to reflect object properties.
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 	spinMatrix = glm::rotate(glm::mat4(1.0f), modelAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(size, size, size));
-	orbitMatrix = glm::rotate(glm::mat4(1.0f), this->orientation, glm::vec3(0.0f, 0.0f, 1.0f));
-	
-	//initlaize point size
-	this->pointSize = 1;
-	*/
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+	trackBallRotate = glm::mat4(1.0);
 
-	
-	toWorld = glm::mat4(1.0f);
-	
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
 	
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
@@ -86,11 +61,27 @@ OBJObject::OBJObject(const char *filepath)
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
 
-	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	// Unbind the VAO now so we don't accidentally tamper with it.
 	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
+		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
+		GL_FLOAT, // What type these components are
+		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
+		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
+		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
+
+
+	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glBindVertexArray(0);
+
 	
 }
 
@@ -102,12 +93,16 @@ OBJObject::~OBJObject() {
 void OBJObject::parse(const char *filepath) 
 {
 
-	// Populate the face indices, vertices, and normals vectors with the OBJ Object data	
+	// Parsing Variables	
 	FILE* fp;
 	char currLine[BUFSIZ];
 	GLfloat x, y, z;
 	GLfloat r, g, b;
 	GLuint v1, v2, v3, n1, n2, n3;
+
+	// Variables for finding Model Center of Mass
+	bool firstVertex = true;
+	GLfloat lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
 
 	fp = fopen(filepath, "rb");
 	if (fp == NULL) {
@@ -122,42 +117,86 @@ void OBJObject::parse(const char *filepath)
 		if (currLine[0] == 'v') {
 			if (currLine[1] == ' ') {
 				sscanf(currLine + 2, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
-				//cout << x << " " << y << " " << z << endl;
 				vertices.push_back(x);
 				vertices.push_back(y);
 				vertices.push_back(z);
+
+				//Code to calc center of mass
+				if (firstVertex) {
+					lowestX = highestX = x;
+					lowestY = highestY = y;
+					lowestZ = highestZ = z;
+					firstVertex = false;
+				}
+				if (x > highestX)	highestX = x;
+				if (x < lowestX)	lowestX = x;
+				if (y > highestY)	highestY = y;
+				if (y < lowestY)	lowestY = y;
+				if (z > highestZ)	highestZ = z;
+				if (z < lowestZ)	lowestZ = z;
 			}
 			else if (currLine[1] == 'n' && currLine[2] == ' ') {
 				sscanf(currLine + 3, "%f %f %f", &x, &y, &z);
-				normals.push_back(x);
-				normals.push_back(y);
-				normals.push_back(z);
+				GLfloat magnitude = sqrt(x * x + y * y + z * z);
+
+				normals.push_back(x / magnitude / 2 + 0.5f);
+				normals.push_back(y / magnitude / 2 + 0.5f);
+				normals.push_back(z / magnitude / 2 + 0.5f);
 			}
 		}
 		//process face
 		else if (currLine[0] == 'f' && currLine[1] == ' ') {		
 			sscanf(currLine + 2, "%i//%i %i//%i %i//%i", &v1, &n1, &v2, &n2, &v3, &n3);
-			indices.push_back(v1);
-			indices.push_back(n1);
-			indices.push_back(v2);
-			indices.push_back(n2);
-			indices.push_back(v3);
-			indices.push_back(n3);
+			indices.push_back(v1 - 1);
+			//indices.push_back(n1 - 1);
+			indices.push_back(v2 - 1);
+			//indices.push_back(n2 - 1);
+			indices.push_back(v3 - 1);
+			//indices.push_back(n3 - 1);
 		}
 		
-	}
+	}//END FOR
+	
+	//define object center
+	glm::vec3 objectCenterOffset;
+	objectCenterOffset.x = (highestX + lowestX) / 2.0f;
+	objectCenterOffset.y = (highestY + lowestY) / 2.0f;
+	objectCenterOffset.z = (highestZ + lowestZ) / 2.0f;
+
+	//use model boundaries to calc scale factor matrix
+	float scaleFactor = calcScaleFactor(objectCenterOffset, highestX, lowestX, highestY, lowestY, highestZ, lowestZ);
+	scaleToFit = glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor, scaleFactor, scaleFactor));
+	centerModel = glm::translate(glm::mat4(1.0f), glm::vec3(-objectCenterOffset.x, -objectCenterOffset.y, -objectCenterOffset.z));
+
 	cout << "num vertices: " << vertices.size() << endl;
 	cout << "num normals: " << normals.size() << endl;
-	cout << "num indices: " << indices.size() << endl;
+	cout << "num indices: " << indices.size() << endl;	
 
-	
+}
+float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &lowestX, float &highestY, float& lowestY, float &highestZ, float &lowestZ) {
+	vector<float> elems;
+	elems.push_back(highestX - objectCenterOffset.x);
+	elems.push_back(objectCenterOffset.x - lowestX);
+	elems.push_back(highestY - objectCenterOffset.y);
+	elems.push_back(objectCenterOffset.y - lowestY);
+	elems.push_back(highestZ - objectCenterOffset.z);
+	elems.push_back(objectCenterOffset.z - lowestZ);
 
+	float furthest = 0;
+	for (unsigned int i = 0; i < elems.size(); ++i) {
+		if (elems[i] > furthest)
+			furthest = elems[i];
+	}
+
+	return 1.0f / furthest;
 }
 
 void OBJObject::draw(GLuint shaderProgram)
 {
+
+	glm::mat4 toWorld = scaleMatrix;
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * toWorld;
+	glm::mat4 modelview = Window::V * translateMatrix * trackBallRotate * toWorld * scaleToFit * centerModel;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -169,42 +208,19 @@ void OBJObject::draw(GLuint shaderProgram)
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 }
 
+void OBJObject::update() {
 
-
-
+	//spin(0.2f * glm::pi<float>() / 180.0f);
+}
 
 void OBJObject::setPosition(glm::vec3 newPosition) {
 	position = newPosition;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-}
-void OBJObject::setSize(float newSize) {
-	size = newSize;
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(size, size, size));
-}
-void OBJObject::setOrientation(float newOrientation) {
-	orientation = newOrientation;
-	orbitMatrix = glm::rotate(glm::mat4(1.0f), this->orientation / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
-}
-
-void OBJObject::update() {
-
-	spin(0.2f * glm::pi<float>() / 180.0f);
-}
-
-void OBJObject::spin(float rad) {
-
-	this->modelAngle += rad;
-	if (this->modelAngle > 360.0f || this->modelAngle < -360.0f) this->modelAngle = 0.0f;
-
-	// This creates the matrix to rotate the object
-	this->spinMatrix = glm::rotate(glm::mat4(1.0f), this->modelAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-
-	this->toWorld = glm::rotate(glm::mat4(1.0f), this->modelAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void OBJObject::move(glm::vec3 displacement) {
@@ -212,29 +228,15 @@ void OBJObject::move(glm::vec3 displacement) {
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 }
 
-void OBJObject::incrementSize(float offset) {
-	size += offset;
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(size, size, size));
+void OBJObject::incrementScale(float scaleDiff) {
+	scale += scaleDiff;
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
 }
 
-void OBJObject::orbit(float orbitVal) {
 
-	orientation += orbitVal;
-
-	float objectAngleXY = atan2(position.y, position.x);
-	float objectDistanceXY = sqrt(position.x * position.x + position.y * position.y);
-
-	position.x = objectDistanceXY * cos(objectAngleXY + orbitVal);
-	position.y = objectDistanceXY * sin(objectAngleXY + orbitVal);
-
-	orbitMatrix = glm::rotate(glm::mat4(1.0f), this->orientation, glm::vec3(0.0f, 0.0f, 1.0f));
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+void OBJObject::updateTrackBallRotate(glm::mat4 offset) {
+	trackBallRotate = offset * trackBallRotate;
 }
 
-void OBJObject::incrementPointSize(GLfloat offset) {
-	pointSize += offset;
 
-	if (pointSize < 1.0f) {
-		pointSize = 1.0f;
-	}
-}
+

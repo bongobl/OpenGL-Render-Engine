@@ -26,32 +26,32 @@ class OBJObject
 {
 private:
 
-	//Object Geometry Data
+	//Model Geometry Data
 	std::vector<GLuint> indices;
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-	glm::mat4 toWorld;
-	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview;
+	//scale and center Model Geometry
+	glm::mat4 scaleToFit;
+	glm::mat4 centerModel;
 
 
-	//Raw Object Properties
-	glm::vec3 objectCenterOffset;
+	//Raw Object Properties	
 	glm::vec3 position;
+	float scale;
 	float modelAngle;
-	float size;
-	float orientation;	
 
 	//Transformation Matrices to adhere to object properties 
 	glm::mat4 translateMatrix;
 	glm::mat4 spinMatrix;
 	glm::mat4 scaleMatrix;
-	glm::mat4 orbitMatrix;
+	glm::mat4 trackBallRotate;
+	//Rendering with modern OpenGL
+	GLuint VBO, VBO2, VAO, EBO;
+	GLuint uProjection, uModelview;
 
-	//Point Size to draw
-	GLfloat pointSize;
 	
+
 
 public:
 	OBJObject(const char* filepath);
@@ -67,16 +67,16 @@ public:
 
 	//Manipulate raw Object Properties
 	void setPosition(glm::vec3 newPosition);
-	void setSize(float newSize);
-	void setOrientation(float newOrientation);
-
-	void spin(float rad);
 	void move(glm::vec3 displacement);
-	void incrementSize(float offset);
-	void orbit(float orbitVal);
-	void incrementPointSize(GLfloat offset);
+	void incrementScale(float scaleDiff);
+	void spin(float rad);
+	void updateTrackBallRotate(glm::mat4 offset);
+	
 
 
+private:
+
+	float calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &lowestX, float &highestY, float& lowestY, float &highestZ, float &lowestZ);
 };
 
 #endif

@@ -3,7 +3,6 @@
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram;
-OBJObject* bunny;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
@@ -14,15 +13,27 @@ glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
+bool Window::isRightMouseButtonDown;
+bool Window::isLeftMouseButtonDown;
 int Window::width;
 int Window::height;
+int Window::currModel;
 
+glm::vec2 Window::mousePosition;
+glm::vec2 Window::lastMousePosition;
+glm::vec3 Window::currPoint;
+glm::vec3 Window::lastPoint;
+
+OBJObject* Window::models;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 void Window::initialize_objects()
 {
-	bunny = new OBJObject("myCube.obj");
+	isLeftMouseButtonDown = false;
+	isRightMouseButtonDown = false;
+	currModel = Window::BUNNY;
+	models = new OBJObject[3]{ OBJObject("bunny.obj") , OBJObject("bear.obj") , OBJObject("dragon.obj") };
 	cube = new Cube();
 	
 	// Load the shader program. Make sure you have the correct filepath up top
@@ -33,7 +44,7 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete(cube);
-	delete(bunny);
+	delete[] models;
 	glDeleteProgram(shaderProgram);
 }
 
@@ -105,7 +116,7 @@ void Window::idle_callback()
 {
 	// Call the update function the cube
 	//cube->update();
-	bunny->update();
+	models[currModel].update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -118,7 +129,7 @@ void Window::display_callback(GLFWwindow* window)
 	
 	// Render the cube
 	//cube->draw(shaderProgram);
-	bunny->draw(shaderProgram);
+	models[currModel].draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -137,5 +148,120 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		// Check which key was pressed
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			// Close the window. This causes the program to also terminate.
+			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+		else if (key == GLFW_KEY_1) {
+			currModel = Window::BUNNY;
+			std::cout << "bunny model, currModel = " << currModel << std::endl;
+		}
+		else if (key == GLFW_KEY_2) {
+			currModel = Window::BEAR;
+			std::cout << "bear model, currModel = " << currModel << std::endl;
+		}
+		else if (key == GLFW_KEY_3) {
+			currModel = Window::DRAGON;
+			std::cout << "dragon model, currModel = " << currModel << std::endl;
+		}
+
+		//Scale
+		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			if (mods & GLFW_MOD_SHIFT) {
+				models[currModel].incrementScale(0.5f);
+			}
+			else {
+				models[currModel].incrementScale(-0.5f);
+			}
+		}
+
+		//Reset Position
+		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+
+			models[currModel].setPosition(glm::vec3(0, 0, 0));
+			
+		}
 	}
+}
+
+void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	
+	if (action == GLFW_PRESS) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			cout << "left button pressed" << endl;
+			isLeftMouseButtonDown = true;
+			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+			cout << "right button pressed" << endl;
+			isRightMouseButtonDown = true;
+			lastMousePosition = mousePosition;
+		}
+	}
+	if (action == GLFW_RELEASE) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			cout << "left button released" << endl;
+			isLeftMouseButtonDown = false;
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+			cout << "right button released" << endl;
+			isRightMouseButtonDown = false;
+		}
+	}
+}
+void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double ypos) {
+	
+	//define mousePosition for other functions to use
+	mousePosition.x = (float)xpos;
+	mousePosition.y = (float)ypos;
+
+	glm::vec3 direction;
+	GLfloat pixel_diff;
+	GLfloat rot_angle, zoom_factor;
+	
+
+	//if left mouse button is down, do trackball rotation
+	if (isLeftMouseButtonDown) {
+		currPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
+		direction = currPoint - lastPoint;
+		float velocity = glm::length(direction);
+		if (velocity > 0.0001f) {			
+
+			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
+			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint));		//should I convert this to degrees?
+
+			models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+		}
+	}
+
+	//if right mouse button is down, translate model
+	if (isRightMouseButtonDown) {
+		glm::vec2 deltaMousePosition;
+		deltaMousePosition.x = (mousePosition.x - lastMousePosition.x) * .033f;
+		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * .033f;
+		models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
+	}
+
+
+	lastPoint = currPoint;
+	lastMousePosition = mousePosition;
+}
+
+glm::vec3 Window::trackBallMap(glm::vec2 point) {
+
+
+	glm::vec3 v;
+	GLfloat d;
+	v.x = (2.0f * point.x - Window::width) / Window::width;
+	v.y = (Window::height - 2.0f * point.y) / Window::height;
+	v.z = 0;
+	d = glm::length(v);
+	if (d > 1.0f)
+		d = 1.0f;
+	v.z = sqrt(1.001f - d*d);
+	v = glm::normalize(v);
+	return v;
 }
