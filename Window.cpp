@@ -220,7 +220,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 	glm::vec3 direction;
 	GLfloat pixel_diff;
-	GLfloat rot_angle, zoom_factor;
 	
 
 	//if left mouse button is down, do trackball rotation
@@ -248,6 +247,11 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 	lastPoint = currPoint;
 	lastMousePosition = mousePosition;
+}
+
+void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	models[currModel].move(glm::vec3(0,0, yoffset));
+
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {

@@ -47,6 +47,7 @@ public:
 
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 	static void cursor_position_callback(GLFWwindow * window, double xpos, double ypos);
+	static void mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 private:
 	static glm::vec3 trackBallMap(glm::vec2 point);
