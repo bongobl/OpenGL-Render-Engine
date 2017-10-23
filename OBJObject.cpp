@@ -194,7 +194,7 @@ float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX,
 
 void OBJObject::draw(GLuint currentShaderProgram)
 {
-
+	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
 	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * scaleMatrix;
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * toWorld  * scaleToFit * centerModel;
@@ -204,6 +204,7 @@ void OBJObject::draw(GLuint currentShaderProgram)
 	uProjection = glGetUniformLocation(currentShaderProgram, "projection");
 	uModelview = glGetUniformLocation(currentShaderProgram, "modelview");
 	uToWorld = glGetUniformLocation(currentShaderProgram, "toWorld");
+
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);

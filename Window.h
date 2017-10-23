@@ -13,15 +13,18 @@
 #include "Cube.h"
 #include "shader.h"
 #include "OBJObject.h"
-
+#include "Light.h"
 using namespace std;
 class Window
 {
 	enum modelID { BUNNY, BEAR, DRAGON };
-
+	
 	static OBJObject* models; 
+	static Light* sceneLights;
 	
 public:
+
+	static int currLight;
 
 	static bool isLeftMouseButtonDown;
 	static bool isRightMouseButtonDown;

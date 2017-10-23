@@ -1,7 +1,5 @@
 #include "window.h"
-
 const char* window_title = "GLFW Starter Project";
-Cube * cube;
 GLint shaderProgram;
 GLint directionalLightProgram;
 GLint pointLightProgram;
@@ -22,6 +20,7 @@ bool Window::isLeftMouseButtonDown;
 int Window::width;
 int Window::height;
 int Window::currModel;
+int Window::currLight;
 
 glm::vec2 Window::mousePosition;
 glm::vec2 Window::lastMousePosition;
@@ -29,6 +28,8 @@ glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
 
 OBJObject* Window::models;
+Light* Window::sceneLights;
+
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
@@ -38,17 +39,29 @@ void Window::initialize_objects()
 	isRightMouseButtonDown = false;
 	currModel = Window::BUNNY;
 	models = new OBJObject[3]{ OBJObject("bunny.obj") , OBJObject("bear.obj") , OBJObject("dragon.obj") };
-	cube = new Cube();
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	directionalLightProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_directionalLight.frag");
+
+	//set up lights
+	sceneLights = new Light[3];
+	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(1, 0, 1), glm::normalize(glm::vec3(-1, -1, -1)));
+	/*
+	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(2, 2, 2));
+	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.75f, 0.75f, 0.75f),
+											glm::vec3(2, 2, 2),
+											glm::normalize(glm::vec3(-1, -1, -1)),
+											1.0f,
+											1);
+	*/
+	currLight = Light::DIRECTIONAL;
+	
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete(cube);
 	delete[] models;
 	glDeleteProgram(shaderProgram);
 	glDeleteProgram(directionalLightProgram);
@@ -121,7 +134,6 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// Call the update function the cube
-	//cube->update();
 	models[currModel].update();
 }
 
@@ -130,12 +142,16 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	/*
 	// Use the shader of programID
-	glUseProgram(directionalLightProgram);
+	glUseProgram(directionalLightProgram); // call lights' update() function here instead
 	
 	// Render the cube
-	//cube->draw(shaderProgram);
 	models[currModel].draw(directionalLightProgram);
+	*/
+
+	sceneLights[Light::DIRECTIONAL].update();
+	models[currModel].draw(sceneLights[Light::DIRECTIONAL].shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -196,24 +212,20 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	
 	if (action == GLFW_PRESS) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT) {
-			cout << "left button pressed" << endl;
 			isLeftMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-			cout << "right button pressed" << endl;
 			isRightMouseButtonDown = true;
 			lastMousePosition = mousePosition;
 		}
 	}
 	if (action == GLFW_RELEASE) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT) {
-			cout << "left button released" << endl;
 			isLeftMouseButtonDown = false;
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-			cout << "right button released" << endl;
 			isRightMouseButtonDown = false;
 		}
 	}
@@ -256,7 +268,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	//models[currModel].move(glm::vec3(0,0, yoffset));
-	models[currModel].zoomModel(yoffset);
+	models[currModel].zoomModel((float)yoffset);
 
 }
 

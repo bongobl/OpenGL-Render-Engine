@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Cube.h" />
+    <ClInclude Include="..\Light.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
@@ -27,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cube.cpp" />
+    <ClCompile Include="..\Light.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />

@@ -15,6 +15,7 @@ uniform mat4 projection;
 uniform mat4 modelview;
 uniform mat4 toWorld;
 
+
 // Outputs of the vertex shader are the inputs of the same name of the fragment shader.
 // The default output, gl_Position, should be assigned something. You can define as many
 // extra outputs as you need.
