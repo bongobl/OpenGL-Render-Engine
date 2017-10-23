@@ -46,13 +46,13 @@ void Window::initialize_objects()
 
 	//set up lights
 	sceneLights = new Light[3];
-	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(1, 0, 1), glm::normalize(glm::vec3(-1, -1, -1)));
+	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(.5f, .5f, 1), glm::normalize(glm::vec3(-1, -1, -1)));
 	/*
 	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(2, 2, 2));
 	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.75f, 0.75f, 0.75f),
 											glm::vec3(2, 2, 2),
 											glm::normalize(glm::vec3(-1, -1, -1)),
-											1.0f,
+											glm::pi<float>()/4,
 											1);
 	*/
 	currLight = Light::DIRECTIONAL;
@@ -150,7 +150,7 @@ void Window::display_callback(GLFWwindow* window)
 	models[currModel].draw(directionalLightProgram);
 	*/
 
-	sceneLights[Light::DIRECTIONAL].update();
+	sceneLights[currLight].update();
 	models[currModel].draw(sceneLights[Light::DIRECTIONAL].shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing

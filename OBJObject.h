@@ -21,6 +21,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
+#include "Material.h"
 
 class OBJObject
 {
@@ -42,7 +43,7 @@ private:
 	float modelAngle;
 	float modelZoom;
 
-	//Transformation Matrices to adhere to object properties 
+	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
 	glm::mat4 spinMatrix;
@@ -55,6 +56,9 @@ private:
 	GLuint VBO, VBO2, VAO, EBO;
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
+
+	//Model Material
+	Material material;
 
 	
 

@@ -5,7 +5,15 @@ struct Light{
 	vec3 Color;
 	vec3 Direction;
 };
+
+struct Material{
+	vec3 materialColor;
+	float diffuse;
+	float specular;
+};
+
 uniform Light directionalLight;
+uniform Material material;
 
 in vec3 normalDataOutput;
 in vec3 vertexDataOutput;
@@ -23,8 +31,18 @@ void main()
 	//find surface to light vector L
 	vec3 L = -1 * directionalLight.Direction;
 
+
 	//add diffuse componenet
-	color = vec4( dot(normal, L) * directionalLight.Color,  1.0f );
-	//color = vec4(normalDataOutput, 1);
+	color = vec4(   material.diffuse * dot(normal, L) * directionalLight.Color,  1.0f );
+
+
+	//add specular component
+	vec3 eyePosition = vec3(0.0f, 0.0f, 20.0f);
+	vec3 R = 2 * dot(normal, L) * normal - L;
+	vec3 fragPosition = normalize(normalMatrix * vertexDataOutput);
+	vec3 e = eyePosition - fragPosition;
+	color += vec4( material.specular * directionalLight.Color * dot(R, e),0 );
+
+	//add ambient component
 	
 }

@@ -31,6 +31,8 @@ OBJObject::OBJObject(const char *filepath)
 	trackBallRotate = glm::mat4(1.0);
 	modelZoomMatrix = glm::translate(glm::mat4(1.0f), position);
 
+	material = Material(glm::vec3(1,1,1), 1, 0);
+
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
 	glGenBuffers(1, &VBO);
@@ -210,6 +212,11 @@ void OBJObject::draw(GLuint currentShaderProgram)
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
+	//Apply model material properties
+	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.diffuse"), material.diffuse);
+	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.specular"), material.specular);
+	glUniform3f(glGetUniformLocation(currentShaderProgram, "material.materialColor"), material.color.x, material.color.y, material.color.z);
+
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
@@ -220,7 +227,7 @@ void OBJObject::draw(GLuint currentShaderProgram)
 
 void OBJObject::update() {
 
-	//spin(0.2f * glm::pi<float>() / 180.0f);
+	
 }
 
 void OBJObject::setPosition(glm::vec3 newPosition) {
@@ -261,6 +268,3 @@ void OBJObject::zoomModel(float z) {
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 
 }
-
-
-

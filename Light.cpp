@@ -45,14 +45,14 @@ void Light::update() {
 		glUniform3f(glGetUniformLocation(shaderProgram, "directionalLight.Direction"), Direction.x, Direction.y, Direction.z);
 	}
 	else if (lightType == Light::POINT) {
-		glUniform3f(glGetUniformLocation(shaderProgram, "light.Color"), Color.x, Color.y, Color.z);
-		glUniform3f(glGetUniformLocation(shaderProgram, "light.Position"), Position.x, Position.y, Position.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "pointLight.Color"), Color.x, Color.y, Color.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "pointLight.Position"), Position.x, Position.y, Position.z);
 	}
 	else if (lightType == Light::SPOT) {
-		glUniform3f(glGetUniformLocation(shaderProgram, "light.Color"), Color.x, Color.y, Color.z);
-		glUniform3f(glGetUniformLocation(shaderProgram, "light.Position"), Position.x, Position.y, Position.z);
-		glUniform3f(glGetUniformLocation(shaderProgram, "light.Direction"), Direction.x, Direction.y, Direction.z);
-		glUniform1f(glGetUniformLocation(shaderProgram, "light.spot_cutoff"), spot_cutoff);
-		glUniform1f(glGetUniformLocation(shaderProgram, "light.spot_exponent"), spot_exponent);
+		glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.Color"), Color.x, Color.y, Color.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.Position"), Position.x, Position.y, Position.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.Direction"), Direction.x, Direction.y, Direction.z);
+		glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.spot_cutoff"), spot_cutoff);
+		glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.spot_exponent"), spot_exponent);
 	}
 }
