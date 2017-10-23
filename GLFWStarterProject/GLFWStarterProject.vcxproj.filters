@@ -56,5 +56,8 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="..\shader_directionalLight.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

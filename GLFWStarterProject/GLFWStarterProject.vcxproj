@@ -35,6 +35,7 @@
   <ItemGroup>
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
+    <None Include="..\shader_directionalLight.frag" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

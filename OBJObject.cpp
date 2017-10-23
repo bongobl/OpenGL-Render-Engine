@@ -22,12 +22,14 @@ OBJObject::OBJObject(const char *filepath)
 	this->position = glm::vec3(0, 0, 0);
 	this->scale = 1.0f;
 	this->modelAngle = 0.0f;
-	
+	this->modelZoom = 0;
+
 	//Initialize transformation matrices to reflect object properties.
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 	spinMatrix = glm::rotate(glm::mat4(1.0f), modelAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
 	trackBallRotate = glm::mat4(1.0);
+	modelZoomMatrix = glm::translate(glm::mat4(1.0f), position);
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -81,7 +83,6 @@ OBJObject::OBJObject(const char *filepath)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
-
 	
 }
 
@@ -191,20 +192,23 @@ float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX,
 	return 1.0f / furthest;
 }
 
-void OBJObject::draw(GLuint shaderProgram)
+void OBJObject::draw(GLuint currentShaderProgram)
 {
 
-	glm::mat4 toWorld = scaleMatrix;
+	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * scaleMatrix;
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * translateMatrix * trackBallRotate * toWorld * scaleToFit * centerModel;
+	glm::mat4 modelview = Window::V * toWorld  * scaleToFit * centerModel;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(shaderProgram, "projection");
-	uModelview = glGetUniformLocation(shaderProgram, "modelview");
+	uProjection = glGetUniformLocation(currentShaderProgram, "projection");
+	uModelview = glGetUniformLocation(currentShaderProgram, "modelview");
+	uToWorld = glGetUniformLocation(currentShaderProgram, "toWorld");
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
+	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
+
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
@@ -221,11 +225,13 @@ void OBJObject::update() {
 void OBJObject::setPosition(glm::vec3 newPosition) {
 	position = newPosition;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+
 }
 
 void OBJObject::move(glm::vec3 displacement) {
 	position = position + displacement;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+
 }
 
 void OBJObject::incrementScale(float scaleDiff) {
@@ -236,6 +242,23 @@ void OBJObject::incrementScale(float scaleDiff) {
 
 void OBJObject::updateTrackBallRotate(glm::mat4 offset) {
 	trackBallRotate = offset * trackBallRotate;
+	position = glm::vec3(offset * glm::vec4(position.x, position.y, position.z,1.0f));
+	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+}
+
+void OBJObject::setZoomVal(float z) {
+	modelZoom = 0;
+	modelZoomMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, modelZoom));
+}
+void OBJObject::zoomModel(float z) {
+	
+	/*
+	modelZoom += z;
+	modelZoomMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,modelZoom));
+	*/
+	position.z += z;
+	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+
 }
 
 

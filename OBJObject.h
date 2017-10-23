@@ -40,15 +40,21 @@ private:
 	glm::vec3 position;
 	float scale;
 	float modelAngle;
+	float modelZoom;
 
 	//Transformation Matrices to adhere to object properties 
+	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
 	glm::mat4 spinMatrix;
 	glm::mat4 scaleMatrix;
 	glm::mat4 trackBallRotate;
+	glm::mat4 screenZoomMatrix;
+	glm::mat4 modelZoomMatrix;
+
 	//Rendering with modern OpenGL
 	GLuint VBO, VBO2, VAO, EBO;
 	GLuint uProjection, uModelview;
+	GLuint uToWorld;
 
 	
 
@@ -59,7 +65,7 @@ public:
 	void parse(const char* filepath);
 
 	//OpenGL draw function
-	void draw(GLuint shaderProgram);
+	void draw(GLuint currShaderProgram);
 
 
 	void update();
@@ -71,6 +77,8 @@ public:
 	void incrementScale(float scaleDiff);
 	void spin(float rad);
 	void updateTrackBallRotate(glm::mat4 offset);
+	void setZoomVal(float z);
+	void zoomModel(float z);
 	
 
 

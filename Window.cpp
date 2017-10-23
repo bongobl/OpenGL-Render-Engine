@@ -3,10 +3,14 @@
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram;
+GLint directionalLightProgram;
+GLint pointLightProgram;
+GLint spotLightProgram;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
+
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
@@ -38,6 +42,7 @@ void Window::initialize_objects()
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	directionalLightProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_directionalLight.frag");
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -46,6 +51,7 @@ void Window::clean_up()
 	delete(cube);
 	delete[] models;
 	glDeleteProgram(shaderProgram);
+	glDeleteProgram(directionalLightProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -125,11 +131,11 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Use the shader of programID
-	glUseProgram(shaderProgram);
+	glUseProgram(directionalLightProgram);
 	
 	// Render the cube
 	//cube->draw(shaderProgram);
-	models[currModel].draw(shaderProgram);
+	models[currModel].draw(directionalLightProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -181,7 +187,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
 
 			models[currModel].setPosition(glm::vec3(0, 0, 0));
-			
+			models[currModel].setZoomVal(0);
 		}
 	}
 }
@@ -219,7 +225,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 	mousePosition.y = (float)ypos;
 
 	glm::vec3 direction;
-	GLfloat pixel_diff;
 	
 
 	//if left mouse button is down, do trackball rotation
@@ -230,9 +235,9 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		if (velocity > 0.0001f) {			
 
 			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
-			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint));		//should I convert this to degrees?
-
-			models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint));	
+			if(!isnan(rotAngle))
+				models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
 		}
 	}
 
@@ -250,7 +255,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 }
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	models[currModel].move(glm::vec3(0,0, yoffset));
+	//models[currModel].move(glm::vec3(0,0, yoffset));
+	models[currModel].zoomModel(yoffset);
 
 }
 
