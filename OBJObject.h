@@ -64,9 +64,11 @@ private:
 
 
 public:
-	OBJObject(const char* filepath);
+
+	OBJObject(const char* filepath, Material m);
 	~OBJObject();
 	void parse(const char* filepath);
+	void setDefaultProperties();
 
 	//OpenGL draw function
 	void draw(GLuint currShaderProgram);
@@ -88,7 +90,7 @@ public:
 
 private:
 
-	float calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &lowestX, float &highestY, float& lowestY, float &highestZ, float &lowestZ);
+	float calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &highestY, float &highestZ);
 };
 
 #endif

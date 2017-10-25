@@ -18,14 +18,15 @@ using namespace std;
 class Window
 {
 	enum modelID { BUNNY, BEAR, DRAGON };
-	
+	enum renderMode { NORMAL, PHONG };
 	static OBJObject* models; 
 	static Light* sceneLights;
 	
 public:
 
 	static int currLight;
-
+	static int currRenderMode;
+	static int currEditMode;
 	static bool isLeftMouseButtonDown;
 	static bool isRightMouseButtonDown;
 	static int currModel;

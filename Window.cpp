@@ -1,4 +1,5 @@
 #include "window.h"
+#define MODEL -1
 const char* window_title = "GLFW Starter Project";
 GLint shaderProgram;
 GLint directionalLightProgram;
@@ -21,6 +22,8 @@ int Window::width;
 int Window::height;
 int Window::currModel;
 int Window::currLight;
+int Window::currRenderMode;
+int Window::currEditMode;
 
 glm::vec2 Window::mousePosition;
 glm::vec2 Window::lastMousePosition;
@@ -38,7 +41,9 @@ void Window::initialize_objects()
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	currModel = Window::BUNNY;
-	models = new OBJObject[3]{ OBJObject("bunny.obj") , OBJObject("bear.obj") , OBJObject("dragon.obj") };
+	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 1, 1)), 
+		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 1)), 
+							   OBJObject("dragon.obj",	Material(glm::vec3(0,0,1), 1, 1))};
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -46,17 +51,19 @@ void Window::initialize_objects()
 
 	//set up lights
 	sceneLights = new Light[3];
-	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(.5f, .5f, 1), glm::normalize(glm::vec3(-1, -1, -1)));
-	/*
-	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(2, 2, 2));
-	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.75f, 0.75f, 0.75f),
-											glm::vec3(2, 2, 2),
-											glm::normalize(glm::vec3(-1, -1, -1)),
+	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(0.65f, 0.65f, 0.65f), glm::normalize(glm::vec3(1, 1, -1)));
+	
+	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(0, 0, 1));
+	
+	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.75f, 0.75f, 0.75f),		//color
+											glm::vec3(0, 1, 0),			//position
+											glm::normalize(glm::vec3(0, -1, 0)),	//direction
 											glm::pi<float>()/4,
 											1);
-	*/
-	currLight = Light::DIRECTIONAL;
 	
+	currLight = Light::DIRECTIONAL;
+	currRenderMode = Window::PHONG;
+	currEditMode = MODEL;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -142,16 +149,19 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*
-	// Use the shader of programID
-	glUseProgram(directionalLightProgram); // call lights' update() function here instead
-	
-	// Render the cube
-	models[currModel].draw(directionalLightProgram);
-	*/
+	if (currRenderMode == Window::PHONG) {
+		sceneLights[currLight].update();
+		models[currModel].draw(sceneLights[Light::DIRECTIONAL].shaderProgram);
+	}
+	else if (currRenderMode == Window::NORMAL) {
+		
+		// Use the shader of programID
+		glUseProgram(shaderProgram); // call lights' update() function here instead
 
-	sceneLights[currLight].update();
-	models[currModel].draw(sceneLights[Light::DIRECTIONAL].shaderProgram);
+		// Render the cube
+		models[currModel].draw(shaderProgram);
+		
+	}
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -178,32 +188,63 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		else if (key == GLFW_KEY_1) {
 			currModel = Window::BUNNY;
-			std::cout << "bunny model, currModel = " << currModel << std::endl;
+			models[currModel].setDefaultProperties();
 		}
 		else if (key == GLFW_KEY_2) {
 			currModel = Window::BEAR;
-			std::cout << "bear model, currModel = " << currModel << std::endl;
+			models[currModel].setDefaultProperties();
 		}
 		else if (key == GLFW_KEY_3) {
 			currModel = Window::DRAGON;
-			std::cout << "dragon model, currModel = " << currModel << std::endl;
+			models[currModel].setDefaultProperties();
 		}
 
 		//Scale
 		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
 			if (mods & GLFW_MOD_SHIFT) {
-				models[currModel].incrementScale(0.5f);
+				if (currEditMode == MODEL)
+					models[currModel].incrementScale(0.5f);
 			}
 			else {
-				models[currModel].incrementScale(-0.5f);
+				if (currEditMode == MODEL) 
+					models[currModel].incrementScale(-0.5f);
 			}
 		}
 
-		//Reset Position
-		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+		//RenderMode
+		if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+			if (mods & GLFW_MOD_SHIFT) {
+				currRenderMode = Window::PHONG;
+			}
+			else {
+				currRenderMode = Window::NORMAL;
+			}
+		}
 
-			models[currModel].setPosition(glm::vec3(0, 0, 0));
-			models[currModel].setZoomVal(0);
+		//Edit Mode/Render Mode
+		else if (key == GLFW_KEY_Q) {
+			currLight = Light::DIRECTIONAL;
+			currEditMode = Light::DIRECTIONAL;
+		}
+		else if (key == GLFW_KEY_W) {
+			currLight = Light::POINT;
+			currEditMode = Light::POINT;
+		}
+		else if (key == GLFW_KEY_E) {
+			currLight = Light::SPOT;
+			currEditMode = Light::SPOT;
+		}
+		else if (key == GLFW_KEY_O) {
+			currEditMode = MODEL;
+		}
+
+		//Reset Position
+		else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+
+			if (currEditMode == MODEL) {
+				models[currModel].setPosition(glm::vec3(0, 0, 0));
+				models[currModel].setZoomVal(0);
+			}
 		}
 	}
 }
@@ -247,9 +288,13 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		if (velocity > 0.0001f) {			
 
 			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
-			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint));	
-			if(!isnan(rotAngle))
-				models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 4.0f;
+			if (!isnan(rotAngle)) {
+				if (currEditMode == MODEL)
+					models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+				else
+					sceneLights[currLight].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+			}
 		}
 	}
 
@@ -258,7 +303,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		glm::vec2 deltaMousePosition;
 		deltaMousePosition.x = (mousePosition.x - lastMousePosition.x) * .033f;
 		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * .033f;
-		models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
+		if(currEditMode == MODEL)
+			models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
 	}
 
 
@@ -268,8 +314,10 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	//models[currModel].move(glm::vec3(0,0, yoffset));
-	models[currModel].zoomModel((float)yoffset);
-
+	if (currEditMode == MODEL)
+		models[currModel].zoomModel((float)yoffset);
+	else
+		sceneLights[currLight].updateDistance(yoffset);
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {

@@ -40,6 +40,8 @@
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
     <None Include="..\shader_directionalLight.frag" />
+    <None Include="..\shader_pointLight.frag" />
+    <None Include="..\shader_spotLight.frag" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

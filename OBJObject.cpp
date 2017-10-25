@@ -10,28 +10,15 @@ using namespace std;
 
 
 
-OBJObject::OBJObject(const char *filepath) 
+OBJObject::OBJObject(const char *filepath, Material m) 
 {
-
 
 	//read in geometry data disk
 	parse(filepath);
-	
-	
-	//initialize Object Properties
-	this->position = glm::vec3(0, 0, 0);
-	this->scale = 1.0f;
-	this->modelAngle = 0.0f;
-	this->modelZoom = 0;
+	material = m;
+	setDefaultProperties();
 
-	//Initialize transformation matrices to reflect object properties.
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-	spinMatrix = glm::rotate(glm::mat4(1.0f), modelAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
-	trackBallRotate = glm::mat4(1.0);
-	modelZoomMatrix = glm::translate(glm::mat4(1.0f), position);
-
-	material = Material(glm::vec3(1,1,1), 1, 0);
+	
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -142,9 +129,9 @@ void OBJObject::parse(const char *filepath)
 				sscanf(currLine + 3, "%f %f %f", &x, &y, &z);
 				GLfloat magnitude = sqrt(x * x + y * y + z * z);
 
-				normals.push_back(x / magnitude / 2 + 0.5f);
-				normals.push_back(y / magnitude / 2 + 0.5f);
-				normals.push_back(z / magnitude / 2 + 0.5f);
+				normals.push_back(x / magnitude);
+				normals.push_back(y / magnitude);
+				normals.push_back(z / magnitude);
 			}
 		}
 		//process face
@@ -167,7 +154,7 @@ void OBJObject::parse(const char *filepath)
 	objectCenterOffset.z = (highestZ + lowestZ) / 2.0f;
 
 	//use model boundaries to calc scale factor matrix
-	float scaleFactor = calcScaleFactor(objectCenterOffset, highestX, lowestX, highestY, lowestY, highestZ, lowestZ);
+	float scaleFactor = calcScaleFactor(objectCenterOffset, highestX, highestY, highestZ);
 	scaleToFit = glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor, scaleFactor, scaleFactor));
 	centerModel = glm::translate(glm::mat4(1.0f), glm::vec3(-objectCenterOffset.x, -objectCenterOffset.y, -objectCenterOffset.z));
 
@@ -176,14 +163,26 @@ void OBJObject::parse(const char *filepath)
 	cout << "num indices: " << indices.size() << endl;	
 
 }
-float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &lowestX, float &highestY, float& lowestY, float &highestZ, float &lowestZ) {
+
+void OBJObject::setDefaultProperties() {
+	
+	//set raw Object Properties
+	this->position = glm::vec3(0, 0, 0);
+	this->scale = 1.0f;
+	this->modelZoom = 0;
+
+	//set transformation matrices to reflect object properties.
+	translateMatrix = glm::translate(glm::mat4(1.0f), position);
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+	trackBallRotate = glm::mat4(1.0);
+	modelZoomMatrix = glm::translate(glm::mat4(1.0f), position);
+}
+
+float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &highestY, float &highestZ) {
 	vector<float> elems;
 	elems.push_back(highestX - objectCenterOffset.x);
-	elems.push_back(objectCenterOffset.x - lowestX);
 	elems.push_back(highestY - objectCenterOffset.y);
-	elems.push_back(objectCenterOffset.y - lowestY);
 	elems.push_back(highestZ - objectCenterOffset.z);
-	elems.push_back(objectCenterOffset.z - lowestZ);
 
 	float furthest = 0;
 	for (unsigned int i = 0; i < elems.size(); ++i) {
@@ -197,9 +196,9 @@ float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX,
 void OBJObject::draw(GLuint currentShaderProgram)
 {
 	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
-	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * scaleMatrix;
+	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * scaleMatrix * scaleToFit * centerModel;
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * toWorld  * scaleToFit * centerModel;
+	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -250,7 +249,7 @@ void OBJObject::incrementScale(float scaleDiff) {
 
 void OBJObject::updateTrackBallRotate(glm::mat4 offset) {
 	trackBallRotate = offset * trackBallRotate;
-	position = glm::vec3(offset * glm::vec4(position.x, position.y, position.z,1.0f));
+	position = glm::vec3(   offset * glm::vec4(position.x, position.y, position.z,1.0f));
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 }
 

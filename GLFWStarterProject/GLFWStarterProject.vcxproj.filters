@@ -71,5 +71,11 @@
     <None Include="..\shader_directionalLight.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\shader_pointLight.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shader_spotLight.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
