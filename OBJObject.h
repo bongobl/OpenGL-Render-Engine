@@ -78,11 +78,13 @@ public:
 	//Manipulate raw Object Properties
 	void setPosition(glm::vec3 newPosition);
 	void move(glm::vec3 displacement);
+	void setScale(float scaleVal);
 	void incrementScale(float scaleDiff);
 	void spin(float rad);
 	void updateTrackBallRotate(glm::mat4 offset);
 	void setZoomVal(float z);
 	void zoomModel(float z);
+	void lookAt(glm::vec3 target);
 	
 
 

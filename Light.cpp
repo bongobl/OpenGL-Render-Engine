@@ -39,6 +39,9 @@ void Light::setAsSpotLight(glm::vec3 c, glm::vec3 p, glm::vec3 d, float sc, floa
 	spot_exponent = se;
 }
 
+glm::vec3 Light::getPosition() {
+	return Position;
+}
 void Light::update() {
 
 	glUseProgram(shaderProgram);

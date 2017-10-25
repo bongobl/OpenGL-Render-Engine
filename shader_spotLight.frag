@@ -5,8 +5,8 @@ struct Light{
 	vec3 Color;
 	vec3 Position;
 	vec3 Direction;
-	//float spot_cutoff;
-	//float spot_exponent;
+	float spot_cutoff;
+	float spot_exponent;
 };
 
 struct Material{
@@ -27,9 +27,7 @@ out vec4 outColor;
 
 void main(){
 
-	//temp constants
-	float spot_cutoff = 0.8f;
-	float spot_exponent = 1;
+
 
 	mat3 normalMatrix = transpose(inverse(mat3(toWorldMatrix)));		//fix on toWorld matrix
 	
@@ -42,13 +40,13 @@ void main(){
 	vec3 C_l = spotLight.Color / length(spotLight.Position - fragPosition);		//find intensity at fragment
 
 
-	if( dot(-1 * L, spotLight.Direction) <= cos(spot_cutoff)){
+	if( dot(-1 * L, spotLight.Direction) <= cos(spotLight.spot_cutoff)){
 		C_l = vec3(0,0,0);
 	}else{
-		C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
+		C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spotLight.spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
 	}
 
-	//C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
+	//C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spotLight.spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
 
 
 	//Add diffuse componenet
@@ -63,6 +61,6 @@ void main(){
 	//Add ambient component
 	vec3 C_ambient = vec3(0.2f,0.2f,0.2f);
 
-	outColor = vec4(C_diffuse + C_specular + C_ambient, 1); //vec4(material.materialColor,1);
+	outColor = vec4(C_diffuse + C_specular + C_ambient, 1) * vec4(material.materialColor,1);
 
 }

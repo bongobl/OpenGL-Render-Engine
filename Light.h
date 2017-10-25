@@ -29,6 +29,7 @@ public:
 	void setAsDirectionalLight(glm::vec3 c, glm::vec3 d);
 	void setAsPointLight(glm::vec3 c, glm::vec3 p);
 	void setAsSpotLight(glm::vec3 c, glm::vec3 p, glm::vec3 d, float sc, float se);
+	glm::vec3 getPosition();
 	void updateTrackBallRotate(glm::mat4 offset);
 	void updateDistance(float offset);
 	void update();

@@ -229,7 +229,11 @@ void OBJObject::update() {
 
 	
 }
-
+void OBJObject::lookAt(glm::vec3 target) {
+	
+	//special case, use trackballRotate
+	trackBallRotate = glm::inverse(glm::lookAt(position, target, glm::vec3(0, 0, 1)));
+}
 void OBJObject::setPosition(glm::vec3 newPosition) {
 	position = newPosition;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
@@ -241,7 +245,10 @@ void OBJObject::move(glm::vec3 displacement) {
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 
 }
-
+void OBJObject::setScale(float scaleVal) {
+	scale = scaleVal;
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+}
 void OBJObject::incrementScale(float scaleDiff) {
 	scale += scaleDiff;
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));

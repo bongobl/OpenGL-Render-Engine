@@ -14,12 +14,15 @@
 #include "shader.h"
 #include "OBJObject.h"
 #include "Light.h"
+#include "Material.h"
 using namespace std;
 class Window
 {
 	enum modelID { BUNNY, BEAR, DRAGON };
 	enum renderMode { NORMAL, PHONG };
 	static OBJObject* models; 
+	static OBJObject* pointLightGraphic;
+	static OBJObject* spotLightGraphic;
 	static Light* sceneLights;
 	
 public:

@@ -1,7 +1,7 @@
 #include "window.h"
 #define MODEL -1
 const char* window_title = "GLFW Starter Project";
-GLint shaderProgram;
+GLint defaultShaderProgram;
 GLint directionalLightProgram;
 GLint pointLightProgram;
 GLint spotLightProgram;
@@ -36,6 +36,9 @@ Light* Window::sceneLights;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
+OBJObject* Window::pointLightGraphic;
+OBJObject* Window::spotLightGraphic;
+
 void Window::initialize_objects()
 {
 	isLeftMouseButtonDown = false;
@@ -43,10 +46,15 @@ void Window::initialize_objects()
 	currModel = Window::BUNNY;
 	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1)), 
 		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1)), 
-							   OBJObject("dragon.obj",	Material(glm::vec3(0,0,1), 0.5f, 1, 1))};
+							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32))};
+
+	pointLightGraphic = new OBJObject("sphere.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1));
+	pointLightGraphic->setScale(0.2f);
+	spotLightGraphic = new OBJObject("cone.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1));
+	spotLightGraphic->setScale(0.2f);
 	
 	// Load the shader program. Make sure you have the correct filepath up top
-	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	defaultShaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	directionalLightProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_directionalLight.frag");
 
 	//set up lights
@@ -55,11 +63,11 @@ void Window::initialize_objects()
 	
 	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(0, 0, 1));
 	
-	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.75f, 0.75f, 0.75f),		//color
-											glm::vec3(0, 1, 0),			//position
-											glm::normalize(glm::vec3(0, -1, 0)),	//direction
-											glm::pi<float>()/4,
-											1);
+	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.90f, 0.90f, 0.90f),		//color
+											glm::vec3(0, 0, -2),			//position
+											glm::normalize(glm::vec3(0, 0, 1)),	//direction
+											glm::pi<float>()/12,
+											30);
 	
 	currLight = Light::DIRECTIONAL;
 	currRenderMode = Window::PHONG;
@@ -70,8 +78,10 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete[] models;
-	glDeleteProgram(shaderProgram);
+	delete pointLightGraphic;
+	glDeleteProgram(defaultShaderProgram);
 	glDeleteProgram(directionalLightProgram);
+	
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -142,6 +152,8 @@ void Window::idle_callback()
 {
 	// Call the update function the cube
 	models[currModel].update();
+	pointLightGraphic->setPosition(sceneLights[Light::POINT].getPosition());
+	spotLightGraphic->setPosition(sceneLights[Light::SPOT].getPosition());
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -151,16 +163,26 @@ void Window::display_callback(GLFWwindow* window)
 
 	if (currRenderMode == Window::PHONG) {
 		sceneLights[currLight].update();
-		models[currModel].draw(sceneLights[Light::DIRECTIONAL].shaderProgram);
+		models[currModel].draw(sceneLights[currLight].shaderProgram);
 	}
 	else if (currRenderMode == Window::NORMAL) {
 		
 		// Use the shader of programID
-		glUseProgram(shaderProgram); // call lights' update() function here instead
+		glUseProgram(defaultShaderProgram); // call lights' update() function here instead
 
 		// Render the cube
-		models[currModel].draw(shaderProgram);
+		models[currModel].draw(defaultShaderProgram);
 		
+	}
+
+	//draw light graphics
+	if (currEditMode == Light::POINT) {
+		glUseProgram(defaultShaderProgram);
+		pointLightGraphic->draw(defaultShaderProgram);
+	}
+	if (currEditMode == Light::SPOT) {
+		glUseProgram(defaultShaderProgram);
+		spotLightGraphic->draw(defaultShaderProgram);
 	}
 
 	// Gets events, including input such as keyboard and mouse or window resizing
