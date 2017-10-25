@@ -215,6 +215,7 @@ void OBJObject::draw(GLuint currentShaderProgram)
 	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.diffuse"), material.diffuse);
 	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.specular"), material.specular);
 	glUniform3f(glGetUniformLocation(currentShaderProgram, "material.materialColor"), material.color.x, material.color.y, material.color.z);
+	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.shine"), material.shine);
 
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);

@@ -10,6 +10,7 @@ struct Material{
 	vec3 materialColor;
 	float diffuse;
 	float specular;
+	float shine;
 };
 
 uniform Light pointLight;
@@ -42,7 +43,7 @@ void main(){
 	vec3 eyePosition = vec3(0.0f, 0.0f, 20.0f);
 	vec3 R = 2 * max(dot(normal, L),0.0f) * normal - L;
 	vec3 e = normalize(eyePosition - fragPosition);
-	vec3 C_specular = material.specular * C_l * pow(dot(R, e), 32);
+	vec3 C_specular = material.specular * C_l * pow(dot(R, e), material.shine);
 
 	//Add ambient component
 	vec3 C_ambient = 0.2f * C_l;

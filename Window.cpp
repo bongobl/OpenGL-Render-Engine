@@ -41,9 +41,9 @@ void Window::initialize_objects()
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	currModel = Window::BUNNY;
-	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 1, 1)), 
-		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 1)), 
-							   OBJObject("dragon.obj",	Material(glm::vec3(0,0,1), 1, 1))};
+	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1)), 
+		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1)), 
+							   OBJObject("dragon.obj",	Material(glm::vec3(0,0,1), 0.5f, 1, 1))};
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -317,11 +317,10 @@ void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yof
 	if (currEditMode == MODEL)
 		models[currModel].zoomModel((float)yoffset);
 	else
-		sceneLights[currLight].updateDistance(yoffset);
+		sceneLights[currLight].updateDistance((float)yoffset);
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {
-
 
 	glm::vec3 v;
 	GLfloat d;

@@ -73,8 +73,10 @@ void Light::updateTrackBallRotate(glm::mat4 offset) {
 }
 
 void Light::updateDistance(float offset) {
-	distanceToCenter += offset;
-	distanceMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, distanceToCenter));
-	Position = glm::vec3(trackBallRotate * distanceMatrix * glm::vec4(startPosition.x, startPosition.y, startPosition.z, 1.0f));
-	Direction = glm::normalize(glm::vec3(-1, -1, -1) * Position);
+	if (lightType == Light::POINT || lightType == Light::SPOT) {
+		distanceToCenter += offset / 4;
+		distanceMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, distanceToCenter));
+		Position = glm::vec3(trackBallRotate * distanceMatrix * glm::vec4(startPosition.x, startPosition.y, startPosition.z, 1.0f));
+		Direction = glm::normalize(glm::vec3(-1, -1, -1) * Position);
+	}
 }

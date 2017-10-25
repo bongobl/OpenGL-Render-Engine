@@ -61,8 +61,6 @@ private:
 	Material material;
 
 	
-
-
 public:
 
 	OBJObject(const char* filepath, Material m);

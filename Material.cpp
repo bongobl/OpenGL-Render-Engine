@@ -6,9 +6,10 @@ Material::Material() {
 	diffuse = 0;
 	specular = 0;
 }
-Material::Material(glm::vec3 c, float d, float s) {
+Material::Material(glm::vec3 c, float d, float s, float sh) {
 	
 	color = c;
 	diffuse = d;
 	specular = s;
+	shine = sh;
 }
