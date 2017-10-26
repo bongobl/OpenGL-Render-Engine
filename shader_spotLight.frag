@@ -46,8 +46,6 @@ void main(){
 		C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spotLight.spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
 	}
 
-	//C_l = spotLight.Color * pow(dot(-1 * L, spotLight.Direction), spotLight.spot_exponent) / pow(length(spotLight.Position - fragPosition),2);
-
 
 	//Add diffuse componenet
 	vec3 C_diffuse = material.diffuse * C_l * max( dot(normal, L), 0.0f);

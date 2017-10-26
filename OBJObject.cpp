@@ -10,14 +10,16 @@ using namespace std;
 
 
 
-OBJObject::OBJObject(const char *filepath, Material m) 
+OBJObject::OBJObject(const char *filepath, Material m, float yOff) 
 {
 
 	//read in geometry data disk
 	parse(filepath);
 	material = m;
 	setDefaultProperties();
-
+	
+	YOffset = yOff;
+	yOffsetMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, YOffset, 0));
 	
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -196,7 +198,7 @@ float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX,
 void OBJObject::draw(GLuint currentShaderProgram)
 {
 	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
-	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * scaleMatrix * scaleToFit * centerModel;
+	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * yOffsetMatrix * scaleMatrix * scaleToFit * centerModel;
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
@@ -233,6 +235,12 @@ void OBJObject::lookAt(glm::vec3 target) {
 	
 	//special case, use trackballRotate
 	trackBallRotate = glm::inverse(glm::lookAt(position, target, glm::vec3(0, 0, 1)));
+}
+
+void OBJObject::updateYOffset(float offset) {
+	YOffset += offset;
+	yOffsetMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, YOffset, 0));
+
 }
 void OBJObject::setPosition(glm::vec3 newPosition) {
 	position = newPosition;
@@ -273,5 +281,4 @@ void OBJObject::zoomModel(float z) {
 	*/
 	position.z += z;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-
 }

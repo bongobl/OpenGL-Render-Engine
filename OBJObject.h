@@ -43,6 +43,8 @@ private:
 	float modelAngle;
 	float modelZoom;
 
+	
+
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
@@ -51,6 +53,8 @@ private:
 	glm::mat4 trackBallRotate;
 	glm::mat4 screenZoomMatrix;
 	glm::mat4 modelZoomMatrix;
+	
+	glm::mat4 yOffsetMatrix;
 
 	//Rendering with modern OpenGL
 	GLuint VBO, VBO2, VAO, EBO;
@@ -63,10 +67,12 @@ private:
 	
 public:
 
-	OBJObject(const char* filepath, Material m);
+	OBJObject(const char* filepath, Material m, float yOff);
 	~OBJObject();
 	void parse(const char* filepath);
 	void setDefaultProperties();
+
+	float YOffset;
 
 	//OpenGL draw function
 	void draw(GLuint currShaderProgram);
@@ -85,6 +91,7 @@ public:
 	void setZoomVal(float z);
 	void zoomModel(float z);
 	void lookAt(glm::vec3 target);
+	void updateYOffset(float offset);
 	
 
 

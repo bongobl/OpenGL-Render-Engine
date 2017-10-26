@@ -12,8 +12,7 @@ class Light {
 	glm::vec3 Direction;
 	glm::vec3 startPosition;
 	glm::vec3 Position;
-	float spot_cutoff;	 //angle of range
-	float spot_exponent;
+	
 
 	float distanceToCenter;
 	glm::mat4 trackBallRotate;
@@ -26,6 +25,10 @@ public:
 
 	Light();
 	~Light();
+
+	float spot_cutoff;
+	float spot_exponent;
+
 	void setAsDirectionalLight(glm::vec3 c, glm::vec3 d);
 	void setAsPointLight(glm::vec3 c, glm::vec3 p);
 	void setAsSpotLight(glm::vec3 c, glm::vec3 p, glm::vec3 d, float sc, float se);

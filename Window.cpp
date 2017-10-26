@@ -2,7 +2,6 @@
 #define MODEL -1
 const char* window_title = "GLFW Starter Project";
 GLint defaultShaderProgram;
-GLint directionalLightProgram;
 GLint pointLightProgram;
 GLint spotLightProgram;
 
@@ -44,28 +43,27 @@ void Window::initialize_objects()
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	currModel = Window::BUNNY;
-	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1)), 
-		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1)), 
-							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32))};
+	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1),0), 
+		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1),0), 
+							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32),0)};
 
-	pointLightGraphic = new OBJObject("sphere.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1));
+	pointLightGraphic = new OBJObject("sphere.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1),0);
 	pointLightGraphic->setScale(0.2f);
-	spotLightGraphic = new OBJObject("cone.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1));
+	spotLightGraphic = new OBJObject("cone.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1), 2.0f);
 	spotLightGraphic->setScale(0.2f);
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	defaultShaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	directionalLightProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_directionalLight.frag");
 
 	//set up lights
 	sceneLights = new Light[3];
 	sceneLights[Light::DIRECTIONAL].setAsDirectionalLight( glm::vec3(0.65f, 0.65f, 0.65f), glm::normalize(glm::vec3(1, 1, -1)));
 	
-	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(0, 0, 1));
+	sceneLights[Light::POINT].setAsPointLight(glm::vec3(0.75f, 0.75f, 0.75f), glm::vec3(0, 1, 0));
 	
-	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(0.90f, 0.90f, 0.90f),		//color
-											glm::vec3(0, 0, -2),			//position
-											glm::normalize(glm::vec3(0, 0, 1)),	//direction
+	sceneLights[Light::SPOT].setAsSpotLight(glm::vec3(1, 1, 1),		//color
+											glm::vec3(0, 2, 0),			//position
+											glm::normalize(glm::vec3(0, -1, 0)),	//direction
 											glm::pi<float>()/12,
 											30);
 	
@@ -80,7 +78,6 @@ void Window::clean_up()
 	delete[] models;
 	delete pointLightGraphic;
 	glDeleteProgram(defaultShaderProgram);
-	glDeleteProgram(directionalLightProgram);
 	
 }
 
@@ -153,7 +150,7 @@ void Window::idle_callback()
 	// Call the update function the cube
 	models[currModel].update();
 	pointLightGraphic->setPosition(sceneLights[Light::POINT].getPosition());
-	spotLightGraphic->setPosition(sceneLights[Light::SPOT].getPosition());
+	//spotLightGraphic->setPosition(sceneLights[Light::SPOT].getPosition());
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -177,12 +174,12 @@ void Window::display_callback(GLFWwindow* window)
 
 	//draw light graphics
 	if (currEditMode == Light::POINT) {
-		glUseProgram(defaultShaderProgram);
-		pointLightGraphic->draw(defaultShaderProgram);
+		glUseProgram(sceneLights[currLight].shaderProgram);
+		pointLightGraphic->draw(sceneLights[currLight].shaderProgram);
 	}
 	if (currEditMode == Light::SPOT) {
-		glUseProgram(defaultShaderProgram);
-		spotLightGraphic->draw(defaultShaderProgram);
+		glUseProgram(sceneLights[currLight].shaderProgram);
+		spotLightGraphic->draw(sceneLights[currLight].shaderProgram);
 	}
 
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -243,6 +240,35 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			}
 		}
 
+		//Spot Light Widening
+		if (key == GLFW_KEY_RIGHT) {
+			if (currEditMode == Light::SPOT) {
+				sceneLights[Light::SPOT].spot_cutoff += glm::pi<float>() / 48;			
+			}
+		}
+
+		//Spot Light Narrowing
+		if (key == GLFW_KEY_LEFT) {
+			if (currEditMode == Light::SPOT) {
+				sceneLights[Light::SPOT].spot_cutoff -= glm::pi<float>() / 48;
+			}
+		}
+
+		//Spot Light blur
+		if (key == GLFW_KEY_UP) {
+			if (currEditMode == Light::SPOT) {
+				sceneLights[Light::SPOT].spot_exponent += 10;
+			}
+		}
+
+		//Spot Light sharpen
+		if (key == GLFW_KEY_DOWN) {
+			if (currEditMode == Light::SPOT) {
+				if(sceneLights[Light::SPOT].spot_exponent > 0)			
+					sceneLights[Light::SPOT].spot_exponent -= 10;
+			}
+		}
+
 		//Edit Mode/Render Mode
 		else if (key == GLFW_KEY_Q) {
 			currLight = Light::DIRECTIONAL;
@@ -293,6 +319,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 		}
 	}
 }
+
 void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double ypos) {
 	
 	//define mousePosition for other functions to use
@@ -314,8 +341,12 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			if (!isnan(rotAngle)) {
 				if (currEditMode == MODEL)
 					models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
-				else
+				else {
 					sceneLights[currLight].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+					if (currEditMode == Light::SPOT) {
+						spotLightGraphic->updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+					}
+				}
 			}
 		}
 	}
@@ -338,8 +369,12 @@ void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yof
 	//models[currModel].move(glm::vec3(0,0, yoffset));
 	if (currEditMode == MODEL)
 		models[currModel].zoomModel((float)yoffset);
-	else
+	else {
 		sceneLights[currLight].updateDistance((float)yoffset);
+		if (currEditMode == Light::SPOT) {
+			spotLightGraphic->updateYOffset((float)yoffset);
+		}
+	}
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {
