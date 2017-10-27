@@ -29,7 +29,7 @@ void main(){
 	
 	vec3 normal = normalize(normalMatrix * normalDataOutput);			//find normal vector in world coordinates
 	
-	vec3 fragPosition = normalize(normalMatrix * vertexDataOutput);		//find fragment position in world coordinates
+	vec3 fragPosition = vec3(toWorldMatrix * vec4(vertexDataOutput,1));		//find fragment position in world coordinates
 	
 	vec3 L = normalize(pointLight.Position - fragPosition);						//find surface to light vector L 
 
@@ -41,12 +41,12 @@ void main(){
 
 	//Add specular component
 	vec3 eyePosition = vec3(0.0f, 0.0f, 20.0f);
-	vec3 R = 2 * max(dot(normal, L),0.0f) * normal - L;
+	vec3 R = 2 * dot(normal, L) * normal - L;
 	vec3 e = normalize(eyePosition - fragPosition);
-	vec3 C_specular = material.specular * C_l * pow(dot(R, e), material.shine);
+	vec3 C_specular = material.specular * C_l * pow( max(dot(R, e),0) , material.shine);
 
 	//Add ambient component
-	vec3 C_ambient = 0.2f * C_l;
+	vec3 C_ambient = 0.1f * C_l;
 
 	outColor = vec4(C_diffuse + C_specular + C_ambient, 1) * vec4(material.materialColor,1);
 

@@ -275,10 +275,7 @@ void OBJObject::setZoomVal(float z) {
 }
 void OBJObject::zoomModel(float z) {
 	
-	/*
-	modelZoom += z;
-	modelZoomMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,modelZoom));
-	*/
+
 	position.z += z;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 }

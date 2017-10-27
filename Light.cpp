@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Light.h"
-
+#include "Window.h"
 using namespace std;
 
 
@@ -53,6 +53,7 @@ void Light::update() {
 	else if (lightType == Light::POINT) {
 		glUniform3f(glGetUniformLocation(shaderProgram, "pointLight.Color"), Color.x, Color.y, Color.z);
 		glUniform3f(glGetUniformLocation(shaderProgram, "pointLight.Position"), Position.x, Position.y, Position.z);
+
 	}
 	else if (lightType == Light::SPOT) {
 		glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.Color"), Color.x, Color.y, Color.z);

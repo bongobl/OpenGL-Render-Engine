@@ -43,8 +43,8 @@ void Window::initialize_objects()
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	currModel = Window::BUNNY;
-	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1),0), 
-		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1),0), 
+	models = new OBJObject[3]{ OBJObject("bunny.obj",	Material(glm::vec3(1,0,0), 0, 1, 1),  0), 
+		                       OBJObject("bear.obj",	Material(glm::vec3(0,1,0), 1, 0, 1),  0), 
 							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32),0)};
 
 	pointLightGraphic = new OBJObject("sphere.obj", Material(glm::vec3(1, 1, 1), 1, 1, 1),0);
@@ -173,11 +173,11 @@ void Window::display_callback(GLFWwindow* window)
 	}
 
 	//draw light graphics
-	if (currEditMode == Light::POINT) {
+	if (currLight == Light::POINT) {
 		glUseProgram(sceneLights[currLight].shaderProgram);
 		pointLightGraphic->draw(sceneLights[currLight].shaderProgram);
 	}
-	if (currEditMode == Light::SPOT) {
+	if (currLight == Light::SPOT) {
 		glUseProgram(sceneLights[currLight].shaderProgram);
 		spotLightGraphic->draw(sceneLights[currLight].shaderProgram);
 	}
@@ -257,7 +257,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		//Spot Light blur
 		if (key == GLFW_KEY_UP) {
 			if (currEditMode == Light::SPOT) {
-				sceneLights[Light::SPOT].spot_exponent += 10;
+				sceneLights[Light::SPOT].spot_exponent += 5;
 			}
 		}
 
@@ -265,7 +265,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_DOWN) {
 			if (currEditMode == Light::SPOT) {
 				if(sceneLights[Light::SPOT].spot_exponent > 0)			
-					sceneLights[Light::SPOT].spot_exponent -= 10;
+					sceneLights[Light::SPOT].spot_exponent -= 5;
 			}
 		}
 
