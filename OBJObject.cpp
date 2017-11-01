@@ -9,17 +9,16 @@
 using namespace std;
 
 
-
 OBJObject::OBJObject(const char *filepath, Material m, float yOff) 
 {
 
 	//read in geometry data disk
 	parse(filepath);
 	material = m;
+	cubeMapTextureID = 0; //no default cubemap texture
 	setDefaultProperties();
 	
-	YOffset = yOff;
-	yOffsetMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, YOffset, 0));
+
 	
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -50,7 +49,6 @@ OBJObject::OBJObject(const char *filepath, Material m, float yOff)
 					 // We've sent the vertex data over to OpenGL, but there's still something missing.
 					 // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
 
@@ -94,7 +92,6 @@ void OBJObject::parse(const char *filepath)
 
 	// Variables for finding Model Center of Mass
 	bool firstVertex = true;
-	GLfloat lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
 
 	fp = fopen(filepath, "rb");
 	if (fp == NULL) {
@@ -113,19 +110,6 @@ void OBJObject::parse(const char *filepath)
 				vertices.push_back(y);
 				vertices.push_back(z);
 
-				//Code to calc center of mass
-				if (firstVertex) {
-					lowestX = highestX = x;
-					lowestY = highestY = y;
-					lowestZ = highestZ = z;
-					firstVertex = false;
-				}
-				if (x > highestX)	highestX = x;
-				if (x < lowestX)	lowestX = x;
-				if (y > highestY)	highestY = y;
-				if (y < lowestY)	lowestY = y;
-				if (z > highestZ)	highestZ = z;
-				if (z < lowestZ)	lowestZ = z;
 			}
 			else if (currLine[1] == 'n' && currLine[2] == ' ') {
 				sscanf(currLine + 3, "%f %f %f", &x, &y, &z);
@@ -149,16 +133,7 @@ void OBJObject::parse(const char *filepath)
 		
 	}//END FOR
 	
-	//define object center
-	glm::vec3 objectCenterOffset;
-	objectCenterOffset.x = (highestX + lowestX) / 2.0f;
-	objectCenterOffset.y = (highestY + lowestY) / 2.0f;
-	objectCenterOffset.z = (highestZ + lowestZ) / 2.0f;
 
-	//use model boundaries to calc scale factor matrix
-	float scaleFactor = calcScaleFactor(objectCenterOffset, highestX, highestY, highestZ);
-	scaleToFit = glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor, scaleFactor, scaleFactor));
-	centerModel = glm::translate(glm::mat4(1.0f), glm::vec3(-objectCenterOffset.x, -objectCenterOffset.y, -objectCenterOffset.z));
 
 	cout << "num vertices: " << vertices.size() << endl;
 	cout << "num normals: " << normals.size() << endl;
@@ -177,28 +152,14 @@ void OBJObject::setDefaultProperties() {
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
 	trackBallRotate = glm::mat4(1.0);
-	modelZoomMatrix = glm::translate(glm::mat4(1.0f), position);
 }
 
-float OBJObject::calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &highestY, float &highestZ) {
-	vector<float> elems;
-	elems.push_back(highestX - objectCenterOffset.x);
-	elems.push_back(highestY - objectCenterOffset.y);
-	elems.push_back(highestZ - objectCenterOffset.z);
 
-	float furthest = 0;
-	for (unsigned int i = 0; i < elems.size(); ++i) {
-		if (elems[i] > furthest)
-			furthest = elems[i];
-	}
-
-	return 1.0f / furthest;
-}
 
 void OBJObject::draw(GLuint currentShaderProgram)
 {
 	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
-	toWorld = modelZoomMatrix * translateMatrix * trackBallRotate * yOffsetMatrix * scaleMatrix * scaleToFit * centerModel;
+	toWorld =  translateMatrix * trackBallRotate * scaleMatrix;
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
@@ -219,7 +180,7 @@ void OBJObject::draw(GLuint currentShaderProgram)
 	glUniform3f(glGetUniformLocation(currentShaderProgram, "material.materialColor"), material.color.x, material.color.y, material.color.z);
 	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.shine"), material.shine);
 
-	// Now draw the cube. We simply need to bind the VAO associated with it.
+	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -231,17 +192,8 @@ void OBJObject::update() {
 
 	
 }
-void OBJObject::lookAt(glm::vec3 target) {
-	
-	//special case, use trackballRotate
-	trackBallRotate = glm::inverse(glm::lookAt(position, target, glm::vec3(0, 0, 1)));
-}
 
-void OBJObject::updateYOffset(float offset) {
-	YOffset += offset;
-	yOffsetMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, YOffset, 0));
 
-}
 void OBJObject::setPosition(glm::vec3 newPosition) {
 	position = newPosition;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
@@ -266,16 +218,5 @@ void OBJObject::incrementScale(float scaleDiff) {
 void OBJObject::updateTrackBallRotate(glm::mat4 offset) {
 	trackBallRotate = offset * trackBallRotate;
 	position = glm::vec3(   offset * glm::vec4(position.x, position.y, position.z,1.0f));
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-}
-
-void OBJObject::setZoomVal(float z) {
-	modelZoom = 0;
-	modelZoomMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, modelZoom));
-}
-void OBJObject::zoomModel(float z) {
-	
-
-	position.z += z;
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 }

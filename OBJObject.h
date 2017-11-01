@@ -32,9 +32,6 @@ private:
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-	//scale and center Model Geometry
-	glm::mat4 scaleToFit;
-	glm::mat4 centerModel;
 
 
 	//Raw Object Properties	
@@ -48,13 +45,12 @@ private:
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
-	glm::mat4 spinMatrix;
+	//glm::mat4 spinMatrix;
 	glm::mat4 scaleMatrix;
 	glm::mat4 trackBallRotate;
-	glm::mat4 screenZoomMatrix;
-	glm::mat4 modelZoomMatrix;
+	//glm::mat4 screenZoomMatrix;
+	//glm::mat4 modelZoomMatrix;
 	
-	glm::mat4 yOffsetMatrix;
 
 	//Rendering with modern OpenGL
 	GLuint VBO, VBO2, VAO, EBO;
@@ -64,6 +60,8 @@ private:
 	//Model Material
 	Material material;
 
+	//Textures
+	GLuint cubeMapTextureID;
 	
 public:
 
@@ -72,11 +70,9 @@ public:
 	void parse(const char* filepath);
 	void setDefaultProperties();
 
-	float YOffset;
 
 	//OpenGL draw function
 	void draw(GLuint currShaderProgram);
-
 
 	void update();
 
@@ -86,18 +82,11 @@ public:
 	void move(glm::vec3 displacement);
 	void setScale(float scaleVal);
 	void incrementScale(float scaleDiff);
-	void spin(float rad);
 	void updateTrackBallRotate(glm::mat4 offset);
-	void setZoomVal(float z);
-	void zoomModel(float z);
-	void lookAt(glm::vec3 target);
-	void updateYOffset(float offset);
-	
 
 
 private:
 
-	float calcScaleFactor(glm::vec3 &objectCenterOffset, float &highestX, float &highestY, float &highestZ);
 };
 
 #endif

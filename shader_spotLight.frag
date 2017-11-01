@@ -57,7 +57,7 @@ void main(){
 	vec3 C_specular = material.specular * C_l * pow( max(dot(R, e),0) , material.shine);
 
 	//Add ambient component
-	vec3 C_ambient = 0.1f * spotLight.Color;
+	vec3 C_ambient = 0.04f * spotLight.Color;
 
 	outColor = vec4(C_diffuse + C_specular + C_ambient, 1) * vec4(material.materialColor,1);
 
