@@ -45,7 +45,6 @@ private:
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
-	//glm::mat4 spinMatrix;
 	glm::mat4 scaleMatrix;
 	glm::mat4 trackBallRotate;
 	//glm::mat4 screenZoomMatrix;
@@ -60,10 +59,12 @@ private:
 	//Model Material
 	Material material;
 
-	//Textures
-	GLuint cubeMapTextureID;
+	
 	
 public:
+
+	//Textures
+	GLuint cubeMapTextureID;
 
 	OBJObject(const char* filepath, Material m, float yOff);
 	~OBJObject();
@@ -75,7 +76,6 @@ public:
 	void draw(GLuint currShaderProgram);
 
 	void update();
-
 
 	//Manipulate raw Object Properties
 	void setPosition(glm::vec3 newPosition);

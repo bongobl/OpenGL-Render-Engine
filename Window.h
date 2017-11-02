@@ -19,8 +19,9 @@
 using namespace std;
 class Window
 {
-	enum modelID { BUNNY, BEAR, DRAGON };
+	enum modelID { SKYBOX, BEAR, DRAGON };
 	static OBJObject* models; 
+	 
 
 public:
 
@@ -38,6 +39,8 @@ public:
 	static glm::vec2 lastMousePosition;
 	static glm::vec3 currPoint;
 	static glm::vec3 lastPoint;
+	static glm::mat4 rotationMatrix;
+
 
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view

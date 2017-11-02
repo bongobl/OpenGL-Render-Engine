@@ -67,9 +67,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\shader.vert">
       <Filter>Source Files</Filter>
     </None>
@@ -81,6 +78,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\shader_spotLight.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shader_skybox.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shader_robot.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

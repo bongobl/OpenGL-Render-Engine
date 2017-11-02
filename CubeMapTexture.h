@@ -11,14 +11,10 @@ class CubeMapTexture {
 
 public:
 
-	//fields
-	int cubeLength;
 	GLuint textureID;
 
-	//public member functions
-	CubeMapTexture(GLuint cl);
 	void loadCubeMapTexture(vector<std::string> faces);
-	
+	GLuint getTextureID();
 
 private:
 	unsigned char* loadPPM(const char* filename, int& width, int& height);

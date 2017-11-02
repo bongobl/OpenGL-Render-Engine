@@ -1,14 +1,16 @@
 #include "window.h"
-#define MODEL -1
 const char* window_title = "GLFW Starter Project";
-GLint defaultShaderProgram;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
-#define FRAGMENT_SHADER_PATH "../shader.frag"
 
+//Shader Programs
+GLint SkyboxShaderProgram;
+GLint RobotShaderProgram;
 
-// Default camera parameters
+// Camera parameters
+float cam_dist(20.0f);
+const glm::vec3 intial_cam_pos(0.0f, 0, cam_dist);
 glm::vec3 cam_pos(0.0f, 0, 20.0f);			// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
@@ -25,25 +27,45 @@ glm::vec2 Window::mousePosition;
 glm::vec2 Window::lastMousePosition;
 glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
+glm::mat4 Window::rotationMatrix;
+
 
 OBJObject* Window::models;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
+vector<string> faceNames;
 
 void Window::initialize_objects()
 {
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
-	currModel = Window::BUNNY;
+	currModel = Window::SKYBOX;
+	rotationMatrix = glm::mat4(1.0f);
+
+	//create models
 	models = new OBJObject[3]{ OBJObject("myCube.obj",	Material(glm::vec3(1,0,0), 0, 1, 1),  0), 
 		                       OBJObject("bunny.obj",	Material(glm::vec3(0,1,0), 1, 0, 1),  0), 
 							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32),0)};
 
+	models[Window::SKYBOX].setScale(500);
+
+	//create cubemap
+	faceNames.push_back("skybox/right.ppm");
+	faceNames.push_back("skybox/left.ppm");
+	faceNames.push_back("skybox/top.ppm");
+	faceNames.push_back("skybox/bottom.ppm");
+	faceNames.push_back("skybox/back.ppm");
+	faceNames.push_back("skybox/front.ppm");
+
+	CubeMapTexture cubeMap;
+	cubeMap.loadCubeMapTexture(faceNames);
+	//models[Window::SKYBOX].cubeMapTextureID = cubeMap.getTextureID();
 	
 	// Load the shader program. Make sure you have the correct filepath up top
-	defaultShaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
+	RobotShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_robot.frag");
 
 }
 
@@ -51,7 +73,8 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete[] models;
-	glDeleteProgram(defaultShaderProgram);
+	glDeleteProgram(SkyboxShaderProgram);
+	glDeleteProgram(RobotShaderProgram);
 	
 }
 
@@ -114,14 +137,13 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	if (height > 0)
 	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 100000.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
 }
 
 void Window::idle_callback()
 {
-	// Call the update function the cube
 	models[currModel].update();
 }
 
@@ -129,15 +151,13 @@ void Window::display_callback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+	// Render the scene
+	models[currModel].draw(SkyboxShaderProgram);
 	
-	// Use the shader of programID
-	glUseProgram(defaultShaderProgram); // call lights' update() function here instead
-
-	// Render the cube
-	models[currModel].draw(defaultShaderProgram);
-
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -160,7 +180,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		else if (key == GLFW_KEY_1) {
-			currModel = Window::BUNNY;
+			currModel = Window::SKYBOX;
 			models[currModel].setDefaultProperties();
 		}
 		else if (key == GLFW_KEY_2) {
@@ -175,10 +195,10 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		//Scale
 		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
 			if (mods & GLFW_MOD_SHIFT) {
-					models[currModel].incrementScale(0.5f);
+					models[currModel].incrementScale(1.0f);
 			}
 			else {
-					models[currModel].incrementScale(-0.5f);
+					models[currModel].incrementScale(-1.0f);
 			}
 		}
 	}
@@ -216,7 +236,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 	glm::vec3 direction;
 	
 
-	//if left mouse button is down, do trackball rotation
+	//If left mouse button is down, do trackball rotation
 	if (isLeftMouseButtonDown) {
 		currPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 		direction = currPoint - lastPoint;
@@ -224,9 +244,13 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		if (velocity > 0.0001f) {			
 
 			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
-			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 4.0f;
+			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 1.0f;
 			if (!isnan(rotAngle)) {
-				models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));				
+
+				//models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
+				rotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * rotationMatrix;
+				cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist,0);
+				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 			}
 		}
 	}
@@ -236,10 +260,9 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		glm::vec2 deltaMousePosition;
 		deltaMousePosition.x = (mousePosition.x - lastMousePosition.x) * .033f;
 		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * .033f;
-		
-		models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
+	
+		//models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
 	}
-
 
 	lastPoint = currPoint;
 	lastMousePosition = mousePosition;
@@ -247,7 +270,11 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
-	models[currModel].move(glm::vec3(0, 0, (float)yoffset));
+	//models[currModel].move(glm::vec3(0, 0, (float)yoffset));
+	
+	cam_dist += (float)yoffset;
+	cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {

@@ -25,6 +25,8 @@ out vec3 normalDataOutput;
 out vec3 vertexDataOutput;
 out mat4 toWorldMatrix;
 
+
+out vec3 TexCoords;
 void main()
 {
     // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
@@ -34,4 +36,6 @@ void main()
 	normalDataOutput = vec3(normal);
 	vertexDataOutput = vec3(position);
 	toWorldMatrix = toWorld;
+
+	TexCoords = position;
 }

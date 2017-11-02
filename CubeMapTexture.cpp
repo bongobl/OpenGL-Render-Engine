@@ -1,35 +1,35 @@
 #include "CubeMapTexture.h"
 #include <iostream>
 
-CubeMapTexture::CubeMapTexture(GLuint cl) {
-	cubeLength = cl;
-}
+
+
 void CubeMapTexture::loadCubeMapTexture(vector<std::string> faces) {
+	
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-	int width, height, nrChannels; //nrChannels needed?
+	int width, height;
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		unsigned char *data = loadPPM(faces[i].c_str(), cubeLength, cubeLength);
+		unsigned char *data = loadPPM(faces[i].c_str(), width, height);
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 			);
-			//stbi_image_free(data);
+			free(data);
 		}
 		else
 		{
 			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-			//stbi_image_free(data);
+			free(data);
 		}
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); //needed?
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 }
 
@@ -82,4 +82,8 @@ unsigned char* CubeMapTexture::loadPPM(const char* filename, int& width, int& he
 	}
 
 	return rawData;
+}
+
+GLuint CubeMapTexture::getTextureID() {
+	return textureID;
 }
