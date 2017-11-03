@@ -16,12 +16,14 @@
 #include "Light.h"
 #include "Material.h"
 #include "CubeMapTexture.h"
+#include "Node.h"
+#include "TransformNode.h"
 using namespace std;
 class Window
 {
 	enum modelID { SKYBOX, BEAR, DRAGON };
 	static OBJObject* models; 
-	 
+	static TransformNode* worldNode;
 
 public:
 

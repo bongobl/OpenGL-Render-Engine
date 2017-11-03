@@ -39,6 +39,15 @@
     <ClInclude Include="..\CubeMapTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TransformNode.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GeometryNode.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">

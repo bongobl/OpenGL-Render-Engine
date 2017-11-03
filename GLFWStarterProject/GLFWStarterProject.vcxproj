@@ -21,11 +21,14 @@
   <ItemGroup>
     <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\CubeMapTexture.h" />
+    <ClInclude Include="..\GeometryNode.h" />
     <ClInclude Include="..\Light.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\Material.h" />
+    <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\TransformNode.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>

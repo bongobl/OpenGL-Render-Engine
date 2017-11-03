@@ -37,6 +37,8 @@ glm::mat4 Window::V;
 
 vector<string> faceNames;
 
+TransformNode* Window::worldNode;
+
 void Window::initialize_objects()
 {
 	isLeftMouseButtonDown = false;
