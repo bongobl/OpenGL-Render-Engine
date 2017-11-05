@@ -15,10 +15,8 @@ glm::vec3 cam_pos(0.0f, 0, 20.0f);			// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
-
 int Window::width;
 int Window::height;
-int Window::currModel;
 
 //trackball variables
 bool Window::isRightMouseButtonDown;
@@ -30,7 +28,8 @@ glm::vec3 Window::lastPoint;
 glm::mat4 Window::rotationMatrix;
 
 
-OBJObject* Window::models;
+OBJObject* Window::skybox;
+OBJObject* Window::body;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
@@ -43,15 +42,16 @@ void Window::initialize_objects()
 {
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
-	currModel = Window::SKYBOX;
 	rotationMatrix = glm::mat4(1.0f);
 
-	//create models
-	models = new OBJObject[3]{ OBJObject("myCube.obj",	Material(glm::vec3(1,0,0), 0, 1, 1),  0), 
-		                       OBJObject("bunny.obj",	Material(glm::vec3(0,1,0), 1, 0, 1),  0), 
-							   OBJObject("dragon.obj",	Material(glm::vec3(1,0,1), 0.5f, 1, 32),0)};
+	// Load the shader program. Make sure you have the correct filepath up top
+	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
+	RobotShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_robot.frag");
 
-	models[Window::SKYBOX].setScale(500);
+	//initialize skybox
+	skybox = new OBJObject("myCube.obj", SkyboxShaderProgram);
+	skybox->setScale(600);
+
 
 	//create cubemap
 	faceNames.push_back("skybox/right.ppm");
@@ -63,18 +63,17 @@ void Window::initialize_objects()
 
 	CubeMapTexture cubeMap;
 	cubeMap.loadCubeMapTexture(faceNames);
-	//models[Window::SKYBOX].cubeMapTextureID = cubeMap.getTextureID();
 	
-	// Load the shader program. Make sure you have the correct filepath up top
-	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
-	RobotShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_robot.frag");
+	//initialize robot
+	body = new OBJObject("robot-parts/body.obj", RobotShaderProgram);
 
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete[] models;
+	delete skybox;
+	delete body;
 	glDeleteProgram(SkyboxShaderProgram);
 	glDeleteProgram(RobotShaderProgram);
 	
@@ -146,7 +145,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	models[currModel].update();
+	
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -154,9 +153,8 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-	// Render the scene
-	models[currModel].draw(SkyboxShaderProgram);
-	
+	skybox->draw();
+	body->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 
@@ -181,28 +179,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		else if (key == GLFW_KEY_1) {
-			currModel = Window::SKYBOX;
-			models[currModel].setDefaultProperties();
-		}
-		else if (key == GLFW_KEY_2) {
-			currModel = Window::BEAR;
-			models[currModel].setDefaultProperties();
-		}
-		else if (key == GLFW_KEY_3) {
-			currModel = Window::DRAGON;
-			models[currModel].setDefaultProperties();
-		}
 
-		//Scale
-		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			if (mods & GLFW_MOD_SHIFT) {
-					models[currModel].incrementScale(1.0f);
-			}
-			else {
-					models[currModel].incrementScale(-1.0f);
-			}
-		}
 	}
 }
 
@@ -249,7 +226,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 1.0f;
 			if (!isnan(rotAngle)) {
 
-				//models[currModel].updateTrackBallRotate(glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis));
 				rotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * rotationMatrix;
 				cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist,0);
 				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
@@ -262,8 +238,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		glm::vec2 deltaMousePosition;
 		deltaMousePosition.x = (mousePosition.x - lastMousePosition.x) * .033f;
 		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * .033f;
-	
-		//models[currModel].move(glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0));
 	}
 
 	lastPoint = currPoint;
@@ -272,9 +246,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
-	//models[currModel].move(glm::vec3(0, 0, (float)yoffset));
 	
-	cam_dist += (float)yoffset;
+	cam_dist += 10 * (float)yoffset;
 	cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }

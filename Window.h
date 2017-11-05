@@ -21,14 +21,12 @@
 using namespace std;
 class Window
 {
-	enum modelID { SKYBOX, BEAR, DRAGON };
-	static OBJObject* models; 
 	static TransformNode* worldNode;
 
+	static OBJObject* skybox;
+	static OBJObject* body;
 public:
 
-	
-	static int currModel;
 
 	//window Variables
 	static int width;

@@ -9,13 +9,12 @@
 using namespace std;
 
 
-OBJObject::OBJObject(const char *filepath, Material m, float yOff) 
+OBJObject::OBJObject(const char *filepath, GLuint sp) 
 {
 
 	//read in geometry data disk
 	parse(filepath);
-	material = m;
-	cubeMapTextureID = 0; //no default cubemap texture
+	shaderProgram = sp;
 	setDefaultProperties();
 	
 
@@ -149,53 +148,38 @@ void OBJObject::setDefaultProperties() {
 	//set transformation matrices to reflect object properties.
 	translateMatrix = glm::translate(glm::mat4(1.0f), position);
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
-	trackBallRotate = glm::mat4(1.0);
 }
 
 
 
-void OBJObject::draw(GLuint currentShaderProgram)
+void OBJObject::draw()
 {
 
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
-	glUseProgram(currentShaderProgram);
+	glUseProgram(shaderProgram);
 
 
 	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
-	toWorld =  translateMatrix * trackBallRotate * scaleMatrix;
+	toWorld =  translateMatrix * scaleMatrix;
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(currentShaderProgram, "projection");
-	uModelview = glGetUniformLocation(currentShaderProgram, "modelview");
-	uToWorld = glGetUniformLocation(currentShaderProgram, "toWorld");
+	uProjection = glGetUniformLocation(shaderProgram, "projection");
+	uModelview = glGetUniformLocation(shaderProgram, "modelview");
+	uToWorld = glGetUniformLocation(shaderProgram, "toWorld");
 
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
-	//Apply model material properties
-	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.diffuse"), material.diffuse);
-	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.specular"), material.specular);
-	glUniform3f(glGetUniformLocation(currentShaderProgram, "material.materialColor"), material.color.x, material.color.y, material.color.z);
-	glUniform1f(glGetUniformLocation(currentShaderProgram, "material.shine"), material.shine);
 
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	
-	
-	/*
-	// Activate texture
-	if (cubeMapTextureID != 0) {
-		glDepthMask(GL_FALSE);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTextureID);
-	}
-	*/
 
 
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
@@ -232,8 +216,4 @@ void OBJObject::incrementScale(float scaleDiff) {
 }
 
 
-void OBJObject::updateTrackBallRotate(glm::mat4 offset) {
-	trackBallRotate = offset * trackBallRotate;
-	position = glm::vec3(   offset * glm::vec4(position.x, position.y, position.z,1.0f));
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-}
+

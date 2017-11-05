@@ -32,48 +32,36 @@ private:
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-
-
 	//Raw Object Properties	
 	glm::vec3 position;
 	float scale;
 	float modelAngle;
 	float modelZoom;
 
-	
-
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 	glm::mat4 translateMatrix;
 	glm::mat4 scaleMatrix;
-	glm::mat4 trackBallRotate;
-	//glm::mat4 screenZoomMatrix;
-	//glm::mat4 modelZoomMatrix;
-	
 
 	//Rendering with modern OpenGL
 	GLuint VBO, VBO2, VAO, EBO;
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
 
-	//Model Material
-	Material material;
-
-	
+	//object's shader program
+	GLuint shaderProgram;
 	
 public:
 
-	//Textures
-	GLuint cubeMapTextureID;
 
-	OBJObject(const char* filepath, Material m, float yOff);
+	OBJObject(const char* filepath, GLuint sp);
 	~OBJObject();
 	void parse(const char* filepath);
 	void setDefaultProperties();
 
 
 	//OpenGL draw function
-	void draw(GLuint currShaderProgram);
+	void draw();
 
 	void update();
 
@@ -82,7 +70,6 @@ public:
 	void move(glm::vec3 displacement);
 	void setScale(float scaleVal);
 	void incrementScale(float scaleDiff);
-	void updateTrackBallRotate(glm::mat4 offset);
 
 
 private:
