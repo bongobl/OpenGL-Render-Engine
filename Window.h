@@ -10,12 +10,12 @@
 #include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
-#include "Cube.h"
 #include "shader.h"
 #include "OBJObject.h"
 #include "Light.h"
 #include "Material.h"
 #include "CubeMapTexture.h"
+#include "Robot.h"
 #include "Node.h"
 #include "GeometryNode.h"
 #include "TransformNode.h"

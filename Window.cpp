@@ -6,12 +6,11 @@ const char* window_title = "GLFW Starter Project";
 
 //Shader Programs
 GLint SkyboxShaderProgram;
-GLint RobotShaderProgram;
 
 // Camera parameters
-float cam_dist(20.0f);
+float cam_dist(100.0f);
 const glm::vec3 intial_cam_pos(0.0f, 0, cam_dist);
-glm::vec3 cam_pos(0.0f, 0, 20.0f);			// e  | Position of camera
+glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
@@ -35,30 +34,20 @@ glm::mat4 Window::V;
 
 vector<string> faceNames;
 
-//Robot variables
-TransformNode* worldNode;
-TransformNode* bodyToWorld;
-TransformNode* headToBody;
-TransformNode* rightArmToBody;
-TransformNode* leftArmToBody;
-TransformNode* rightLegToBody;
-TransformNode* leftLegToBody;
-TransformNode* rightEyeToHead;
-TransformNode* leftEyeToHead;
-TransformNode* rightAntennaToHead;
-TransformNode* leftAntennaToHead;
 
-float legRotation = 0;
-
+//robot obj
+Robot* MrAndroid;
+Robot* MrsAndroid;
+Robot** army;
 void Window::initialize_objects()
 {
+
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	rotationMatrix = glm::mat4(1.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
-	RobotShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_robot.frag");
 
 	//initialize skybox
 	skybox = new OBJObject("myCube.obj", SkyboxShaderProgram);
@@ -73,79 +62,13 @@ void Window::initialize_objects()
 	CubeMapTexture cubeMap;
 	cubeMap.loadCubeMapTexture(faceNames);
 	
-
-	//initialize world Node
-	worldNode = new TransformNode();
-
-	//attach body to world
-	bodyToWorld = new TransformNode();
-	bodyToWorld->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(1, 0, 0)));
-	bodyToWorld->addChild(new GeometryNode("robot-parts/body.obj", RobotShaderProgram));
-	worldNode->addChild(bodyToWorld);
-
-	//attach head to body
-	headToBody = new TransformNode();
-	headToBody->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1, 0, 0)));
-	headToBody->setPosition(glm::vec3(0, 0, -32));
-	headToBody->addChild(new GeometryNode("robot-parts/head.obj", RobotShaderProgram));
-	bodyToWorld->addChild(headToBody);
-
-	//attach right arm to body
-	rightArmToBody = new TransformNode();
-	rightArmToBody->setPosition(glm::vec3(-26, 0, -10));
-	GeometryNode* rightArm = new GeometryNode("robot-parts/limb.obj", RobotShaderProgram);
-	rightArm->setCenter(0, 0, 10);
-	rightArmToBody->addChild(rightArm);
-	bodyToWorld->addChild(rightArmToBody);
-
-	//attach left arm to body
-	leftArmToBody = new TransformNode();
-	leftArmToBody->setPosition(glm::vec3(26, 0, -10));
-	GeometryNode* leftArm = new GeometryNode("robot-parts/limb.obj", RobotShaderProgram);
-	leftArm->setCenter(0, 0, 10);
-	leftArmToBody->addChild(leftArm);
-	bodyToWorld->addChild(leftArmToBody);
-
-	//attach right leg to body
-	rightLegToBody = new TransformNode();
-	rightLegToBody->setPosition(glm::vec3(-10,0, 20));
-	rightLegToBody->addChild(new GeometryNode("robot-parts/limb.obj", RobotShaderProgram));
-	bodyToWorld->addChild(rightLegToBody);
-
-	//attach left leg to body
-	leftLegToBody = new TransformNode();
-	leftLegToBody->setPosition(glm::vec3(10, 0, 20));
-	leftLegToBody->addChild(new GeometryNode("robot-parts/limb.obj", RobotShaderProgram));
-	bodyToWorld->addChild(leftLegToBody);
-
-
-	//attach right eye to head
-	rightEyeToHead = new TransformNode();
-	rightEyeToHead->setPosition(glm::vec3(-6.5f, -17, -2));
-	rightEyeToHead->setScale(0.75f);
-	rightEyeToHead->addChild(new GeometryNode("robot-parts/eyeball.obj", RobotShaderProgram));
-	headToBody->addChild(rightEyeToHead);
-
-	//attach left eye to head
-	leftEyeToHead = new TransformNode();
-	leftEyeToHead->setPosition(glm::vec3(6.5f, -17, -2));
-	leftEyeToHead->setScale(0.75f);
-	leftEyeToHead->addChild(new GeometryNode("robot-parts/eyeball.obj", RobotShaderProgram));
-	headToBody->addChild(leftEyeToHead);
-
-	//attach right antenna to head
-	rightAntennaToHead = new TransformNode();
-	rightAntennaToHead->setPosition(glm::vec3(-6.5f, 0, 3));
-	rightAntennaToHead->addChild(new GeometryNode("robot-parts/antenna.obj", RobotShaderProgram));
-	headToBody->addChild(rightAntennaToHead);
-
-	//attach left antenna to head
-	leftAntennaToHead = new TransformNode();
-	leftAntennaToHead->setPosition(glm::vec3(6.5f, 0, 3));
-	leftAntennaToHead->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1, 0, 0)));
-	leftAntennaToHead->addChild(new GeometryNode("robot-parts/antenna.obj", RobotShaderProgram));
-	headToBody->addChild(leftAntennaToHead);
-	
+	Robot::initializeStatics();
+	army = new Robot*[100];
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			army[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, -90, j * - 90));
+		}
+	}
 
 }
 
@@ -154,8 +77,11 @@ void Window::clean_up()
 {
 	delete skybox;
 	glDeleteProgram(SkyboxShaderProgram);
-	glDeleteProgram(RobotShaderProgram);
-	
+	for (int i = 0; i < 100; ++i) {
+		delete army[i];
+	}
+	delete army;
+	Robot::cleanUpStatics();
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -224,15 +150,11 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	legRotation += 0.03f;
-	leftLegToBody->setRotation(glm::rotate(glm::mat4(1.0f), sin(legRotation), glm::vec3(1, 0, 0)));
-	rightLegToBody->setRotation(glm::rotate(glm::mat4(1.0f), -sin(legRotation), glm::vec3(1, 0, 0)));
-
-	rightArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), sin(legRotation), glm::vec3(1, 0, 0)));
-	leftArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), -sin(legRotation), glm::vec3(1, 0, 0)));
 
 
-
+	for (int i = 0; i < 100; ++i) {
+		army[i]->update();
+	}
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -242,7 +164,9 @@ void Window::display_callback(GLFWwindow* window)
 		
 	skybox->draw();
 
-	worldNode->draw(glm::mat4(1.0f));
+	for (int i = 0; i < 100; ++i) {
+		army[i]->draw();
+	}
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 

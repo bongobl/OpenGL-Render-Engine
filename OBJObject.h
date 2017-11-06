@@ -67,6 +67,7 @@ public:
 	void draw();
 
 	friend class GeometryNode;
+	friend class Robot;
 
 };
 
