@@ -29,14 +29,26 @@ glm::mat4 Window::rotationMatrix;
 
 
 OBJObject* Window::skybox;
-OBJObject* Window::body;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 vector<string> faceNames;
 
-TransformNode* Window::worldNode;
+//Robot variables
+TransformNode* worldNode;
+TransformNode* bodyToWorld;
+TransformNode* headToBody;
+TransformNode* rightArmToBody;
+TransformNode* leftArmToBody;
+TransformNode* rightLegToBody;
+TransformNode* leftLegToBody;
+TransformNode* rightEyeToHead;
+TransformNode* leftEyeToHead;
+TransformNode* rightAntennaToHead;
+TransformNode* leftAntennaToHead;
+
+float legRotation = 0;
 
 void Window::initialize_objects()
 {
@@ -50,10 +62,7 @@ void Window::initialize_objects()
 
 	//initialize skybox
 	skybox = new OBJObject("myCube.obj", SkyboxShaderProgram);
-	skybox->setScale(600);
 
-
-	//create cubemap
 	faceNames.push_back("skybox/right.ppm");
 	faceNames.push_back("skybox/left.ppm");
 	faceNames.push_back("skybox/top.ppm");
@@ -64,8 +73,79 @@ void Window::initialize_objects()
 	CubeMapTexture cubeMap;
 	cubeMap.loadCubeMapTexture(faceNames);
 	
-	//initialize robot
-	body = new OBJObject("robot-parts/body.obj", RobotShaderProgram);
+
+	//initialize world Node
+	worldNode = new TransformNode();
+
+	//attach body to world
+	bodyToWorld = new TransformNode();
+	bodyToWorld->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(1, 0, 0)));
+	bodyToWorld->addChild(new GeometryNode("robot-parts/body.obj", RobotShaderProgram));
+	worldNode->addChild(bodyToWorld);
+
+	//attach head to body
+	headToBody = new TransformNode();
+	headToBody->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1, 0, 0)));
+	headToBody->setPosition(glm::vec3(0, 0, -32));
+	headToBody->addChild(new GeometryNode("robot-parts/head.obj", RobotShaderProgram));
+	bodyToWorld->addChild(headToBody);
+
+	//attach right arm to body
+	rightArmToBody = new TransformNode();
+	rightArmToBody->setPosition(glm::vec3(-26, 0, -10));
+	GeometryNode* rightArm = new GeometryNode("robot-parts/limb.obj", RobotShaderProgram);
+	rightArm->setCenter(0, 0, 10);
+	rightArmToBody->addChild(rightArm);
+	bodyToWorld->addChild(rightArmToBody);
+
+	//attach left arm to body
+	leftArmToBody = new TransformNode();
+	leftArmToBody->setPosition(glm::vec3(26, 0, -10));
+	GeometryNode* leftArm = new GeometryNode("robot-parts/limb.obj", RobotShaderProgram);
+	leftArm->setCenter(0, 0, 10);
+	leftArmToBody->addChild(leftArm);
+	bodyToWorld->addChild(leftArmToBody);
+
+	//attach right leg to body
+	rightLegToBody = new TransformNode();
+	rightLegToBody->setPosition(glm::vec3(-10,0, 20));
+	rightLegToBody->addChild(new GeometryNode("robot-parts/limb.obj", RobotShaderProgram));
+	bodyToWorld->addChild(rightLegToBody);
+
+	//attach left leg to body
+	leftLegToBody = new TransformNode();
+	leftLegToBody->setPosition(glm::vec3(10, 0, 20));
+	leftLegToBody->addChild(new GeometryNode("robot-parts/limb.obj", RobotShaderProgram));
+	bodyToWorld->addChild(leftLegToBody);
+
+
+	//attach right eye to head
+	rightEyeToHead = new TransformNode();
+	rightEyeToHead->setPosition(glm::vec3(-6.5f, -17, -2));
+	rightEyeToHead->setScale(0.75f);
+	rightEyeToHead->addChild(new GeometryNode("robot-parts/eyeball.obj", RobotShaderProgram));
+	headToBody->addChild(rightEyeToHead);
+
+	//attach left eye to head
+	leftEyeToHead = new TransformNode();
+	leftEyeToHead->setPosition(glm::vec3(6.5f, -17, -2));
+	leftEyeToHead->setScale(0.75f);
+	leftEyeToHead->addChild(new GeometryNode("robot-parts/eyeball.obj", RobotShaderProgram));
+	headToBody->addChild(leftEyeToHead);
+
+	//attach right antenna to head
+	rightAntennaToHead = new TransformNode();
+	rightAntennaToHead->setPosition(glm::vec3(-6.5f, 0, 3));
+	rightAntennaToHead->addChild(new GeometryNode("robot-parts/antenna.obj", RobotShaderProgram));
+	headToBody->addChild(rightAntennaToHead);
+
+	//attach left antenna to head
+	leftAntennaToHead = new TransformNode();
+	leftAntennaToHead->setPosition(glm::vec3(6.5f, 0, 3));
+	leftAntennaToHead->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1, 0, 0)));
+	leftAntennaToHead->addChild(new GeometryNode("robot-parts/antenna.obj", RobotShaderProgram));
+	headToBody->addChild(leftAntennaToHead);
+	
 
 }
 
@@ -73,7 +153,6 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete skybox;
-	delete body;
 	glDeleteProgram(SkyboxShaderProgram);
 	glDeleteProgram(RobotShaderProgram);
 	
@@ -145,7 +224,15 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	
+	legRotation += 0.03f;
+	leftLegToBody->setRotation(glm::rotate(glm::mat4(1.0f), sin(legRotation), glm::vec3(1, 0, 0)));
+	rightLegToBody->setRotation(glm::rotate(glm::mat4(1.0f), -sin(legRotation), glm::vec3(1, 0, 0)));
+
+	rightArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), sin(legRotation), glm::vec3(1, 0, 0)));
+	leftArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), -sin(legRotation), glm::vec3(1, 0, 0)));
+
+
+
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -154,7 +241,8 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 	skybox->draw();
-	body->draw();
+
+	worldNode->draw(glm::mat4(1.0f));
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 
@@ -168,12 +256,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	if (action == GLFW_PRESS)
 	{
 		// Check if escape was pressed
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			// Close the window. This causes the program to also terminate.
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-		// Check which key was pressed
 		if (key == GLFW_KEY_ESCAPE)
 		{
 			// Close the window. This causes the program to also terminate.
@@ -245,9 +327,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 }
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
-
 	
-	cam_dist += 10 * (float)yoffset;
+	cam_dist += -10 * (float)yoffset;
 	cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }

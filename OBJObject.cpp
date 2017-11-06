@@ -15,8 +15,9 @@ OBJObject::OBJObject(const char *filepath, GLuint sp)
 	//read in geometry data disk
 	parse(filepath);
 	shaderProgram = sp;
-	setDefaultProperties();
-	
+
+	modelCenter = glm::vec3(0, 0, 0);
+	toWorld = glm::mat4(1.0f);
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -87,6 +88,8 @@ void OBJObject::parse(const char *filepath)
 	GLfloat r, g, b;
 	GLuint v1, v2, v3, n1, n2, n3;
 
+	GLfloat lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
+
 	// Variables for finding Model Center of Mass
 	bool firstVertex = true;
 
@@ -106,6 +109,20 @@ void OBJObject::parse(const char *filepath)
 				vertices.push_back(x);
 				vertices.push_back(y);
 				vertices.push_back(z);
+
+				//Code to calc center of mass
+				if (firstVertex) {
+					lowestX = highestX = x;
+					lowestY = highestY = y;
+					lowestZ = highestZ = z;
+					firstVertex = false;
+				}
+				if (x > highestX)	highestX = x;
+				if (x < lowestX)	lowestX = x;
+				if (y > highestY)	highestY = y;
+				if (y < lowestY)	lowestY = y;
+				if (z > highestZ)	highestZ = z;
+				if (z < lowestZ)	lowestZ = z;
 
 			}
 			else if (currLine[1] == 'n' && currLine[2] == ' ') {
@@ -130,7 +147,12 @@ void OBJObject::parse(const char *filepath)
 		
 	}//END FOR
 	
-
+	 //define object center
+	glm::vec3 meshCenterOffset;
+	meshCenterOffset.x = (highestX + lowestX) / 2.0f;
+	meshCenterOffset.y = (highestY + lowestY) / 2.0f;
+	meshCenterOffset.z = (highestZ + lowestZ) / 2.0f;
+	centerModelMesh = glm::translate(glm::mat4(1.0f), glm::vec3(-meshCenterOffset.x, -meshCenterOffset.y, -meshCenterOffset.z));
 
 	cout << "num vertices: " << vertices.size() << endl;
 	cout << "num normals: " << normals.size() << endl;
@@ -138,19 +160,10 @@ void OBJObject::parse(const char *filepath)
 
 }
 
-void OBJObject::setDefaultProperties() {
-	
-	//set raw Object Properties
-	this->position = glm::vec3(0, 0, 0);
-	this->scale = 1.0f;
-	this->modelZoom = 0;
 
-	//set transformation matrices to reflect object properties.
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+void OBJObject::setToWorld(glm::mat4 M_new) {
+	this->toWorld = M_new;
 }
-
-
 
 void OBJObject::draw()
 {
@@ -159,11 +172,9 @@ void OBJObject::draw()
 	//glCullFace(GL_FRONT);
 	glUseProgram(shaderProgram);
 
-
-	//ALL INFO HERE IS SENT TO VERT FILE, NOT FRAG FILE
-	toWorld =  translateMatrix * scaleMatrix;
+	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * toWorld;
+	glm::mat4 modelview = Window::V * toWorld * modelCenterMatrix * centerModelMesh;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -188,32 +199,5 @@ void OBJObject::draw()
 	glBindVertexArray(0);
 
 }
-
-void OBJObject::update() {
-
-	
-}
-
-
-void OBJObject::setPosition(glm::vec3 newPosition) {
-	position = newPosition;
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-
-}
-
-void OBJObject::move(glm::vec3 displacement) {
-	position = position + displacement;
-	translateMatrix = glm::translate(glm::mat4(1.0f), position);
-
-}
-void OBJObject::setScale(float scaleVal) {
-	scale = scaleVal;
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
-}
-void OBJObject::incrementScale(float scaleDiff) {
-	scale += scaleDiff;
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
-}
-
 
 

@@ -1,15 +1,19 @@
 #ifndef OBJOBJECT_H
 #define OBJOBJECT_H
 
+
 #define GLFW_INCLUDE_GLEXT
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenGL/glext.h>
-#include <OpenGL/gl.h> // Remove this line in future projects
+//#include <OpenGL/gl.h> // Remove this line in future projects
 #else
+
 #include <GL/glew.h>
+
 #endif
+
 
 #include <GLFW/glfw3.h>
 
@@ -23,25 +27,23 @@
 #include <vector>
 #include "Material.h"
 
+
 class OBJObject
 {
-private:
 
 	//Model Geometry Data
 	std::vector<GLuint> indices;
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-	//Raw Object Properties	
-	glm::vec3 position;
-	float scale;
-	float modelAngle;
-	float modelZoom;
+	//centers model geometry
+	glm::mat4 centerModelMesh;
+
+	//model center
+	glm::vec3 modelCenter;
 
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
-	glm::mat4 translateMatrix;
-	glm::mat4 scaleMatrix;
 
 	//Rendering with modern OpenGL
 	GLuint VBO, VBO2, VAO, EBO;
@@ -53,26 +55,18 @@ private:
 	
 public:
 
-
 	OBJObject(const char* filepath, GLuint sp);
 	~OBJObject();
 	void parse(const char* filepath);
-	void setDefaultProperties();
 
+
+	//to manipulate toWorld
+	void setToWorld(glm::mat4 M_new);
 
 	//OpenGL draw function
 	void draw();
 
-	void update();
-
-	//Manipulate raw Object Properties
-	void setPosition(glm::vec3 newPosition);
-	void move(glm::vec3 displacement);
-	void setScale(float scaleVal);
-	void incrementScale(float scaleDiff);
-
-
-private:
+	friend class GeometryNode;
 
 };
 

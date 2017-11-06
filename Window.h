@@ -17,14 +17,14 @@
 #include "Material.h"
 #include "CubeMapTexture.h"
 #include "Node.h"
+#include "GeometryNode.h"
 #include "TransformNode.h"
 using namespace std;
 class Window
 {
-	static TransformNode* worldNode;
-
 	static OBJObject* skybox;
-	static OBJObject* body;
+
+	
 public:
 
 

@@ -1,13 +1,15 @@
 #pragma once
-#include "Node.h"
 #include "OBJObject.h"
+#include "Node.h"
+
 class GeometryNode : public Node {
 	
 	OBJObject* model;
-
+	
 public:
 
-	GeometryNode(OBJObject* mod);
-	void draw(glm::mat4 C) = 0;
-
+	GeometryNode(const char* filepath, GLuint sp);
+	void draw(glm::mat4 C);
+	void setCenter(float x, float y, float z);
+	void update();
 };
