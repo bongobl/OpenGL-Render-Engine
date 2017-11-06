@@ -11,6 +11,5 @@ public:
 	GeometryNode(OBJObject* mod);
 	GeometryNode(const char* filepath, GLuint sp);
 	void draw(glm::mat4 C);
-	void setCenter(float x, float y, float z);
 	void update();
 };

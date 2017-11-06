@@ -59,15 +59,13 @@ public:
 	~OBJObject();
 	void parse(const char* filepath);
 
-
 	//to manipulate toWorld
 	void setToWorld(glm::mat4 M_new);
 
 	//OpenGL draw function
 	void draw();
 
-	friend class GeometryNode;
-	friend class Robot;
+	void setModelCenter(glm::vec3 newCenter);
 
 };
 

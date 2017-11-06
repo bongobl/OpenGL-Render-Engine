@@ -35,10 +35,8 @@ glm::mat4 Window::V;
 vector<string> faceNames;
 
 
-//robot obj
-Robot* MrAndroid;
-Robot* MrsAndroid;
-Robot** army;
+//Robot Army array
+Robot** robotArmy;
 void Window::initialize_objects()
 {
 
@@ -49,8 +47,9 @@ void Window::initialize_objects()
 	// Load the shader program. Make sure you have the correct filepath up top
 	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
 
-	//initialize skybox
+	//initialize skybox and put it at camera position
 	skybox = new OBJObject("myCube.obj", SkyboxShaderProgram);
+	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
 	faceNames.push_back("skybox/right.ppm");
 	faceNames.push_back("skybox/left.ppm");
@@ -63,10 +62,10 @@ void Window::initialize_objects()
 	cubeMap.loadCubeMapTexture(faceNames);
 	
 	Robot::initializeStatics();
-	army = new Robot*[100];
+	robotArmy = new Robot*[100];
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
-			army[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, -90, j * - 90));
+			robotArmy[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, -90, j * - 90));
 		}
 	}
 
@@ -78,9 +77,9 @@ void Window::clean_up()
 	delete skybox;
 	glDeleteProgram(SkyboxShaderProgram);
 	for (int i = 0; i < 100; ++i) {
-		delete army[i];
+		delete robotArmy[i];
 	}
-	delete army;
+	delete robotArmy;
 	Robot::cleanUpStatics();
 }
 
@@ -150,10 +149,12 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
+	//keep skybox position at camera position
+	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
-
+	//update robot army
 	for (int i = 0; i < 100; ++i) {
-		army[i]->update();
+		robotArmy[i]->update();
 	}
 }
 
@@ -162,10 +163,13 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+	glDepthMask(GL_FALSE);
 	skybox->draw();
+	glDepthMask(GL_TRUE);
+
 
 	for (int i = 0; i < 100; ++i) {
-		army[i]->draw();
+		robotArmy[i]->draw();
 	}
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

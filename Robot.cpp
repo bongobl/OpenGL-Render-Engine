@@ -14,7 +14,7 @@ void Robot::initializeStatics() {
 	body = new OBJObject("robot-parts/body.obj", RobotShaderProgram);
 	head = new OBJObject("robot-parts/head.obj", RobotShaderProgram);
 	arm = new OBJObject("robot-parts/limb.obj", RobotShaderProgram);
-	arm->modelCenter = glm::vec3(0, 0, 10);
+	arm->setModelCenter(glm::vec3(0, 0, 10));
 	leg = new OBJObject("robot-parts/limb.obj", RobotShaderProgram);
 	eye = new OBJObject("robot-parts/eyeball.obj", RobotShaderProgram);
 	antenna = new OBJObject("robot-parts/antenna.obj", RobotShaderProgram);
@@ -95,6 +95,10 @@ Robot::Robot(glm::vec3 position) {
 	prevTime = (float)glfwGetTime();
 }
 
+Robot::~Robot() {
+
+	delete worldNode;
+}
 void Robot::cleanUpStatics() {
 	
 	delete body;

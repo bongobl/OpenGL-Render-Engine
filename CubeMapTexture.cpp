@@ -31,6 +31,8 @@ void CubeMapTexture::loadCubeMapTexture(vector<std::string> faces) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	
+
 }
 
 unsigned char* CubeMapTexture::loadPPM(const char* filename, int& width, int& height) {

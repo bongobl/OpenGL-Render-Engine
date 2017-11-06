@@ -17,6 +17,8 @@ public:
 
 
 	TransformNode(); //set M to identity
+	~TransformNode();
+
 	void draw(glm::mat4 C);
 	void update();
 
@@ -29,6 +31,6 @@ public:
 
 private:
 
-	void update_M();
+	void updateMatrix_M();
 	
 };

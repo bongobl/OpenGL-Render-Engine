@@ -200,4 +200,8 @@ void OBJObject::draw()
 
 }
 
+void OBJObject::setModelCenter(glm::vec3 newCenter) {
+	modelCenter = newCenter;
+}
+
 

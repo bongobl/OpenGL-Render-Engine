@@ -38,7 +38,7 @@ public:
 	static void initializeStatics();
 	static void cleanUpStatics();
 	Robot(glm::vec3 position);
-
+	~Robot();
 
 	void update();
 	void draw();
