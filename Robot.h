@@ -16,10 +16,11 @@ class Robot {
 	static OBJObject* leg;
 	static OBJObject* eye;
 	static OBJObject* antenna;
+	static OBJObject* sphere;
 
 	//member fields
-	TransformNode* worldNode;
-	TransformNode* bodyToWorld;
+	TransformNode* rootNode;
+	TransformNode* bodyToRoot;
 	TransformNode* headToBody;
 	TransformNode* rightArmToBody;
 	TransformNode* leftArmToBody;
@@ -29,6 +30,9 @@ class Robot {
 	TransformNode* leftEyeToHead;
 	TransformNode* rightAntennaToHead;
 	TransformNode* leftAntennaToHead;
+	TransformNode* boundingSphereToBody;
+
+	GeometryNode* boundingSphere;
 
 	GLfloat clock;
 	GLfloat prevTime;
@@ -41,8 +45,8 @@ public:
 	~Robot();
 
 	void update();
-	void draw();
+	void draw(glm::mat4 start);
 	void setPosition(glm::vec3 position);
-
+	glm::mat4 getBoundingSphereToRoot();
 };
 

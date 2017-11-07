@@ -14,6 +14,8 @@ glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
+int Window::currRotateMode;
+
 int Window::width;
 int Window::height;
 
@@ -24,7 +26,7 @@ glm::vec2 Window::mousePosition;
 glm::vec2 Window::lastMousePosition;
 glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
-glm::mat4 Window::rotationMatrix;
+glm::mat4 Window::camRotationMatrix;
 
 
 OBJObject* Window::skybox;
@@ -37,12 +39,16 @@ vector<string> faceNames;
 
 //Robot Army array
 Robot** robotArmy;
+glm::mat4 gridRotation(1.0f);
+bool Window::drawBoundingSpheres;
+
 void Window::initialize_objects()
 {
-
+	currRotateMode = Window::CAMERA;
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
-	rotationMatrix = glm::mat4(1.0f);
+	camRotationMatrix = glm::mat4(1.0f);
+	drawBoundingSpheres = false;
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
@@ -61,14 +67,14 @@ void Window::initialize_objects()
 	CubeMapTexture cubeMap;
 	cubeMap.loadCubeMapTexture(faceNames);
 	
+
 	Robot::initializeStatics();
 	robotArmy = new Robot*[100];
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
-			robotArmy[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, -90, j * - 90));
+			robotArmy[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, 0, j * - 90 + 405));
 		}
 	}
-
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -154,6 +160,7 @@ void Window::idle_callback()
 
 	//update robot army
 	for (int i = 0; i < 100; ++i) {
+		
 		robotArmy[i]->update();
 	}
 }
@@ -167,10 +174,14 @@ void Window::display_callback(GLFWwindow* window)
 	skybox->draw();
 	glDepthMask(GL_TRUE);
 
-
+	
 	for (int i = 0; i < 100; ++i) {
-		robotArmy[i]->draw();
+		glm::vec4 robotPosition = gridRotation * robotArmy[i]->getBoundingSphereToRoot() * glm::vec4(0,0,0,1);
+
+		if(robotPosition.z > 0)
+			robotArmy[i]->draw(gridRotation);
 	}
+
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 
@@ -189,8 +200,14 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-
+		if (key == GLFW_KEY_A) {
+			drawBoundingSpheres = false;
+		}
+		if (key == GLFW_KEY_S) {
+			drawBoundingSpheres = true;
+		}
 	}
+
 }
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -203,6 +220,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 			isRightMouseButtonDown = true;
+			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 			lastMousePosition = mousePosition;
 		}
 	}
@@ -225,23 +243,29 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 	glm::vec3 direction;
 	
 
-	//If left mouse button is down, do trackball rotation
-	if (isLeftMouseButtonDown) {
+	//If any mouse button is down, do trackball rotation
+	if (isLeftMouseButtonDown || isRightMouseButtonDown) {
 		currPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 		direction = currPoint - lastPoint;
 		float velocity = glm::length(direction);
-		if (velocity > 0.0001f) {			
+		if (velocity > 0.0001f) {
 
 			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
 			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 1.0f;
 			if (!isnan(rotAngle)) {
-
-				rotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * rotationMatrix;
-				cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist,0);
-				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+				if (isLeftMouseButtonDown) {
+					camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
+					cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+					V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+				}
+				if (isRightMouseButtonDown) {
+					gridRotation = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * gridRotation;
+				}
 			}
 		}
 	}
+	
+	
 
 	//if right mouse button is down, translate model
 	if (isRightMouseButtonDown) {
@@ -257,7 +281,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	
 	cam_dist += -10 * (float)yoffset;
-	cam_pos = rotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+	cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }
 

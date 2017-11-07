@@ -7,7 +7,7 @@ OBJObject* Robot::arm;
 OBJObject* Robot::leg;
 OBJObject* Robot::eye;
 OBJObject* Robot::antenna;
-
+OBJObject* Robot::sphere;
 void Robot::initializeStatics() {
 
 	RobotShaderProgram =  LoadShaders("../shader.vert", "../shader_robot.frag");
@@ -18,51 +18,51 @@ void Robot::initializeStatics() {
 	leg = new OBJObject("robot-parts/limb.obj", RobotShaderProgram);
 	eye = new OBJObject("robot-parts/eyeball.obj", RobotShaderProgram);
 	antenna = new OBJObject("robot-parts/antenna.obj", RobotShaderProgram);
-
+	sphere = new OBJObject("sphere.obj", RobotShaderProgram);
 }
 
 Robot::Robot(glm::vec3 position) {
 
 	//initialize world Node
-	worldNode = new TransformNode();
+	rootNode = new TransformNode();
 
 	//attach body to world
-	bodyToWorld = new TransformNode();
-	bodyToWorld->setPosition(position);
-	bodyToWorld->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(1, 0, 0)));
-	bodyToWorld->addChild(new GeometryNode(body));
-	worldNode->addChild(bodyToWorld);
+	bodyToRoot = new TransformNode();
+	bodyToRoot->setPosition(position);
+	bodyToRoot->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(1, 0, 0)));
+	bodyToRoot->addChild(new GeometryNode(body));
+	rootNode->addChild(bodyToRoot);
 
 	//attach head to body
 	headToBody = new TransformNode();
 	headToBody->setRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1, 0, 0)));
 	headToBody->setPosition(glm::vec3(0, 0, -32));
 	headToBody->addChild(new GeometryNode(head));
-	bodyToWorld->addChild(headToBody);
+	bodyToRoot->addChild(headToBody);
 
 	//attach right arm to body
 	rightArmToBody = new TransformNode();
 	rightArmToBody->setPosition(glm::vec3(-26, 0, -10));
 	rightArmToBody->addChild(new GeometryNode(arm));
-	bodyToWorld->addChild(rightArmToBody);
+	bodyToRoot->addChild(rightArmToBody);
 
 	//attach left arm to body
 	leftArmToBody = new TransformNode();
 	leftArmToBody->setPosition(glm::vec3(26, 0, -10));
 	leftArmToBody->addChild(new GeometryNode(arm));
-	bodyToWorld->addChild(leftArmToBody);
+	bodyToRoot->addChild(leftArmToBody);
 
 	//attach right leg to body
 	rightLegToBody = new TransformNode();
 	rightLegToBody->setPosition(glm::vec3(-10, 0, 20));
 	rightLegToBody->addChild(new GeometryNode(leg));
-	bodyToWorld->addChild(rightLegToBody);
+	bodyToRoot->addChild(rightLegToBody);
 
 	//attach left leg to body
 	leftLegToBody = new TransformNode();
 	leftLegToBody->setPosition(glm::vec3(10, 0, 20));
 	leftLegToBody->addChild(new GeometryNode(leg));
-	bodyToWorld->addChild(leftLegToBody);
+	bodyToRoot->addChild(leftLegToBody);
 
 	//attach right eye to head
 	rightEyeToHead = new TransformNode();
@@ -91,13 +91,22 @@ Robot::Robot(glm::vec3 position) {
 	leftAntennaToHead->addChild(new GeometryNode(antenna));
 	headToBody->addChild(leftAntennaToHead);
 
+	//attach bounding sphere to body
+	boundingSphereToBody = new TransformNode();
+	boundingSphereToBody->setScale(43);
+	boundingSphereToBody->setPosition(glm::vec3(0, 0, -6));
+	boundingSphere = new GeometryNode(sphere);
+	boundingSphere->getModel()->enableDrawWithLines();
+	boundingSphereToBody->addChild(boundingSphere);
+	bodyToRoot->addChild(boundingSphereToBody);
+
 	clock = 0;
 	prevTime = (float)glfwGetTime();
 }
 
 Robot::~Robot() {
 
-	delete worldNode;
+	delete rootNode;
 }
 void Robot::cleanUpStatics() {
 	
@@ -107,6 +116,7 @@ void Robot::cleanUpStatics() {
 	delete leg;
 	delete eye;
 	delete antenna;
+	delete sphere;
 	glDeleteProgram(RobotShaderProgram);
 }
 
@@ -121,10 +131,17 @@ void Robot::update() {
 	rightArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), sin(clock), glm::vec3(1, 0, 0)));
 	leftArmToBody->setRotation(glm::rotate(glm::mat4(1.0f), -sin(clock), glm::vec3(1, 0, 0)));
 }
-void Robot::draw() {
-	worldNode->draw(glm::mat4(1.0f));
+void Robot::draw(glm::mat4 start) {
+
+	rootNode->draw(start);
 }
 
 void Robot::setPosition(glm::vec3 position) {
-	bodyToWorld->setPosition(position);
+	bodyToRoot->setPosition(position);
+}
+
+
+
+glm::mat4 Robot::getBoundingSphereToRoot() {
+	return bodyToRoot->getMatrixM() * boundingSphereToBody->getMatrixM();
 }

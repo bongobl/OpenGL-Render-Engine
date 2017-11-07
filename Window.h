@@ -22,11 +22,14 @@
 using namespace std;
 class Window
 {
-	static OBJObject* skybox;
 
+	enum RotateMode { CAMERA, ROBOT_GRID };
+	static OBJObject* skybox;
 	
 public:
 
+	static int currRotateMode;
+	static bool drawBoundingSpheres;
 
 	//window Variables
 	static int width;
@@ -39,7 +42,7 @@ public:
 	static glm::vec2 lastMousePosition;
 	static glm::vec3 currPoint;
 	static glm::vec3 lastPoint;
-	static glm::mat4 rotationMatrix;
+	static glm::mat4 camRotationMatrix;
 
 
 	static glm::mat4 P; // P for projection

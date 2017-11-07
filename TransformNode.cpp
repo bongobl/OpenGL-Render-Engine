@@ -45,8 +45,18 @@ void TransformNode::setRotation(glm::mat4 rot) {
 	updateMatrix_M();
 }
 
+
+void TransformNode::rotate(glm::mat4 deltaRot) {
+	rotation = deltaRot * rotation;
+	updateMatrix_M();
+}
+
 void TransformNode::updateMatrix_M() {
 	M = glm::translate(glm::mat4(1.0f), position)
 		* rotation * 
 		glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+}
+
+glm::mat4 TransformNode::getMatrixM() {
+	return M;
 }

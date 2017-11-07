@@ -29,6 +29,10 @@ public:
 	void setScale(float s);
 	void setRotation(glm::mat4 rot);
 
+	void rotate(glm::mat4 deltaRot);
+
+	glm::mat4 getMatrixM();
+
 private:
 
 	void updateMatrix_M();

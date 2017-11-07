@@ -52,6 +52,8 @@ class OBJObject
 
 	//object's shader program
 	GLuint shaderProgram;
+
+	bool drawWithLines;
 	
 public:
 
@@ -66,6 +68,8 @@ public:
 	void draw();
 
 	void setModelCenter(glm::vec3 newCenter);
+
+	void enableDrawWithLines();
 
 };
 

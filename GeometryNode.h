@@ -10,6 +10,8 @@ public:
 
 	GeometryNode(OBJObject* mod);
 	GeometryNode(const char* filepath, GLuint sp);
+
+	OBJObject* getModel();
 	void draw(glm::mat4 C);
 	void update();
 };

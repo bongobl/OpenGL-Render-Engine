@@ -17,3 +17,7 @@ void GeometryNode::draw(glm::mat4 C) {
 void GeometryNode::update() {
 
 }
+
+OBJObject* GeometryNode::getModel() {
+	return model;
+}

@@ -11,13 +11,15 @@ using namespace std;
 
 OBJObject::OBJObject(const char *filepath, GLuint sp) 
 {
-
+	
 	//read in geometry data disk
 	parse(filepath);
 	shaderProgram = sp;
 
 	modelCenter = glm::vec3(0, 0, 0);
 	toWorld = glm::mat4(1.0f);
+
+	drawWithLines = false;
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -70,7 +72,7 @@ OBJObject::OBJObject(const char *filepath, GLuint sp)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
-	
+
 }
 
 OBJObject::~OBJObject() {
@@ -192,9 +194,13 @@ void OBJObject::draw()
 	glBindVertexArray(VAO);
 	
 
-
-	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	if (drawWithLines) {
+		if(Window::drawBoundingSpheres)
+			glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+	}
+	else
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 
@@ -204,4 +210,8 @@ void OBJObject::setModelCenter(glm::vec3 newCenter) {
 	modelCenter = newCenter;
 }
 
+
+void OBJObject::enableDrawWithLines() {
+	drawWithLines = true;
+}
 
