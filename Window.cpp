@@ -133,6 +133,7 @@ GLFWwindow* Window::create_window(int width, int height)
 	// Call the resize callback to make sure things get drawn immediately
 	Window::resize_callback(window, width, height);
 
+
 	return window;
 }
 
@@ -176,9 +177,9 @@ void Window::display_callback(GLFWwindow* window)
 
 	
 	for (int i = 0; i < 100; ++i) {
-		glm::vec4 robotPosition = gridRotation * robotArmy[i]->getBoundingSphereToRoot() * glm::vec4(0,0,0,1);
-
-		if(robotPosition.z > 0)
+		
+		//implement culling algorithm here
+		if (isRobotInFrustum(robotArmy[i]))
 			robotArmy[i]->draw(gridRotation);
 	}
 
@@ -298,4 +299,14 @@ glm::vec3 Window::trackBallMap(glm::vec2 point) {
 	v.z = sqrt(1.001f - d*d);
 	v = glm::normalize(v);
 	return v;
+}
+
+bool Window::isRobotInFrustum(Robot* robot) {
+
+	glm::vec4 robotPosition = gridRotation * robot->getBoundingSphereToRoot() * glm::vec4(0, 0, 0, 1);
+	float robotSphereRadius = robot->getBoundingSphereRadius();
+	
+	if(robotPosition.y > 0)
+		return true;
+	return false;
 }

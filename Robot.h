@@ -33,7 +33,7 @@ class Robot {
 	TransformNode* boundingSphereToBody;
 
 	GeometryNode* boundingSphere;
-
+	float boundingSphereRadius;
 	GLfloat clock;
 	GLfloat prevTime;
 
@@ -48,5 +48,6 @@ public:
 	void draw(glm::mat4 start);
 	void setPosition(glm::vec3 position);
 	glm::mat4 getBoundingSphereToRoot();
+	float getBoundingSphereRadius();
 };
 

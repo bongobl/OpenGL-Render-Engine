@@ -23,6 +23,8 @@ void Robot::initializeStatics() {
 
 Robot::Robot(glm::vec3 position) {
 
+	boundingSphereRadius = 43;
+
 	//initialize world Node
 	rootNode = new TransformNode();
 
@@ -93,7 +95,7 @@ Robot::Robot(glm::vec3 position) {
 
 	//attach bounding sphere to body
 	boundingSphereToBody = new TransformNode();
-	boundingSphereToBody->setScale(43);
+	boundingSphereToBody->setScale(boundingSphereRadius);
 	boundingSphereToBody->setPosition(glm::vec3(0, 0, -6));
 	boundingSphere = new GeometryNode(sphere);
 	boundingSphere->getModel()->enableDrawWithLines();
@@ -140,8 +142,10 @@ void Robot::setPosition(glm::vec3 position) {
 	bodyToRoot->setPosition(position);
 }
 
-
-
 glm::mat4 Robot::getBoundingSphereToRoot() {
 	return bodyToRoot->getMatrixM() * boundingSphereToBody->getMatrixM();
+}
+
+float Robot::getBoundingSphereRadius() {
+	return boundingSphereRadius;
 }
