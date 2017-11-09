@@ -4,10 +4,6 @@ GeometryNode::GeometryNode(OBJObject* mod) {
 	model = mod;
 }
 
-GeometryNode::GeometryNode(const char* filepath, GLuint sp) {
-
-	model = new OBJObject(filepath, sp);
-}
 
 void GeometryNode::draw(glm::mat4 C) {
 

@@ -43,6 +43,9 @@ Robot** robotArmy;
 glm::mat4 gridRotation(1.0f);
 bool Window::drawBoundingSpheres;
 
+//culling
+bool useCulling = true;
+
 void Window::initialize_objects()
 {
 	currRotateMode = Window::CAMERA;
@@ -176,14 +179,14 @@ void Window::display_callback(GLFWwindow* window)
 	skybox->draw();
 	glDepthMask(GL_TRUE);
 
-	
-	for (int i = 0; i < armyDimension * armyDimension; ++i) {
-		
+	double startTime = glfwGetTime();
+	for (int i = 0; i < armyDimension * armyDimension; ++i) {		
 		//implement culling algorithm here
-		if (isRobotInFrustum(robotArmy[i]))
+		if (!useCulling || isRobotInFrustum(robotArmy[i]))
 			robotArmy[i]->draw(gridRotation);
 	}
-
+	double endTime = glfwGetTime();
+	cout << "Rendering Time Per Frame: " << endTime - startTime << endl;
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 
@@ -202,11 +205,23 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+
+		//Bounding Sphere Render
 		if (key == GLFW_KEY_A) {
 			drawBoundingSpheres = false;
 		}
 		if (key == GLFW_KEY_S) {
 			drawBoundingSpheres = true;
+		}
+
+		//Culling
+		if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+			if (mods & GLFW_MOD_SHIFT) {
+					useCulling = true;
+			}
+			else {
+					useCulling = false;
+			}
 		}
 	}
 
@@ -266,8 +281,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		}
 	}
 	
-	
-
 	//if right mouse button is down, translate model
 	if (isRightMouseButtonDown) {
 		glm::vec2 deltaMousePosition;
@@ -322,7 +335,6 @@ bool Window::isRobotInFrustum(Robot* robot) {
 	glm::vec3 BR = glm::inverse(Window::V) * glm::vec4(x, -y, z, 1);
 	glm::vec3 TL = glm::inverse(Window::V) * glm::vec4(-x, y, z, 1);
 	glm::vec3 BL = glm::inverse(Window::V) * glm::vec4(-x, -y, z, 1);
-
 
 	//to re calculate for each plane
 	glm::vec3 normal;
