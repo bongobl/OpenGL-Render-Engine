@@ -38,6 +38,7 @@ vector<string> faceNames;
 
 
 //Robot Army array
+int armyDimension = 30;
 Robot** robotArmy;
 glm::mat4 gridRotation(1.0f);
 bool Window::drawBoundingSpheres;
@@ -69,10 +70,11 @@ void Window::initialize_objects()
 	
 
 	Robot::initializeStatics();
-	robotArmy = new Robot*[100];
-	for (int i = 0; i < 10; ++i) {
-		for (int j = 0; j < 10; ++j) {
-			robotArmy[i * 10 + j] = new Robot(glm::vec3(i * 90 - 405, 0, j * - 90 + 405));
+	robotArmy = new Robot*[armyDimension * armyDimension];
+	int startOffset = (armyDimension - 1) * 45;
+	for (int i = 0; i < armyDimension; ++i) {
+		for (int j = 0; j < armyDimension; ++j) {
+			robotArmy[i * armyDimension + j] = new Robot(glm::vec3(i * 90 - startOffset, 0, j * - 90 + startOffset));
 		}
 	}
 }
@@ -82,7 +84,7 @@ void Window::clean_up()
 {
 	delete skybox;
 	glDeleteProgram(SkyboxShaderProgram);
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < armyDimension * armyDimension; ++i) {
 		delete robotArmy[i];
 	}
 	delete robotArmy;
@@ -160,8 +162,7 @@ void Window::idle_callback()
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
 	//update robot army
-	for (int i = 0; i < 100; ++i) {
-		
+	for (int i = 0; i < armyDimension * armyDimension; ++i) {		
 		robotArmy[i]->update();
 	}
 }
@@ -176,7 +177,7 @@ void Window::display_callback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < armyDimension * armyDimension; ++i) {
 		
 		//implement culling algorithm here
 		if (isRobotInFrustum(robotArmy[i]))
@@ -242,7 +243,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 	mousePosition.y = (float)ypos;
 
 	glm::vec3 direction;
-	
 
 	//If any mouse button is down, do trackball rotation
 	if (isLeftMouseButtonDown || isRightMouseButtonDown) {
@@ -303,10 +303,55 @@ glm::vec3 Window::trackBallMap(glm::vec2 point) {
 
 bool Window::isRobotInFrustum(Robot* robot) {
 
-	glm::vec4 robotPosition = gridRotation * robot->getBoundingSphereToRoot() * glm::vec4(0, 0, 0, 1);
+
+	//robot transform and sphere
+	glm::vec3 robotPosition = gridRotation * robot->getBoundingSphereToRoot() * glm::vec4(0, 0, 0, 1);
 	float robotSphereRadius = robot->getBoundingSphereRadius();
 	
-	if(robotPosition.y > 0)
-		return true;
-	return false;
+	//camera fields
+	float angle_fov = glm::pi<float>() / 3;
+	float aspect_ratio = (float)width / (float)height;
+
+	//xyz components that differ slightly for each point
+	float z = cos(angle_fov / 2) * -1;
+	float y = sin(angle_fov / 2);
+	float x = y * aspect_ratio;
+
+	//define all 4 point locations on corners of camera screen
+	glm::vec3 TR = glm::inverse(Window::V) * glm::vec4(x, y, z, 1);
+	glm::vec3 BR = glm::inverse(Window::V) * glm::vec4(x, -y, z, 1);
+	glm::vec3 TL = glm::inverse(Window::V) * glm::vec4(-x, y, z, 1);
+	glm::vec3 BL = glm::inverse(Window::V) * glm::vec4(-x, -y, z, 1);
+
+
+	//to re calculate for each plane
+	glm::vec3 normal;
+	float dist;
+
+	//cull from top plane
+	normal = glm::normalize(  glm::cross((TR - cam_pos), (TL - cam_pos))   );
+	dist = glm::dot(robotPosition - cam_pos, normal);
+	if(dist > robotSphereRadius)
+		return false;
+
+	//cull from bottom plane
+	normal = glm::normalize( glm::cross((BL - cam_pos), (BR - cam_pos)));
+	dist = glm::dot(robotPosition - cam_pos, normal);
+	if (dist > robotSphereRadius)
+		return false;
+
+	//cull from right plane
+	normal = glm::normalize(glm::cross((BR - cam_pos), (TR - cam_pos)));
+	dist = glm::dot(robotPosition - cam_pos, normal);
+	if (dist > robotSphereRadius)
+		return false;
+
+	//cull from left plane
+	normal = glm::normalize(glm::cross((TL - cam_pos), (BL - cam_pos)));
+	dist = glm::dot(robotPosition - cam_pos, normal);
+	if (dist > robotSphereRadius)
+		return false;
+
+	//object is in camera frustum
+	return true;
 }
