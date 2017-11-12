@@ -181,7 +181,7 @@ void Window::display_callback(GLFWwindow* window)
 
 	double startTime = glfwGetTime();
 	for (int i = 0; i < armyDimension * armyDimension; ++i) {		
-		//implement culling algorithm here
+
 		if (!useCulling || isRobotInFrustum(robotArmy[i]))
 			robotArmy[i]->draw(gridRotation);
 	}
@@ -364,6 +364,17 @@ bool Window::isRobotInFrustum(Robot* robot) {
 	if (dist > robotSphereRadius)
 		return false;
 
+	//find robot position in camera space
+	glm::vec3 robotinCamSpace = Window::V * glm::vec4(robotPosition, 1);
+	
+	//cull from far plane
+	if (robotinCamSpace.z < -1500)
+		return false;
+
+	//cull from near place
+	if(robotinCamSpace.z > -30)
+		return false;
+	
 	//object is in camera frustum
 	return true;
 }
