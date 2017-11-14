@@ -12,26 +12,20 @@
 #include <GLFW/glfw3.h>
 #include "shader.h"
 #include "OBJObject.h"
-#include "Light.h"
-#include "Material.h"
 #include "CubeMapTexture.h"
-#include "Robot.h"
 #include "Node.h"
 #include "GeometryNode.h"
 #include "TransformNode.h"
+#include "ControlPoint.h"
 using namespace std;
 class Window
 {
-
-	enum RotateMode { CAMERA, ROBOT_GRID };
 	static OBJObject* skybox;
 	
 public:
 
-	static int currRotateMode;
-	static bool drawBoundingSpheres;
 
-	//window Variables
+	//Window Variables
 	static int width;
 	static int height;
 
@@ -63,7 +57,6 @@ public:
 
 private:
 	static glm::vec3 trackBallMap(glm::vec2 point);
-	static bool isRobotInFrustum(Robot* robot);
 };
 
 #endif

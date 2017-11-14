@@ -12,6 +12,9 @@ out vec4 color;
 //how does frag shader get this?
 uniform samplerCube skybox;
 
+//not used in skybox
+uniform vec3 inColor;
+
 void main()
 {
 	//color = vec4(0,1,0, 1);				//for testing

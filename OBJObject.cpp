@@ -167,11 +167,9 @@ void OBJObject::setToWorld(glm::mat4 M_new) {
 	this->toWorld = M_new;
 }
 
-void OBJObject::draw()
+void OBJObject::draw(glm::vec3 color)
 {
 
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
 	glUseProgram(shaderProgram);
 
 	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
@@ -189,17 +187,13 @@ void OBJObject::draw()
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
+	//Apply model color properties
+	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), color.x, color.y, color.z);
 
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	
-
-	if (drawWithLines) {
-		if(Window::drawBoundingSpheres)
-			glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
-	}
-	else
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);

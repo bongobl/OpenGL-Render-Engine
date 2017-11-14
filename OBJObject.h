@@ -65,12 +65,11 @@ public:
 	void setToWorld(glm::mat4 M_new);
 
 	//OpenGL draw function
-	void draw();
+	void draw(glm::vec3 color);
 
 	void setModelCenter(glm::vec3 newCenter);
 
 	void enableDrawWithLines();
-
 };
 
 #endif

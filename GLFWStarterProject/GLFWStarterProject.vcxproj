@@ -19,37 +19,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ControlPoint.h" />
     <ClInclude Include="..\CubeMapTexture.h" />
     <ClInclude Include="..\GeometryNode.h" />
-    <ClInclude Include="..\Light.h" />
     <ClInclude Include="..\main.h" />
-    <ClInclude Include="..\Material.h" />
     <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
-    <ClInclude Include="..\Robot.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\TransformNode.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ControlPoint.cpp" />
     <ClCompile Include="..\CubeMapTexture.cpp" />
     <ClCompile Include="..\GeometryNode.cpp" />
-    <ClCompile Include="..\Light.cpp" />
     <ClCompile Include="..\main.cpp" />
-    <ClCompile Include="..\Material.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
-    <ClCompile Include="..\Robot.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\TransformNode.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader_robot.frag" />
+    <None Include="..\shader_point.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />
-    <None Include="..\shader_directionalLight.frag" />
-    <None Include="..\shader_pointLight.frag" />
-    <None Include="..\shader_spotLight.frag" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

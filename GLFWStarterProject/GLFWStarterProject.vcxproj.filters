@@ -24,12 +24,6 @@
     <ClInclude Include="..\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\CubeMapTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,7 +39,7 @@
     <ClInclude Include="..\OBJObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Robot.h">
+    <ClInclude Include="..\ControlPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,12 +56,6 @@
     <ClCompile Include="..\OBJObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\CubeMapTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,7 +65,7 @@
     <ClCompile Include="..\GeometryNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Robot.cpp">
+    <ClCompile Include="..\ControlPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,19 +74,10 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="..\shader_directionalLight.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader_pointLight.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader_spotLight.frag">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_robot.frag">
+    <None Include="..\shader_point.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
