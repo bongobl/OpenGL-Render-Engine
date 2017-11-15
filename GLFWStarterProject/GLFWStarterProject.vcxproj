@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\BezierCurve.h" />
     <ClInclude Include="..\ControlPoint.h" />
     <ClInclude Include="..\CubeMapTexture.h" />
     <ClInclude Include="..\GeometryNode.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\BezierCurve.cpp" />
     <ClCompile Include="..\ControlPoint.cpp" />
     <ClCompile Include="..\CubeMapTexture.cpp" />
     <ClCompile Include="..\GeometryNode.cpp" />

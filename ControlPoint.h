@@ -2,8 +2,6 @@
 #include "OBJObject.h"
 class ControlPoint {
 	
-	
-	enum type { INTERPOLATE, APPROX };
 
 	//static fields
 	static OBJObject *visual;
@@ -22,8 +20,11 @@ public:
 
 	void update();
 	void draw();
+	void drawAsSelected();
 
 	void move(glm::vec3 deltaPos);
 	void setColor(glm::vec3 newCol);
+
+	glm::vec3 getPosition();
 
 };

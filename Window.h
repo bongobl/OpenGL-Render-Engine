@@ -17,6 +17,7 @@
 #include "GeometryNode.h"
 #include "TransformNode.h"
 #include "ControlPoint.h"
+#include "BezierCurve.h"
 using namespace std;
 class Window
 {

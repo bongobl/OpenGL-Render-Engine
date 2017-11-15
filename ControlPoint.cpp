@@ -28,10 +28,17 @@ void ControlPoint::draw() {
 	visual->setToWorld(glm::translate(glm::mat4(1.0f), position));
 	visual->draw(color);
 }
-
+void ControlPoint::drawAsSelected() {
+	visual->setToWorld(glm::translate(glm::mat4(1.0f), position));
+	visual->draw(glm::vec3(1,1,1));
+}
 void ControlPoint::move(glm::vec3 deltaPos) {
 	position += deltaPos;
 }
 void ControlPoint::setColor(glm::vec3 newCol) {
 	color = newCol;
+}
+
+glm::vec3 ControlPoint::getPosition() {
+	return position;
 }

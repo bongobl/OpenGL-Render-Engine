@@ -27,18 +27,23 @@ glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
 glm::mat4 Window::camRotationMatrix;
 
-
-OBJObject* Window::skybox;
-
+//Camera
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 //skybox
+OBJObject* Window::skybox;
 vector<string> faceNames;
 
-//ControlPointTest
+//ControlPoints
+int selectedControlPoint = -1;
 ControlPoint* points;
 
+//Bezier Curves
+BezierCurve* testCurve;
+
+//pixel data
+float currPixelColor[3];
 
 void Window::initialize_objects()
 {
@@ -66,16 +71,17 @@ void Window::initialize_objects()
 
 	//controlPointTest
 	ControlPoint::InitStatics();
-	points = new ControlPoint[4]{	ControlPoint(glm::vec3(1.0f/255, 0, 1)),
+	points = new ControlPoint[4]{	ControlPoint(glm::vec3(1.0f /255, 0, 1)),
 									ControlPoint(glm::vec3(2.0f / 255, 1, 0)),
 									ControlPoint(glm::vec3(3.0f / 255, 1, 0)),
 									ControlPoint(glm::vec3(4.0f / 255, 0, 1))};
 
-	points[0].move(glm::vec3(10, 0, 10));
-	points[1].move(glm::vec3(-10, 0, 10));
-	points[2].move(glm::vec3(10, 0, -10));
-	points[3].move(glm::vec3(-10, 0, -10));
+	points[0].move(glm::vec3(15, 0, 10));
+	points[1].move(glm::vec3(10, 0, -10));
+	points[2].move(glm::vec3(-10, 0, -10));
+	points[3].move(glm::vec3(-15, 0, 10));
 
+	testCurve = new BezierCurve(&points[0], &points[1], &points[2], &points[3]);
 
 }
 
@@ -157,6 +163,10 @@ void Window::idle_callback()
 	//keep skybox position at camera position
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
+	//glm::vec3 pos = testCurve->positionAtTime(0.1f);
+	//cout << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")" << endl;
+
+
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -164,12 +174,21 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+	//draw skybox
 	glDepthMask(GL_FALSE);
 	skybox->draw(glm::vec3(0,0,0));
 	glDepthMask(GL_TRUE);
 
+	//draw control points
 	for (int i = 0; i < 4; ++i)
 		points[i].draw();
+	
+	//draw selected point
+	if (selectedControlPoint != -1) {
+		points[selectedControlPoint].drawAsSelected();
+	}
+	//draw Bezier Curve
+	testCurve->draw();
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -202,12 +221,23 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			isLeftMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 			
+			//read current pixel val and set selectedControlPoint
+			glReadPixels((int)mousePosition.x, (int)mousePosition.y, 1, 1, GL_RGB, GL_FLOAT, currPixelColor);
+			cout << "(" << currPixelColor[0] * 255 - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
+			if (currPixelColor[1] == 1 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 1) {
+				selectedControlPoint = (int)(currPixelColor[0] * 255 - 1);
+			}
+			else {
+				selectedControlPoint = -1;
+			}
+			
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 			isRightMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 			lastMousePosition = mousePosition;
+		
 		}
 	}
 	if (action == GLFW_RELEASE) {
@@ -253,8 +283,10 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * 150.0f / height;
 		
 		//move point
-		glm::vec3 moveVal = glm::inverse(glm::mat3(V)) * glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0);
-		points[1].move(moveVal);
+		if (selectedControlPoint != -1) {
+			glm::vec3 moveVal = glm::inverse(glm::mat3(V)) * glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0);
+			points[selectedControlPoint].move(moveVal);
+		}
 	}
 
 	//for trackball
