@@ -9,12 +9,10 @@ in vec3 vertexDataOutput;
 in vec3 TexCoords;
 out vec4 color;
 
-//how does frag shader get this?
-uniform samplerCube skybox;
 
 uniform vec3 inColor;
 
 void main()
 {
-	color = vec4(inColor, 1);	//direct color
+	color = vec4(0,0,0, 1);	//black color
 }

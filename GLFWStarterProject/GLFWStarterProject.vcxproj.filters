@@ -86,5 +86,8 @@
     <None Include="..\shader_point.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\shader_bezier.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

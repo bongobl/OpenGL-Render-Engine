@@ -70,6 +70,8 @@ void Window::initialize_objects()
 	CubeMapTexture cubeMap;
 	cubeMap.loadCubeMapTexture(faceNames);
 
+	
+
 	//controlPointTest
 	ControlPoint::InitStatics();
 	points = new ControlPoint[4]{	ControlPoint(glm::vec3(1.0f /255, 0, 1)),
@@ -86,8 +88,8 @@ void Window::initialize_objects()
 	points[0].handleA = &points[1];
 	points[3].handleA = &points[2];
 
+	BezierCurve::InitStatics();
 	testCurve = new BezierCurve(&points[0], &points[1], &points[2], &points[3]);
-
 
 }
 
@@ -95,6 +97,9 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete skybox;
+
+	ControlPoint::cleanUpStatics();
+	BezierCurve::cleanUpStatics();
 	glDeleteProgram(SkyboxShaderProgram);
 
 }
@@ -295,6 +300,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
 			points[selectedControlPoint].move(moveVal);
+			testCurve->updateSegPoints();
 		}
 	}
 
