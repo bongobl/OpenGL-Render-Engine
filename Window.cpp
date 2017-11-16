@@ -43,7 +43,8 @@ ControlPoint* points;
 BezierCurve* testCurve;
 
 //pixel data
-float currPixelColor[3];
+unsigned char currPixelColor[4];
+
 
 void Window::initialize_objects()
 {
@@ -81,7 +82,12 @@ void Window::initialize_objects()
 	points[2].move(glm::vec3(-10, 0, -10));
 	points[3].move(glm::vec3(-15, 0, 10));
 
+	//test handles
+	points[0].handleA = &points[1];
+	points[3].handleA = &points[2];
+
 	testCurve = new BezierCurve(&points[0], &points[1], &points[2], &points[3]);
+
 
 }
 
@@ -162,11 +168,7 @@ void Window::idle_callback()
 {
 	//keep skybox position at camera position
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
-
-	//glm::vec3 pos = testCurve->positionAtTime(0.1f);
-	//cout << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")" << endl;
-
-
+	
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -187,8 +189,12 @@ void Window::display_callback(GLFWwindow* window)
 	if (selectedControlPoint != -1) {
 		points[selectedControlPoint].drawAsSelected();
 	}
+
 	//draw Bezier Curve
 	testCurve->draw();
+
+	
+	
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -221,11 +227,13 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			isLeftMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 			
-			//read current pixel val and set selectedControlPoint
-			glReadPixels((int)mousePosition.x, (int)mousePosition.y, 1, 1, GL_RGB, GL_FLOAT, currPixelColor);
-			cout << "(" << currPixelColor[0] * 255 - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
-			if (currPixelColor[1] == 1 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 1) {
-				selectedControlPoint = (int)(currPixelColor[0] * 255 - 1);
+			//read current pixel val
+			glReadPixels((int)mousePosition.x, Window::height - (int)mousePosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, currPixelColor);
+			cout << "(" << currPixelColor[0] - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
+			
+			//set selectedControlPoint
+			if (currPixelColor[1] == 255 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 255) {
+				selectedControlPoint = currPixelColor[0] - 1;
 			}
 			else {
 				selectedControlPoint = -1;
@@ -284,7 +292,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		
 		//move point
 		if (selectedControlPoint != -1) {
-			glm::vec3 moveVal = glm::inverse(glm::mat3(V)) * glm::vec3(deltaMousePosition.x, deltaMousePosition.y, 0);
+
+			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
 			points[selectedControlPoint].move(moveVal);
 		}
 	}

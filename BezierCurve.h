@@ -6,6 +6,9 @@ class BezierCurve {
 	ControlPoint* p1;
 	ControlPoint* p2;
 	ControlPoint* p3;
+
+	//delete me, temp for drawing curve
+	ControlPoint* rider;
 	
 public:
 

@@ -6,6 +6,9 @@ BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPo
 	p1 = approx1;
 	p2 = approx2;
 	p3 = interp2;
+
+	//delete me
+	rider = new ControlPoint(glm::vec3(.5, .5, .5));
 }
 
 void BezierCurve::draw() {
@@ -20,6 +23,12 @@ void BezierCurve::draw() {
 		//draw segment from pointA to pointB
 
 		prevTime = currTime;
+	}
+
+	//delete me, temp way to draw curve
+	for (int i = 1; i < 50; ++i) {
+		rider->setPosition(positionAtTime(i / 50.0f));
+		rider->draw();
 	}
 
 }

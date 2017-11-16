@@ -1,5 +1,6 @@
 #pragma once
 #include "OBJObject.h"
+
 class ControlPoint {
 	
 
@@ -10,9 +11,13 @@ class ControlPoint {
 	//member fields
 	glm::vec3 position;
 	glm::vec3 color;
+	
 
 public:
 	
+	ControlPoint* handleA;
+	ControlPoint* handleB;
+
 	static void InitStatics();
 	static void cleanUpStatics();
 
@@ -26,5 +31,9 @@ public:
 	void setColor(glm::vec3 newCol);
 
 	glm::vec3 getPosition();
+	void setPosition(glm::vec3 pos);
+
+
+	friend class BezierCurve;
 
 };
