@@ -17,6 +17,12 @@ BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPo
 	p2 = approx2;
 	p3 = interp2;
 
+
+	p0->handleB = p1;
+	p3->handleA = p2;
+	p1->parent = p0;
+	p2->parent = p3;
+
 	for (int i = 0; i <= 150; ++i) {
 		segPoints.push_back(glm::vec3(0,0,0));
 	}

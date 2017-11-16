@@ -17,6 +17,7 @@ public:
 	
 	ControlPoint* handleA;
 	ControlPoint* handleB;
+	ControlPoint* parent;
 
 	static void InitStatics();
 	static void cleanUpStatics();
@@ -32,6 +33,8 @@ public:
 
 	glm::vec3 getPosition();
 	void setPosition(glm::vec3 pos);
+
+	void updateOtherHandle(ControlPoint* activeHandle);
 
 
 	friend class BezierCurve;

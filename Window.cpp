@@ -41,7 +41,8 @@ ControlPoint* points;
 
 //Bezier Curves
 BezierCurve* testCurve;
-
+BezierCurve* testCurve2;
+BezierCurve* testCurve3;
 //pixel data
 unsigned char currPixelColor[4];
 
@@ -74,22 +75,35 @@ void Window::initialize_objects()
 
 	//controlPointTest
 	ControlPoint::InitStatics();
-	points = new ControlPoint[4]{	ControlPoint(glm::vec3(1.0f /255, 0, 1)),
+	points = new ControlPoint[10]{  ControlPoint(glm::vec3(1.0f / 255, 0, 1)),
 									ControlPoint(glm::vec3(2.0f / 255, 1, 0)),
 									ControlPoint(glm::vec3(3.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(4.0f / 255, 0, 1))};
+									ControlPoint(glm::vec3(4.0f / 255, 0, 1)),
+									ControlPoint(glm::vec3(5.0f / 255, 1, 0)),
+									ControlPoint(glm::vec3(6.0f / 255, 1, 0)),
+									ControlPoint(glm::vec3(7.0f / 255, 0, 1)), 
+									ControlPoint(glm::vec3(8.0f / 255, 1, 0)),
+									ControlPoint(glm::vec3(9.0f / 255, 1, 0)), 
+									ControlPoint(glm::vec3(10.0f / 255, 0, 1)) };
 
-	points[0].move(glm::vec3(15, 0, 10));
-	points[1].move(glm::vec3(10, 0, -10));
-	points[2].move(glm::vec3(-10, 0, -10));
-	points[3].move(glm::vec3(-15, 0, 10));
 
-	//test handles
-	points[0].handleA = &points[1];
-	points[3].handleA = &points[2];
+	points[0].move(glm::vec3(-35, 0, 0));
+	points[1].move(glm::vec3(-25, 0, 0));
+	points[2].move(glm::vec3(-15, 0, 0));
+	points[3].move(glm::vec3(-5, 0, 0));
+	points[4].move(glm::vec3(5, 0, 0));
+	points[5].move(glm::vec3(15, 0, 0));
+	points[6].move(glm::vec3(25, 0, 0));
+	points[7].move(glm::vec3(25, 0, 10));
+	points[8].move(glm::vec3(25, 0, 20));
+	points[9].move(glm::vec3(25, 0, 30));
 
 	BezierCurve::InitStatics();
 	testCurve = new BezierCurve(&points[0], &points[1], &points[2], &points[3]);
+	testCurve2 = new BezierCurve(&points[3], &points[4], &points[5], &points[6]);
+	testCurve3 = new BezierCurve(&points[6], &points[7], &points[8], &points[9]);
+
+	
 
 }
 
@@ -187,7 +201,7 @@ void Window::display_callback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	//draw control points
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 10; ++i)
 		points[i].draw();
 	
 	//draw selected point
@@ -197,8 +211,8 @@ void Window::display_callback(GLFWwindow* window)
 
 	//draw Bezier Curve
 	testCurve->draw();
-
-	
+	testCurve2->draw();
+	testCurve3->draw();
 	
 
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -301,6 +315,8 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
 			points[selectedControlPoint].move(moveVal);
 			testCurve->updateSegPoints();
+			testCurve2->updateSegPoints();
+			testCurve3->updateSegPoints();
 		}
 	}
 
