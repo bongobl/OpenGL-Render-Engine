@@ -24,6 +24,7 @@ public:
 	static void InitStatics();
 	static void cleanUpStatics();
 
+	BezierCurve();
 	BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPoint* approx2, ControlPoint* interp2);
 	void draw();
 	glm::vec3 positionAtTime(float t);

@@ -35,14 +35,17 @@ glm::mat4 Window::V;
 OBJObject* Window::skybox;
 vector<string> faceNames;
 
-//ControlPoints
+
 int selectedControlPoint = -1;
+
+//ControlPoints
+int numPoints(30);
 ControlPoint* points;
 
 //Bezier Curves
-BezierCurve* testCurve;
-BezierCurve* testCurve2;
-BezierCurve* testCurve3;
+int numCurves(10);
+BezierCurve* curves;
+
 //pixel data
 unsigned char currPixelColor[4];
 
@@ -73,37 +76,35 @@ void Window::initialize_objects()
 
 	
 
-	//controlPointTest
+	//Curves and Points
 	ControlPoint::InitStatics();
-	points = new ControlPoint[10]{  ControlPoint(glm::vec3(1.0f / 255, 0, 1)),
-									ControlPoint(glm::vec3(2.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(3.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(4.0f / 255, 0, 1)),
-									ControlPoint(glm::vec3(5.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(6.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(7.0f / 255, 0, 1)), 
-									ControlPoint(glm::vec3(8.0f / 255, 1, 0)),
-									ControlPoint(glm::vec3(9.0f / 255, 1, 0)), 
-									ControlPoint(glm::vec3(10.0f / 255, 0, 1)) };
-
-
-	points[0].move(glm::vec3(-35, 0, 0));
-	points[1].move(glm::vec3(-25, 0, 0));
-	points[2].move(glm::vec3(-15, 0, 0));
-	points[3].move(glm::vec3(-5, 0, 0));
-	points[4].move(glm::vec3(5, 0, 0));
-	points[5].move(glm::vec3(15, 0, 0));
-	points[6].move(glm::vec3(25, 0, 0));
-	points[7].move(glm::vec3(25, 0, 10));
-	points[8].move(glm::vec3(25, 0, 20));
-	points[9].move(glm::vec3(25, 0, 30));
-
 	BezierCurve::InitStatics();
-	testCurve = new BezierCurve(&points[0], &points[1], &points[2], &points[3]);
-	testCurve2 = new BezierCurve(&points[3], &points[4], &points[5], &points[6]);
-	testCurve3 = new BezierCurve(&points[6], &points[7], &points[8], &points[9]);
 
+
+	//initialize points
+	points = new ControlPoint[numPoints];
+	for (int i = 0; i < numPoints; ++i) {
+		points[i] = ControlPoint(  glm::vec3(  (i + 1.0f) / 255,   i % 3 != 0,  i % 3 == 0 )     );
+	}
+	//initialize curves
+	curves = new BezierCurve[numCurves];
+	for (int i = 0; i < numCurves - 1; ++i) {
+		int startIndex = 3 * i;
+		curves[i] = BezierCurve(&points[startIndex], &points[startIndex + 1], &points[startIndex + 2], &points[startIndex + 3]);
+	}
+	curves[numCurves-1] = BezierCurve(&points[numPoints - 3], &points[numPoints - 2], &points[numPoints - 1], &points[0]);
 	
+
+	//position points
+	for (int i = 0; i < numPoints; ++i) {		
+		float angle = i * (2 * glm::pi<float>() / numPoints);
+		points[i].move(glm::vec3(90 * cos(angle), 0, 90 * sin(angle)));
+	}
+
+	//update curves
+	for (int i = 0; i < numCurves; ++i) {
+		curves[i].updateSegPoints();
+	}
 
 }
 
@@ -112,8 +113,12 @@ void Window::clean_up()
 {
 	delete skybox;
 
-	ControlPoint::cleanUpStatics();
+	
+	delete[] curves;
 	BezierCurve::cleanUpStatics();
+	delete[] points;
+	ControlPoint::cleanUpStatics();	
+
 	glDeleteProgram(SkyboxShaderProgram);
 
 }
@@ -201,7 +206,7 @@ void Window::display_callback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	//draw control points
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < numPoints; ++i)
 		points[i].draw();
 	
 	//draw selected point
@@ -209,10 +214,11 @@ void Window::display_callback(GLFWwindow* window)
 		points[selectedControlPoint].drawAsSelected();
 	}
 
+	
 	//draw Bezier Curve
-	testCurve->draw();
-	testCurve2->draw();
-	testCurve3->draw();
+	for (int i = 0; i < numCurves; ++i) {
+		curves[i].draw();
+	}
 	
 
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -313,10 +319,14 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		if (selectedControlPoint != -1) {
 
 			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
+
 			points[selectedControlPoint].move(moveVal);
-			testCurve->updateSegPoints();
-			testCurve2->updateSegPoints();
-			testCurve3->updateSegPoints();
+
+			
+			//Update Bezier Curve
+			for (int i = 0; i < numCurves; ++i) {
+				curves[i].updateSegPoints();
+			}
 		}
 	}
 

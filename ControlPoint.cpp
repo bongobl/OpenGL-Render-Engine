@@ -14,6 +14,9 @@ void ControlPoint::cleanUpStatics() {
 	glDeleteProgram(PointShaderProgram);
 }
 
+ControlPoint::ControlPoint() {
+
+}
 ControlPoint::ControlPoint(glm::vec3 col) {
 	position = glm::vec3(0, 0, 0);
 	color = col;

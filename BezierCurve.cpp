@@ -9,7 +9,9 @@ void BezierCurve::InitStatics() {
 void BezierCurve::cleanUpStatics() {
 	glDeleteProgram(shaderProgram);
 }
+BezierCurve::BezierCurve() {
 
+}
 BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPoint* approx2, ControlPoint* interp2) {
 	
 	p0 = interp1;
@@ -26,10 +28,14 @@ BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPo
 	for (int i = 0; i <= 150; ++i) {
 		segPoints.push_back(glm::vec3(0,0,0));
 	}
+
+	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
 	updateSegPoints();
 
-
 }
+
 
 void BezierCurve::draw() {
 
@@ -39,7 +45,7 @@ void BezierCurve::draw() {
 	//world coordinates of all segPoints is (0,0,0)
 	glm::mat4 toWorld(1.0f);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * glm::mat4(1.0f);
+	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -95,9 +101,8 @@ void BezierCurve::updateSegPoints() {
 		segPoints[i] = positionAtTime(currTime);
 	}
 
-	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+	
+	
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

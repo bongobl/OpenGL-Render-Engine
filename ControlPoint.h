@@ -22,6 +22,7 @@ public:
 	static void InitStatics();
 	static void cleanUpStatics();
 
+	ControlPoint();
 	ControlPoint(glm::vec3 col);
 
 	void update();
