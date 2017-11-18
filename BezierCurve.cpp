@@ -34,10 +34,15 @@ BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPo
 	glGenBuffers(1, &VBO_curve);
 
 	//tangent points
-	for (int i = 0; i < 4; ++i)
-		tangentPoints.push_back(glm::vec3(0, 0, 0));
-	glGenVertexArrays(1, &VAO_tangent);
-	glGenBuffers(1, &VBO_tangent);
+	for (int i = 0; i < 2; ++i)
+		tangentAPoints.push_back(glm::vec3(0, 0, 0));
+	glGenVertexArrays(1, &VAO_tangentA);
+	glGenBuffers(1, &VBO_tangentA);
+	for (int i = 0; i < 2; ++i)
+		tangentBPoints.push_back(glm::vec3(0, 0, 0));
+	glGenVertexArrays(1, &VAO_tangentB);
+	glGenBuffers(1, &VBO_tangentB);
+
 	updateCurveLines();
 
 }
@@ -50,7 +55,7 @@ BezierCurve::~BezierCurve() {
 	//glDeleteVertexArrays(1, &VAO_tangent);
 	//glDeleteBuffers(1, &VBO_tangent);
 }
-void BezierCurve::draw() {
+void BezierCurve::draw(ControlPoint* currSelected) {
 
 
 	glUseProgram(shaderProgram);
@@ -79,10 +84,19 @@ void BezierCurve::draw() {
 	glBindVertexArray(0);
 
 	// Now draw tangents by binding VAO_tangent
-	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 1, 1, 0);
-	glBindVertexArray(VAO_tangent);
-	glDrawArrays(GL_LINES, 0, tangentPoints.size());
-	glBindVertexArray(0);
+
+	if (currSelected == p3 || currSelected == p3->handleA || currSelected == p3->handleB) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 1, 1, 0);
+		glBindVertexArray(VAO_tangentA);
+		glDrawArrays(GL_LINES, 0, tangentAPoints.size());
+		glBindVertexArray(0);
+	}
+	if (currSelected == p0 || currSelected == p0->handleA || currSelected == p0->handleB) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 1, 1, 0);
+		glBindVertexArray(VAO_tangentB);
+		glDrawArrays(GL_LINES, 0, tangentBPoints.size());
+		glBindVertexArray(0);
+	}
 
 
 }
@@ -132,18 +146,25 @@ void BezierCurve::updateCurveLines() {
 
 
 	//update tangent lines
-	tangentPoints[0] = p0->getPosition();
-	tangentPoints[1] = p1->getPosition();
-	tangentPoints[2] = p2->getPosition();
-	tangentPoints[3] = p3->getPosition();
+	tangentAPoints[0] = p3->getPosition();
+	tangentAPoints[1] = p2->getPosition();
+	
 
-	glBindVertexArray(VAO_tangent);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_tangent);
-
-	glBufferData(GL_ARRAY_BUFFER, tangentPoints.size() * sizeof(glm::vec3), tangentPoints.data(), GL_STATIC_DRAW);
-
+	glBindVertexArray(VAO_tangentA);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tangentA);
+	glBufferData(GL_ARRAY_BUFFER, tangentAPoints.size() * sizeof(glm::vec3), tangentAPoints.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
 
+
+	tangentBPoints[0] = p0->getPosition();
+	tangentBPoints[1] = p1->getPosition();
+
+	glBindVertexArray(VAO_tangentB);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tangentB);
+	glBufferData(GL_ARRAY_BUFFER, tangentBPoints.size() * sizeof(glm::vec3), tangentBPoints.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindVertexArray(0);
 }

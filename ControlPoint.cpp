@@ -27,17 +27,20 @@ ControlPoint::ControlPoint(glm::vec3 col) {
 void ControlPoint::update() {
 	visual->setToWorld(glm::translate(glm::mat4(1.0f), position));
 }
-void ControlPoint::draw() {
+void ControlPoint::draw(ControlPoint* currSelected) {
 
-	//note, visual is static, so always set toWorld before drawing OBJObject
-	visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f)));
-	visual->draw(color);
+	if (handleA != NULL || handleB != NULL || 
+		parent == currSelected || parent->handleA == currSelected || parent->handleB == currSelected) {
+		//note, visual is static, so always set toWorld before drawing OBJObject
+		visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f, 0.7f, 0.7f)));
+		visual->draw(color);
+	}
 	
 	
 }
 void ControlPoint::drawAsSelected() {
 	
-	visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f, 0.7f, 0.7f)));
+	visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.9f, 0.9f, 0.9f)));
 	visual->draw(glm::vec3(1, 1, 1));
 	
 }

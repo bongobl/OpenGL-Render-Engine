@@ -16,8 +16,11 @@ class BezierCurve {
 	GLuint VAO_curve, VBO_curve;
 
 	//for drawing tangents
-	std::vector<glm::vec3> tangentPoints;
-	GLuint VAO_tangent, VBO_tangent;
+	std::vector<glm::vec3> tangentAPoints;
+	GLuint VAO_tangentA, VBO_tangentA;
+
+	std::vector<glm::vec3> tangentBPoints;
+	GLuint VAO_tangentB, VBO_tangentB;
 
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
@@ -34,7 +37,7 @@ public:
 	BezierCurve();
 	BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPoint* approx2, ControlPoint* interp2);
 	~BezierCurve();
-	void draw();
+	void draw(ControlPoint* currSelected);
 	glm::vec3 positionAtTime(float t);
 	void updateCurveLines();
 

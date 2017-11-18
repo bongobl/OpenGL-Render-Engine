@@ -26,7 +26,7 @@ public:
 	ControlPoint(glm::vec3 col);
 
 	void update();
-	void draw();
+	void draw(ControlPoint* currSelected);
 	void drawAsSelected();
 
 	void move(glm::vec3 deltaPos);

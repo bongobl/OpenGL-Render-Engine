@@ -226,7 +226,7 @@ void Window::display_callback(GLFWwindow* window)
 
 	//draw control points
 	for (int i = 0; i < numPoints; ++i)
-		points[i].draw();
+		points[i].draw(&points[selectedControlPoint]);
 	
 	//draw selected point
 	if (selectedControlPoint != -1) {
@@ -236,7 +236,7 @@ void Window::display_callback(GLFWwindow* window)
 	
 	//draw Bezier Curve
 	for (int i = 0; i < numCurves; ++i) {
-		curves[i].draw();
+		curves[i].draw(&points[selectedControlPoint]);
 	}
 	
 	//draw car
