@@ -1,5 +1,6 @@
 #include "ControlPoint.h"
 #include "shader.h"
+
 #include <iostream>
 OBJObject* ControlPoint::visual;
 GLuint ControlPoint::PointShaderProgram;
@@ -31,10 +32,14 @@ void ControlPoint::draw() {
 	//note, visual is static, so always set toWorld before drawing OBJObject
 	visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f)));
 	visual->draw(color);
+	
+	
 }
 void ControlPoint::drawAsSelected() {
+	
 	visual->setToWorld(glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f, 0.7f, 0.7f)));
-	visual->draw(glm::vec3(1,1,1));
+	visual->draw(glm::vec3(1, 1, 1));
+	
 }
 void ControlPoint::move(glm::vec3 deltaPos) {
 	position += deltaPos;

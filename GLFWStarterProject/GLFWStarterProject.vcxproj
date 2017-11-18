@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shader_bezier.frag" />
+    <None Include="..\shader_car.frag" />
     <None Include="..\shader_point.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />

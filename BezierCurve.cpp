@@ -25,18 +25,31 @@ BezierCurve::BezierCurve(ControlPoint* interp1, ControlPoint* approx1, ControlPo
 	p1->parent = p0;
 	p2->parent = p3;
 
+
+	//curve segment points
 	for (int i = 0; i <= 150; ++i) {
 		segPoints.push_back(glm::vec3(0,0,0));
 	}
+	glGenVertexArrays(1, &VAO_curve);
+	glGenBuffers(1, &VBO_curve);
 
-	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	updateSegPoints();
+	//tangent points
+	for (int i = 0; i < 4; ++i)
+		tangentPoints.push_back(glm::vec3(0, 0, 0));
+	glGenVertexArrays(1, &VAO_tangent);
+	glGenBuffers(1, &VBO_tangent);
+	updateCurveLines();
 
 }
 
+BezierCurve::~BezierCurve() {
 
+	//cout << "Descructor Called" << endl;
+	//glDeleteVertexArrays(1, &VAO_curve);
+	//glDeleteBuffers(1, &VBO_curve);
+	//glDeleteVertexArrays(1, &VAO_tangent);
+	//glDeleteBuffers(1, &VBO_tangent);
+}
 void BezierCurve::draw() {
 
 
@@ -59,12 +72,16 @@ void BezierCurve::draw() {
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
 
-	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
-	glBindVertexArray(VAO);
-
+	// Now draw curve segment points by binding VAO_curve
+	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 0, 0, 0);
+	glBindVertexArray(VAO_curve);
 	glDrawArrays(GL_LINE_STRIP, 0, segPoints.size());
+	glBindVertexArray(0);
 
-	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
+	// Now draw tangents by binding VAO_tangent
+	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 1, 1, 0);
+	glBindVertexArray(VAO_tangent);
+	glDrawArrays(GL_LINES, 0, tangentPoints.size());
 	glBindVertexArray(0);
 
 
@@ -94,20 +111,36 @@ float BezierCurve::fact(int n) {
 		return n * fact(n - 1);
 }
 
-void BezierCurve::updateSegPoints() {
+void BezierCurve::updateCurveLines() {
 	
+
+	//update curve segment poinnts
 	for (int i = 0; i <= 150; ++i) {
 		float currTime = i / 150.0f;
 		segPoints[i] = positionAtTime(currTime);
 	}
 
-	
-	
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindVertexArray(VAO_curve);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_curve);
 
 	glBufferData(GL_ARRAY_BUFFER, segPoints.size() * sizeof(glm::vec3), segPoints.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+	glBindVertexArray(0);
+
+
+	//update tangent lines
+	tangentPoints[0] = p0->getPosition();
+	tangentPoints[1] = p1->getPosition();
+	tangentPoints[2] = p2->getPosition();
+	tangentPoints[3] = p3->getPosition();
+
+	glBindVertexArray(VAO_tangent);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tangent);
+
+	glBufferData(GL_ARRAY_BUFFER, tangentPoints.size() * sizeof(glm::vec3), tangentPoints.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);

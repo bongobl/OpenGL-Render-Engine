@@ -46,6 +46,12 @@ ControlPoint* points;
 int numCurves(10);
 BezierCurve* curves;
 
+//Roller coaster car, keep car data in Window file
+GLuint CarShaderProgram;
+OBJObject* car;
+float prevTime, currTime;
+float carTime(0);
+
 //pixel data
 unsigned char currPixelColor[4];
 
@@ -103,16 +109,20 @@ void Window::initialize_objects()
 
 	//update curves
 	for (int i = 0; i < numCurves; ++i) {
-		curves[i].updateSegPoints();
+		curves[i].updateCurveLines();
 	}
 
+	//create car
+	CarShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_car.frag");
+	car = new OBJObject("sphere.obj", CarShaderProgram);
+	prevTime = (float)glfwGetTime();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
 	delete skybox;
-
+	delete car;
 	
 	delete[] curves;
 	BezierCurve::cleanUpStatics();
@@ -192,6 +202,15 @@ void Window::idle_callback()
 {
 	//keep skybox position at camera position
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
+
+	//set car position
+	currTime = (float)glfwGetTime();	
+	carTime += currTime - prevTime;
+	prevTime = currTime;
+	if (carTime >= numCurves)
+		carTime = 0;
+	glm::vec3 carPosition = curves[(int)carTime].positionAtTime(carTime - (int)carTime);
+	car->setToWorld(glm::translate(glm::mat4(1.0f), carPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2)));
 	
 }
 
@@ -220,6 +239,8 @@ void Window::display_callback(GLFWwindow* window)
 		curves[i].draw();
 	}
 	
+	//draw car
+	car->draw(glm::vec3(1,0,0));
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -254,7 +275,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			
 			//read current pixel val
 			glReadPixels((int)mousePosition.x, Window::height - (int)mousePosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, currPixelColor);
-			cout << "(" << currPixelColor[0] - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
+			//cout << "(" << currPixelColor[0] - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
 			
 			//set selectedControlPoint
 			if (currPixelColor[1] == 255 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 255) {
@@ -325,7 +346,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			
 			//Update Bezier Curve
 			for (int i = 0; i < numCurves; ++i) {
-				curves[i].updateSegPoints();
+				curves[i].updateCurveLines();
 			}
 		}
 	}
