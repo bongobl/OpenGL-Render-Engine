@@ -50,8 +50,8 @@ BezierCurve* curves;
 GLuint CarShaderProgram;
 OBJObject* car;
 float prevTime, currTime;
-float carTime(0);
-
+float param_T(0);
+float carSpeed = .06f;
 //pixel data
 unsigned char currPixelColor[4];
 
@@ -113,7 +113,7 @@ void Window::initialize_objects()
 	}
 
 	//create car
-	CarShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_car.frag");
+	CarShaderProgram = LoadShaders("../shader_car.vert", "../shader_car.frag");
 	car = new OBJObject("sphere.obj", CarShaderProgram);
 	prevTime = (float)glfwGetTime();
 }
@@ -204,12 +204,17 @@ void Window::idle_callback()
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
 	//set car position
-	currTime = (float)glfwGetTime();	
-	carTime += currTime - prevTime;
+	currTime = (float)glfwGetTime();
+	float deltaTime = currTime - prevTime;
+	float deltaDist = carSpeed * deltaTime;
+
+	//find change in param_T given deltaDist
+	param_T += deltaDist / curves[(int)param_T].paramTDistance(param_T - (int)param_T);
+
 	prevTime = currTime;
-	if (carTime >= numCurves)
-		carTime = 0;
-	glm::vec3 carPosition = curves[(int)carTime].positionAtTime(carTime - (int)carTime);
+	if (param_T >= numCurves)
+		param_T = 0;
+	glm::vec3 carPosition = curves[(int)param_T].positionAtTime(param_T - (int)param_T);
 	car->setToWorld(glm::translate(glm::mat4(1.0f), carPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2)));
 	
 }

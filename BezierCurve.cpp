@@ -76,6 +76,8 @@ void BezierCurve::draw(ControlPoint* currSelected) {
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
+	//set line width for all lines
+	glLineWidth(2);
 
 	// Now draw curve segment points by binding VAO_curve
 	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), 0, 0, 0);
@@ -167,4 +169,36 @@ void BezierCurve::updateCurveLines() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindVertexArray(0);
+}
+
+float BezierCurve::curveLength() {
+
+	float runningCurveLength = 0;
+	//make sure this is called right after updateCurveLines()
+	for (int i = 1; i <= 150; ++i) {
+
+		float deltaX = segPoints[i].x - segPoints[i - 1].x;
+		float deltaY = segPoints[i].y - segPoints[i - 1].y;
+		float deltaZ = segPoints[i].z - segPoints[i - 1].z;
+		float segLength = (float)sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+		runningCurveLength += segLength;
+	}
+	return runningCurveLength;
+
+}
+
+float BezierCurve::paramTDistance(float t) {
+
+	if (t < 0.001f) {
+		float deltaX = positionAtTime(0).x - positionAtTime(0.001f).x;
+		float deltaY = positionAtTime(0).y - positionAtTime(0.001f).y;
+		float deltaZ = positionAtTime(0).z - positionAtTime(0.001f).z;
+		return (float)sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+	}
+
+	float preT = t - 0.001f;
+	float deltaX = positionAtTime(t).x - positionAtTime(t - 0.001f).x;
+	float deltaY = positionAtTime(t).y - positionAtTime(t - 0.001f).y;
+	float deltaZ = positionAtTime(t).z - positionAtTime(t - 0.001f).z;
+	return (float)sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 }

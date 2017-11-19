@@ -92,5 +92,8 @@
     <None Include="..\shader_car.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\shader_car.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

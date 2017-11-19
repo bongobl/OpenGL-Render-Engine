@@ -26,8 +26,6 @@ class BezierCurve {
 	GLuint uToWorld;
 
 	
-
-	
 	
 public:
 
@@ -40,6 +38,8 @@ public:
 	void draw(ControlPoint* currSelected);
 	glm::vec3 positionAtTime(float t);
 	void updateCurveLines();
+	float curveLength();
+	float paramTDistance(float t);
 
 private:
 	float C_func(int i, float t);
