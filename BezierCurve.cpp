@@ -129,11 +129,15 @@ float BezierCurve::fact(int n) {
 
 void BezierCurve::updateCurveLines() {
 	
+	maxPoint_T = 0;
 
 	//update curve segment poinnts
 	for (int i = 0; i <= 150; ++i) {
 		float currTime = i / 150.0f;
 		segPoints[i] = positionAtTime(currTime);
+
+		if (positionAtTime(currTime).y > positionAtTime(maxPoint_T).y)
+			maxPoint_T = currTime;
 	}
 
 	glBindVertexArray(VAO_curve);
@@ -170,7 +174,7 @@ void BezierCurve::updateCurveLines() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindVertexArray(0);
 }
-
+/*
 float BezierCurve::curveLength() {
 
 	float runningCurveLength = 0;
@@ -186,7 +190,7 @@ float BezierCurve::curveLength() {
 	return runningCurveLength;
 
 }
-
+*/
 float BezierCurve::paramTDistance(float t) {
 
 	if (t < 0.001f) {
@@ -201,4 +205,9 @@ float BezierCurve::paramTDistance(float t) {
 	float deltaY = positionAtTime(t).y - positionAtTime(t - 0.001f).y;
 	float deltaZ = positionAtTime(t).z - positionAtTime(t - 0.001f).z;
 	return (float)sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+}
+
+float BezierCurve::getMaxPoint_T() {
+
+	return maxPoint_T;
 }

@@ -11,6 +11,8 @@ class BezierCurve {
 	ControlPoint* p2;
 	ControlPoint* p3;
 
+	float maxPoint_T;
+
 	//for drawing curve
 	std::vector<glm::vec3> segPoints;
 	GLuint VAO_curve, VBO_curve;
@@ -22,6 +24,7 @@ class BezierCurve {
 	std::vector<glm::vec3> tangentBPoints;
 	GLuint VAO_tangentB, VBO_tangentB;
 
+	//matrices for shaders
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
 
@@ -38,8 +41,9 @@ public:
 	void draw(ControlPoint* currSelected);
 	glm::vec3 positionAtTime(float t);
 	void updateCurveLines();
-	float curveLength();
+	//float curveLength();
 	float paramTDistance(float t);
+	float getMaxPoint_T();
 
 private:
 	float C_func(int i, float t);

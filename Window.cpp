@@ -35,7 +35,6 @@ glm::mat4 Window::V;
 OBJObject* Window::skybox;
 vector<string> faceNames;
 
-
 int selectedControlPoint = -1;
 
 //ControlPoints
@@ -45,6 +44,7 @@ ControlPoint* points;
 //Bezier Curves
 int numCurves(10);
 BezierCurve* curves;
+float trackMaximumHeight(0);
 
 //Roller coaster car, keep car data in Window file
 GLuint CarShaderProgram;
@@ -52,6 +52,8 @@ OBJObject* car;
 float prevTime, currTime;
 float param_T(0);
 float carSpeed = .06f;
+bool isCarMoving = true;
+
 //pixel data
 unsigned char currPixelColor[4];
 
@@ -81,7 +83,6 @@ void Window::initialize_objects()
 	cubeMap.loadCubeMapTexture(faceNames);
 
 	
-
 	//Curves and Points
 	ControlPoint::InitStatics();
 	BezierCurve::InitStatics();
@@ -203,17 +204,26 @@ void Window::idle_callback()
 	//keep skybox position at camera position
 	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
 
+	//physics for finding car speed
+	float delta_H = trackMaximumHeight - curves[(int)param_T].positionAtTime(param_T - (int)param_T).y;
+	carSpeed = isCarMoving? 0.015f + 0.03f * sqrt(abs(delta_H)) : 0;
+	
 	//set car position
 	currTime = (float)glfwGetTime();
 	float deltaTime = currTime - prevTime;
 	float deltaDist = carSpeed * deltaTime;
+	prevTime = currTime;
 
 	//find change in param_T given deltaDist
 	param_T += deltaDist / curves[(int)param_T].paramTDistance(param_T - (int)param_T);
 
-	prevTime = currTime;
+	//bounds check on param_T
 	if (param_T >= numCurves)
 		param_T = 0;
+	if (param_T < 0)
+		param_T = numCurves - (0 - param_T);
+
+	
 	glm::vec3 carPosition = curves[(int)param_T].positionAtTime(param_T - (int)param_T);
 	car->setToWorld(glm::translate(glm::mat4(1.0f), carPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2)));
 	
@@ -238,7 +248,6 @@ void Window::display_callback(GLFWwindow* window)
 		points[selectedControlPoint].drawAsSelected();
 	}
 
-	
 	//draw Bezier Curve
 	for (int i = 0; i < numCurves; ++i) {
 		curves[i].draw(&points[selectedControlPoint]);
@@ -264,6 +273,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+		else if (key == GLFW_KEY_SPACE) {
+			setParamT_ToMax();
+		}
+		else if (key == GLFW_KEY_S) {
+			isCarMoving = isCarMoving ? false : true;
 		}
 
 
@@ -347,7 +362,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
 
 			points[selectedControlPoint].move(moveVal);
-
+			calcMaxHeight();
 			
 			//Update Bezier Curve
 			for (int i = 0; i < numCurves; ++i) {
@@ -385,3 +400,40 @@ glm::vec3 Window::trackBallMap(glm::vec2 point) {
 	return v;
 }
 
+void Window::setParamT_ToMax() {
+
+	int curveIndex = 0;
+
+	//find curveIndex
+	for (int i = 0; i < numCurves; ++i) {
+		
+		float t_val_i = curves[i].getMaxPoint_T();
+		glm::vec3 position_i = curves[i].positionAtTime(t_val_i);
+
+		float t_val_currIndex = curves[curveIndex].getMaxPoint_T();
+		glm::vec3 position_currIndex = curves[curveIndex].positionAtTime(t_val_currIndex);
+
+		if (position_i.y > position_currIndex.y ) {
+			curveIndex = i;
+		}
+	}
+
+	//find param t at that index
+	param_T = curveIndex + curves[curveIndex].getMaxPoint_T();
+	
+}
+
+void Window::calcMaxHeight() {
+
+	trackMaximumHeight = 0;
+	for (int i = 0; i < numCurves; ++i) {
+
+		float t_val_i = curves[i].getMaxPoint_T();
+		glm::vec3 position_i = curves[i].positionAtTime(t_val_i);
+
+
+		if (position_i.y > trackMaximumHeight) {
+			trackMaximumHeight = position_i.y;
+		}
+	}
+}

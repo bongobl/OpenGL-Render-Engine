@@ -58,6 +58,8 @@ public:
 
 private:
 	static glm::vec3 trackBallMap(glm::vec2 point);
+	static void setParamT_ToMax();
+	static void calcMaxHeight();
 };
 
 #endif
