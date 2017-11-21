@@ -9,6 +9,13 @@
 using namespace std;
 
 
+glm::vec3* OBJObject::cameraPosition = NULL;
+
+void OBJObject::setCamPosition(glm::vec3* cp) {
+	cameraPosition = cp;
+
+}
+
 OBJObject::OBJObject(const char *filepath, GLuint sp) 
 {
 	
@@ -190,6 +197,10 @@ void OBJObject::draw(glm::vec3 color)
 	//Apply model color properties
 	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), color.x, color.y, color.z);
 
+	//send cam position to shader
+	if (cameraPosition != NULL) {		
+		glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition->x, cameraPosition->y, cameraPosition->z);
+	}
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	

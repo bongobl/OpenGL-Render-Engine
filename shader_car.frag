@@ -9,6 +9,8 @@ in vec3 vertexDataOutput;
 in vec3 TexCoords;
 out vec4 color;
 
+uniform vec3 cameraPos;
+
 //how does frag shader get this?
 uniform samplerCube skybox;
 
@@ -17,5 +19,8 @@ uniform vec3 inColor;
 void main()
 {
 
-	color = vec4(normalDataOutput, 1);	//direct color
+	vec3 I = normalize(vertexDataOutput - cameraPos);
+    vec3 R = reflect(I, normalize(normalDataOutput));
+    color = vec4(texture(skybox, R).rgb, 1.0);
+	
 }

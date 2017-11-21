@@ -31,6 +31,9 @@
 class OBJObject
 {
 
+	//static fields
+	static glm::vec3* cameraPosition;
+
 	//Model Geometry Data
 	std::vector<GLuint> indices;
 	std::vector<GLfloat> vertices;
@@ -56,6 +59,8 @@ class OBJObject
 	bool drawWithLines;
 	
 public:
+
+	static void setCamPosition(glm::vec3* cp);
 
 	OBJObject(const char* filepath, GLuint sp);
 	~OBJObject();

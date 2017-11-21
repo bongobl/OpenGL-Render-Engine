@@ -60,10 +60,14 @@ unsigned char currPixelColor[4];
 
 void Window::initialize_objects()
 {
+
+	//basic window
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	camRotationMatrix = glm::mat4(1.0f);
 
+	//OBJObject
+	OBJObject::setCamPosition(&cam_pos);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
