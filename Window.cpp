@@ -36,7 +36,7 @@ OBJObject* Window::skybox;
 vector<string> faceNames;
 
 int selectedControlPoint = -1;
-
+int savedSelectedIndex = -1;
 //ControlPoints
 int numPoints(30);
 ControlPoint* points;
@@ -51,8 +51,10 @@ GLuint CarShaderProgram;
 OBJObject* car;
 float prevTime, currTime;
 float param_T(0);
+float param_T_Look(0);
 float carSpeed = .06f;
 bool isCarMoving = true;
+bool FPSMode = false;
 
 //pixel data
 unsigned char currPixelColor[4];
@@ -95,7 +97,7 @@ void Window::initialize_objects()
 	//initialize points
 	points = new ControlPoint[numPoints];
 	for (int i = 0; i < numPoints; ++i) {
-		points[i] = ControlPoint(  glm::vec3(  (i + 1.0f) / 255,   i % 3 != 0,  i % 3 == 0 )     );
+		points[i] = ControlPoint(  glm::vec3(  (i + 0.0f) / 255,   i % 3 != 0,  i % 3 == 0 )     );
 	}
 	//initialize curves
 	curves = new BezierCurve[numCurves];
@@ -223,14 +225,30 @@ void Window::idle_callback()
 
 	//bounds check on param_T
 	if (param_T >= numCurves)
-		param_T = 0;
+		param_T -= numCurves;
 	if (param_T < 0)
-		param_T = numCurves - (0 - param_T);
+		param_T += numCurves;
 
 	
+	//set car position
 	glm::vec3 carPosition = curves[(int)param_T].positionAtTime(param_T - (int)param_T);
 	car->setToWorld(glm::translate(glm::mat4(1.0f), carPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2)));
 	
+	//if FPSMode, find lookAt position
+	if (FPSMode) {
+		//find param_T_Look
+		param_T_Look = param_T + 0.04f;
+
+		//bounds check on param_T_Look
+		if (param_T_Look >= numCurves)
+			param_T_Look -= numCurves;
+		if (param_T_Look < 0)
+			param_T_Look += numCurves;
+
+		//set look at position
+		glm::vec3 lookAtPosition = curves[(int)param_T_Look].positionAtTime(param_T_Look - (int)param_T_Look);
+		V = glm::lookAt(carPosition, lookAtPosition, cam_up);
+	}
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -243,23 +261,27 @@ void Window::display_callback(GLFWwindow* window)
 	skybox->draw(glm::vec3(0,0,0));
 	glDepthMask(GL_TRUE);
 
-	//draw control points
-	for (int i = 0; i < numPoints; ++i)
-		points[i].draw(&points[selectedControlPoint]);
-	
-	//draw selected point
-	if (selectedControlPoint != -1) {
-		points[selectedControlPoint].drawAsSelected();
+	//draw car and control points only in edit mode
+	if (!FPSMode) {
+		//draw control points
+		for (int i = 0; i < numPoints; ++i)
+			points[i].draw(&points[selectedControlPoint]);
+
+		//draw selected point
+		if (selectedControlPoint != -1) {
+			points[selectedControlPoint].drawAsSelected();
+		}
+
+		//draw car
+		car->draw(glm::vec3(1, 0, 0));
 	}
 
 	//draw Bezier Curve
 	for (int i = 0; i < numCurves; ++i) {
 		curves[i].draw(&points[selectedControlPoint]);
 	}
-	
-	//draw car
-	car->draw(glm::vec3(1,0,0));
 
+	
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 
@@ -284,7 +306,18 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		else if (key == GLFW_KEY_S) {
 			isCarMoving = isCarMoving ? false : true;
 		}
-
+		else if (key == GLFW_KEY_L) {
+			if (FPSMode) {
+				FPSMode = false;
+				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+				selectedControlPoint = savedSelectedIndex;
+			}
+			else {
+				FPSMode = true;
+				savedSelectedIndex = selectedControlPoint;
+				selectedControlPoint = -1;
+			}
+		}
 
 	}
 
@@ -292,6 +325,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	
+	if (FPSMode)
+		return;
+
 	if (action == GLFW_PRESS) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT) {
 			isLeftMouseButtonDown = true;
@@ -303,7 +339,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			
 			//set selectedControlPoint
 			if (currPixelColor[1] == 255 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 255) {
-				selectedControlPoint = currPixelColor[0] - 1;
+				selectedControlPoint = currPixelColor[0];
 			}
 			else {
 				selectedControlPoint = -1;
@@ -345,11 +381,13 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 			glm::vec3 rotAxis = glm::cross(lastPoint, currPoint);
 			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 1.0f;
-			if (!isnan(rotAngle)) {				
-				camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
-				cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
-				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-				
+			if (!isnan(rotAngle)) {		
+
+				if (!FPSMode) {
+					camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
+					cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+					V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+				}
 			}
 		}
 	}
@@ -384,9 +422,11 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	
-	cam_dist += -10 * (float)yoffset;
-	cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
-	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+	if (!FPSMode) {
+		cam_dist += -10 * (float)yoffset;
+		cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+	}
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {

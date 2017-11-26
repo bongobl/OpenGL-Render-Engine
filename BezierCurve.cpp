@@ -174,23 +174,7 @@ void BezierCurve::updateCurveLines() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindVertexArray(0);
 }
-/*
-float BezierCurve::curveLength() {
 
-	float runningCurveLength = 0;
-	//make sure this is called right after updateCurveLines()
-	for (int i = 1; i <= 150; ++i) {
-
-		float deltaX = segPoints[i].x - segPoints[i - 1].x;
-		float deltaY = segPoints[i].y - segPoints[i - 1].y;
-		float deltaZ = segPoints[i].z - segPoints[i - 1].z;
-		float segLength = (float)sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-		runningCurveLength += segLength;
-	}
-	return runningCurveLength;
-
-}
-*/
 float BezierCurve::paramTDistance(float t) {
 
 	if (t < 0.001f) {
