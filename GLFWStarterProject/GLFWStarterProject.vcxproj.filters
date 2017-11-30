@@ -24,25 +24,13 @@
     <ClInclude Include="..\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CubeMapTexture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\GeometryNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TransformNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\OBJObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ControlPoint.h">
+    <ClInclude Include="..\CubeMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\BezierCurve.h">
+    <ClInclude Include="..\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,19 +47,10 @@
     <ClCompile Include="..\OBJObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CubeMapTexture.cpp">
+    <ClCompile Include="..\CubeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\TransformNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\GeometryNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ControlPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BezierCurve.cpp">
+    <ClCompile Include="..\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,16 +62,10 @@
     <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_point.frag">
+    <None Include="..\shader_asteroid.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_bezier.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader_car.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader_car.vert">
+    <None Include="..\shader_default.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

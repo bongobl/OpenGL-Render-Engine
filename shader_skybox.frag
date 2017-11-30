@@ -19,5 +19,5 @@ void main()
 {
 	//color = vec4(0,1,0, 1);				//for testing
 	color = texture(skybox, TexCoords);		//for skybox
-	//color = vec4(normalDataOutput, 1);	//for normal coloring
+	
 }

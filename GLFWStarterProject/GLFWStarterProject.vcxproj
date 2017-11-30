@@ -19,33 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\BezierCurve.h" />
-    <ClInclude Include="..\ControlPoint.h" />
-    <ClInclude Include="..\CubeMapTexture.h" />
-    <ClInclude Include="..\GeometryNode.h" />
+    <ClInclude Include="..\CubeMap.h" />
     <ClInclude Include="..\main.h" />
-    <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
-    <ClInclude Include="..\TransformNode.h" />
+    <ClInclude Include="..\Texture.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\BezierCurve.cpp" />
-    <ClCompile Include="..\ControlPoint.cpp" />
-    <ClCompile Include="..\CubeMapTexture.cpp" />
-    <ClCompile Include="..\GeometryNode.cpp" />
+    <ClCompile Include="..\CubeMap.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
-    <ClCompile Include="..\TransformNode.cpp" />
+    <ClCompile Include="..\Texture.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader_bezier.frag" />
-    <None Include="..\shader_car.frag" />
-    <None Include="..\shader_car.vert" />
-    <None Include="..\shader_point.frag" />
+    <None Include="..\shader_asteroid.frag" />
+    <None Include="..\shader_default.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />
     <None Include="packages.config" />

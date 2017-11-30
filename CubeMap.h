@@ -14,22 +14,33 @@
 #endif
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include <string>
 
-class Cube
+class CubeMap
 {
+	float scale;
+	glm::vec3 position;
+
+	GLuint shaderProgram;
+	GLuint textureID;
 public:
-	Cube();
-	~Cube();
+	CubeMap();
+	~CubeMap();
 
 	glm::mat4 toWorld;
 
-	void draw(GLuint);
-	void update();
-	void spin(float);
+	void draw();
+
+	void setScale(float sc);
+	void setPosition(glm::vec3 pos);
 
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
 	GLuint uProjection, uModelview;
+
+	void loadCubeMapTexture(std::vector<std::string> faces);
+	unsigned char* loadPPM(const char* filename, int& width, int& height);
 };
 
 // Define the coordinates and indices needed to draw the cube. Note that it is not necessary
@@ -47,21 +58,5 @@ const GLfloat cube_vertices[8][3] = {
 
 const GLuint cube_indices[36] = { 0, 1, 2, 2, 3, 0,  1, 5, 6, 6, 2, 1, 7, 6, 5, 5, 4, 7,  4, 0, 3, 3, 7, 4,  4, 5, 1, 1, 0, 4,  3, 2, 6, 6, 7, 3 };
 
-/*
-const GLuint indices[6][6] = {
-	// Front face
-	{0, 1, 2, 2, 3, 0},
-	// Top face
-	{1, 5, 6, 6, 2, 1},
-	// Back face
-	{7, 6, 5, 5, 4, 7},
-	// Bottom face
-	{4, 0, 3, 3, 7, 4},
-	// Left face
-	{4, 5, 1, 1, 0, 4},
-	// Right face
-	{3, 2, 6, 6, 7, 3}
-};
-*/
 #endif
 

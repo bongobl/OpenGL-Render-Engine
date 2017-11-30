@@ -9,13 +9,6 @@
 using namespace std;
 
 
-glm::vec3* OBJObject::cameraPosition = NULL;
-
-void OBJObject::setCamPosition(glm::vec3* cp) {
-	cameraPosition = cp;
-
-}
-
 OBJObject::OBJObject(const char *filepath, GLuint sp) 
 {
 	
@@ -25,8 +18,6 @@ OBJObject::OBJObject(const char *filepath, GLuint sp)
 
 	modelCenter = glm::vec3(0, 0, 0);
 	toWorld = glm::mat4(1.0f);
-
-	drawWithLines = false;
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -147,11 +138,8 @@ void OBJObject::parse(const char *filepath)
 		else if (currLine[0] == 'f' && currLine[1] == ' ') {		
 			sscanf(currLine + 2, "%i//%i %i//%i %i//%i", &v1, &n1, &v2, &n2, &v3, &n3);
 			indices.push_back(v1 - 1);
-			//indices.push_back(n1 - 1);
 			indices.push_back(v2 - 1);
-			//indices.push_back(n2 - 1);
 			indices.push_back(v3 - 1);
-			//indices.push_back(n3 - 1);
 		}
 		
 	}//END FOR
@@ -173,8 +161,10 @@ void OBJObject::parse(const char *filepath)
 void OBJObject::setToWorld(glm::mat4 M_new) {
 	this->toWorld = M_new;
 }
-
-void OBJObject::draw(glm::vec3 color)
+void OBJObject::setTexture(Texture t) {
+	texture = t;
+}
+void OBJObject::draw()
 {
 
 	glUseProgram(shaderProgram);
@@ -194,16 +184,17 @@ void OBJObject::draw(glm::vec3 color)
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
-	//Apply model color properties
-	glUniform3f(glGetUniformLocation(shaderProgram, "inColor"), color.x, color.y, color.z);
 
-	//send cam position to shader
-	if (cameraPosition != NULL) {		
-		glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition->x, cameraPosition->y, cameraPosition->z);
-	}
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	
+	
+	//texture properties
+	if (texture.getTextureID() != 0) {		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+	}
+
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
@@ -215,8 +206,4 @@ void OBJObject::setModelCenter(glm::vec3 newCenter) {
 	modelCenter = newCenter;
 }
 
-
-void OBJObject::enableDrawWithLines() {
-	drawWithLines = true;
-}
 

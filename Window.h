@@ -12,16 +12,12 @@
 #include <GLFW/glfw3.h>
 #include "shader.h"
 #include "OBJObject.h"
-#include "CubeMapTexture.h"
-#include "Node.h"
-#include "GeometryNode.h"
-#include "TransformNode.h"
-#include "ControlPoint.h"
-#include "BezierCurve.h"
+#include "CubeMap.h"
+#include "Texture.h"
 using namespace std;
+
 class Window
 {
-	static OBJObject* skybox;
 	
 public:
 
@@ -58,8 +54,6 @@ public:
 
 private:
 	static glm::vec3 trackBallMap(glm::vec2 point);
-	static void setParamT_ToMax();
-	static void calcMaxHeight();
 };
 
 #endif

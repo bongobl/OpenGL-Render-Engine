@@ -10,11 +10,11 @@ in vec3 TexCoords;
 out vec4 color;
 
 //how does frag shader get this?
-uniform samplerCube skybox;
+uniform sampler2D image;
 
 uniform vec3 inColor;
 
 void main()
 {
-	color = vec4(inColor, 1);	//direct color
+	color = texture(image, vec2(TexCoords));	//for skybox
 }

@@ -5,10 +5,10 @@ const char* window_title = "GLFW Starter Project";
 #define VERTEX_SHADER_PATH "../shader.vert"
 
 //Shader Programs
-GLint SkyboxShaderProgram;
+GLint AsteroidShaderProgram;
 
 // Camera parameters
-float cam_dist(100.0f);
+float cam_dist(30.0f);
 const glm::vec3 intial_cam_pos(0.0f, 0, cam_dist);
 glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
@@ -31,53 +31,23 @@ glm::mat4 Window::camRotationMatrix;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
-//skybox
-OBJObject* Window::skybox;
-vector<string> faceNames;
+//cubeMap
+CubeMap* lakeView;
 
-int selectedControlPoint = -1;
-int savedSelectedIndex = -1;
-//ControlPoints
-int numPoints(30);
-ControlPoint* points;
-
-//Bezier Curves
-int numCurves(10);
-BezierCurve* curves;
-float trackMaximumHeight(0);
-
-//Roller coaster car, keep car data in Window file
-GLuint CarShaderProgram;
-OBJObject* car;
-float prevTime, currTime;
-float param_T(0);
-float param_T_Look(0);
-float carSpeed = .06f;
-bool isCarMoving = true;
-bool FPSMode = false;
-
-//pixel data
-unsigned char currPixelColor[4];
-
+//Asteroid
+OBJObject* asteroid;
+Texture asteroidTexture;
 
 void Window::initialize_objects()
 {
-
+	
 	//basic window
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	camRotationMatrix = glm::mat4(1.0f);
 
-	//OBJObject
-	OBJObject::setCamPosition(&cam_pos);
-
-	// Load the shader program. Make sure you have the correct filepath up top
-	SkyboxShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_skybox.frag");
-
-	//initialize skybox and put it at camera position
-	skybox = new OBJObject("myCube.obj", SkyboxShaderProgram);
-	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
-
+	//vector of skybox face names
+	vector<string> faceNames;
 	faceNames.push_back("skybox/right.ppm");
 	faceNames.push_back("skybox/left.ppm");
 	faceNames.push_back("skybox/top.ppm");
@@ -85,58 +55,23 @@ void Window::initialize_objects()
 	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
 
-	CubeMapTexture cubeMap;
-	cubeMap.loadCubeMapTexture(faceNames);
+	lakeView = new CubeMap();
+	lakeView->loadCubeMapTexture(faceNames);
 
-	
-	//Curves and Points
-	ControlPoint::InitStatics();
-	BezierCurve::InitStatics();
+	AsteroidShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_asteroid.frag");
 
+	asteroid = new OBJObject("Models/AsteroidSample.obj", AsteroidShaderProgram);
+	asteroidTexture.loadTexture("Textures/AsteroidTexture.ppm");
+	asteroid->setTexture(asteroidTexture);
 
-	//initialize points
-	points = new ControlPoint[numPoints];
-	for (int i = 0; i < numPoints; ++i) {
-		points[i] = ControlPoint(  glm::vec3(  (i + 0.0f) / 255,   i % 3 != 0,  i % 3 == 0 )     );
-	}
-	//initialize curves
-	curves = new BezierCurve[numCurves];
-	for (int i = 0; i < numCurves - 1; ++i) {
-		int startIndex = 3 * i;
-		curves[i] = BezierCurve(&points[startIndex], &points[startIndex + 1], &points[startIndex + 2], &points[startIndex + 3]);
-	}
-	curves[numCurves-1] = BezierCurve(&points[numPoints - 3], &points[numPoints - 2], &points[numPoints - 1], &points[0]);
-	
-
-	//position points
-	for (int i = 0; i < numPoints; ++i) {		
-		float angle = i * (2 * glm::pi<float>() / numPoints);
-		points[i].move(glm::vec3(90 * cos(angle), 0, 90 * sin(angle)));
-	}
-
-	//update curves
-	for (int i = 0; i < numCurves; ++i) {
-		curves[i].updateCurveLines();
-	}
-
-	//create car
-	CarShaderProgram = LoadShaders("../shader_car.vert", "../shader_car.frag");
-	car = new OBJObject("sphere.obj", CarShaderProgram);
-	prevTime = (float)glfwGetTime();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete skybox;
-	delete car;
-	
-	delete[] curves;
-	BezierCurve::cleanUpStatics();
-	delete[] points;
-	ControlPoint::cleanUpStatics();	
+	delete lakeView;
 
-	glDeleteProgram(SkyboxShaderProgram);
+	glDeleteProgram(AsteroidShaderProgram);
 
 }
 
@@ -207,84 +142,20 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	//keep skybox position at camera position
-	skybox->setToWorld(glm::translate(glm::mat4(1.0f), cam_pos));
-
-	//physics for finding car speed
-	float delta_H = trackMaximumHeight - curves[(int)param_T].positionAtTime(param_T - (int)param_T).y;
-	carSpeed = isCarMoving? 0.015f + 0.03f * sqrt(abs(delta_H)) : 0;
+	lakeView->setPosition(cam_pos);
 	
-	//set car position
-	currTime = (float)glfwGetTime();
-	float deltaTime = currTime - prevTime;
-	float deltaDist = carSpeed * deltaTime;
-	prevTime = currTime;
-
-	//find change in param_T given deltaDist
-	param_T += deltaDist / curves[(int)param_T].paramTDistance(param_T - (int)param_T);
-
-	//bounds check on param_T
-	if (param_T >= numCurves)
-		param_T -= numCurves;
-	if (param_T < 0)
-		param_T += numCurves;
-
-	
-	//set car position
-	glm::vec3 carPosition = curves[(int)param_T].positionAtTime(param_T - (int)param_T);
-	car->setToWorld(glm::translate(glm::mat4(1.0f), carPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2)));
-	
-	//if FPSMode, find lookAt position
-	if (FPSMode) {
-		//find param_T_Look
-		param_T_Look = param_T + 0.04f;
-
-		//bounds check on param_T_Look
-		if (param_T_Look >= numCurves)
-			param_T_Look -= numCurves;
-		if (param_T_Look < 0)
-			param_T_Look += numCurves;
-
-		//set look at position
-		glm::vec3 lookAtPosition = curves[(int)param_T_Look].positionAtTime(param_T_Look - (int)param_T_Look);
-		V = glm::lookAt(carPosition, lookAtPosition, cam_up);
-	}
 }
 
 void Window::display_callback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-	//draw skybox
-	glDepthMask(GL_FALSE);
-	skybox->draw(glm::vec3(0,0,0));
-	glDepthMask(GL_TRUE);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
+	//draw skybox cubemap	
+	lakeView->draw();	
 
-	//draw car and control points only in edit mode
-	if (!FPSMode) {
-		//draw control points
-		for (int i = 0; i < numPoints; ++i)
-			points[i].draw(&points[selectedControlPoint]);
-
-		//draw selected point
-		if (selectedControlPoint != -1) {
-			points[selectedControlPoint].drawAsSelected();
-		}
-
-		//draw car
-		car->draw(glm::vec3(1, 0, 0));
-	}
-
-	//draw Bezier Curve
-	for (int i = 0; i < numCurves; ++i) {
-		curves[i].draw(&points[selectedControlPoint]);
-	}
-
-	
+	asteroid->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
-
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -300,50 +171,19 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		else if (key == GLFW_KEY_SPACE) {
-			setParamT_ToMax();
-		}
-		else if (key == GLFW_KEY_S) {
-			isCarMoving = isCarMoving ? false : true;
-		}
-		else if (key == GLFW_KEY_L) {
-			if (FPSMode) {
-				FPSMode = false;
-				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-				selectedControlPoint = savedSelectedIndex;
-			}
-			else {
-				FPSMode = true;
-				savedSelectedIndex = selectedControlPoint;
-				selectedControlPoint = -1;
-			}
-		}
 
 	}
 
 }
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	
-	if (FPSMode)
-		return;
+
 
 	if (action == GLFW_PRESS) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT) {
 			isLeftMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
 			
-			//read current pixel val
-			glReadPixels((int)mousePosition.x, Window::height - (int)mousePosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, currPixelColor);
-			//cout << "(" << currPixelColor[0] - 1 << ", " << currPixelColor[1] << ", " << currPixelColor[2] << ")" << endl;
-			
-			//set selectedControlPoint
-			if (currPixelColor[1] == 255 && currPixelColor[2] == 0 || currPixelColor[1] == 0 && currPixelColor[2] == 255) {
-				selectedControlPoint = currPixelColor[0];
-			}
-			else {
-				selectedControlPoint = -1;
-			}
 			
 		}
 
@@ -383,11 +223,9 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			GLfloat rotAngle = acos(glm::dot(lastPoint, currPoint)) * 1.0f;
 			if (!isnan(rotAngle)) {		
 
-				if (!FPSMode) {
-					camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
-					cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
-					V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-				}
+				camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
+				cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 			}
 		}
 	}
@@ -398,19 +236,6 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 		deltaMousePosition.x = (mousePosition.x - lastMousePosition.x) * 150.0f / width;
 		deltaMousePosition.y = (lastMousePosition.y - mousePosition.y) * 150.0f / height;
 		
-		//move point
-		if (selectedControlPoint != -1) {
-
-			glm::vec3 moveVal = glm::inverse(V) * glm::vec4(deltaMousePosition.x, deltaMousePosition.y, 0,0);
-
-			points[selectedControlPoint].move(moveVal);
-			calcMaxHeight();
-			
-			//Update Bezier Curve
-			for (int i = 0; i < numCurves; ++i) {
-				curves[i].updateCurveLines();
-			}
-		}
 	}
 
 	//for trackball
@@ -422,11 +247,11 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	
-	if (!FPSMode) {
-		cam_dist += -10 * (float)yoffset;
-		cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-	}
+	
+	cam_dist += -10 * (float)yoffset;
+	cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+	
 }
 
 glm::vec3 Window::trackBallMap(glm::vec2 point) {
@@ -442,42 +267,4 @@ glm::vec3 Window::trackBallMap(glm::vec2 point) {
 	v.z = sqrt(1.001f - d*d);
 	v = glm::normalize(v);
 	return v;
-}
-
-void Window::setParamT_ToMax() {
-
-	int curveIndex = 0;
-
-	//find curveIndex
-	for (int i = 0; i < numCurves; ++i) {
-		
-		float t_val_i = curves[i].getMaxPoint_T();
-		glm::vec3 position_i = curves[i].positionAtTime(t_val_i);
-
-		float t_val_currIndex = curves[curveIndex].getMaxPoint_T();
-		glm::vec3 position_currIndex = curves[curveIndex].positionAtTime(t_val_currIndex);
-
-		if (position_i.y > position_currIndex.y ) {
-			curveIndex = i;
-		}
-	}
-
-	//find param t at that index
-	param_T = curveIndex + curves[curveIndex].getMaxPoint_T();
-	
-}
-
-void Window::calcMaxHeight() {
-
-	trackMaximumHeight = 0;
-	for (int i = 0; i < numCurves; ++i) {
-
-		float t_val_i = curves[i].getMaxPoint_T();
-		glm::vec3 position_i = curves[i].positionAtTime(t_val_i);
-
-
-		if (position_i.y > trackMaximumHeight) {
-			trackMaximumHeight = position_i.y;
-		}
-	}
 }

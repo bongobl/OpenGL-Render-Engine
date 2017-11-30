@@ -25,14 +25,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
-#include "Material.h"
-
+#include "Texture.h"
 
 class OBJObject
 {
 
-	//static fields
-	static glm::vec3* cameraPosition;
 
 	//Model Geometry Data
 	std::vector<GLuint> indices;
@@ -56,11 +53,10 @@ class OBJObject
 	//object's shader program
 	GLuint shaderProgram;
 
-	bool drawWithLines;
+	//object's texture
+	Texture texture;
 	
 public:
-
-	static void setCamPosition(glm::vec3* cp);
 
 	OBJObject(const char* filepath, GLuint sp);
 	~OBJObject();
@@ -70,11 +66,11 @@ public:
 	void setToWorld(glm::mat4 M_new);
 
 	//OpenGL draw function
-	void draw(glm::vec3 color);
+	void draw();
 
 	void setModelCenter(glm::vec3 newCenter);
 
-	void enableDrawWithLines();
+	void setTexture(Texture t);
 };
 
 #endif

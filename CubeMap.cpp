@@ -1,9 +1,11 @@
-#include "Cube.h"
+#include "CubeMap.h"
 #include "Window.h"
 
-Cube::Cube()
+CubeMap::CubeMap()
 {
-	toWorld = glm::mat4(1.0f);
+	scale = 1000;
+	position = glm::vec3(1.0f, 1.0f, 1.0f);
+	this->shaderProgram = LoadShaders("../shader.vert", "../shader_skybox.frag");
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);
@@ -44,7 +46,7 @@ Cube::Cube()
 	glBindVertexArray(0);
 }
 
-Cube::~Cube()
+CubeMap::~CubeMap()
 {
 	// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a 
 	// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
@@ -53,8 +55,20 @@ Cube::~Cube()
 	glDeleteBuffers(1, &EBO);
 }
 
-void Cube::draw(GLuint shaderProgram)
+void CubeMap::setScale(float sc) {
+	scale = sc;
+}
+void CubeMap::setPosition(glm::vec3 pos) {
+	position = pos;
+}
+
+void CubeMap::draw()
 { 
+
+	glUseProgram(shaderProgram);
+
+	toWorld = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * toWorld;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
@@ -67,20 +81,102 @@ void Cube::draw(GLuint shaderProgram)
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
+
+
+	glDepthMask(GL_FALSE);
+
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	glDepthMask(GL_TRUE);
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 }
 
-void Cube::update()
-{
-	spin(1.f);
+
+
+void CubeMap::loadCubeMapTexture(std::vector<std::string> faces) {
+
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char *data = loadPPM(faces[i].c_str(), width, height);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 }
 
-void Cube::spin(float deg)
-{
-	// If you haven't figured it out from the last project, this is how you fix spin's behavior
-	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), 1.0f / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+unsigned char* CubeMap::loadPPM(const char* filename, int& width, int& height) {
+	const int BUFSIZE = 128;
+	FILE* fp;
+	unsigned int read;
+	unsigned char* rawData;
+	char buf[3][BUFSIZE];
+	char* retval_fgets;
+	size_t retval_sscanf;
+
+	if ((fp = fopen(filename, "rb")) == NULL)
+	{
+		std::cerr << "error reading ppm file, could not locate " << filename << std::endl;
+		width = 0;
+		height = 0;
+		return NULL;
+	}
+
+	// Read magic number:
+	retval_fgets = fgets(buf[0], BUFSIZE, fp);
+
+	// Read width and height:
+	do
+	{
+		retval_fgets = fgets(buf[0], BUFSIZE, fp);
+	} while (buf[0][0] == '#');
+	retval_sscanf = sscanf(buf[0], "%s %s", buf[1], buf[2]);
+	width = atoi(buf[1]);
+	height = atoi(buf[2]);
+
+	// Read maxval:
+	do
+	{
+		retval_fgets = fgets(buf[0], BUFSIZE, fp);
+	} while (buf[0][0] == '#');
+
+	// Read image data:
+	rawData = new unsigned char[width * height * 3];
+	read = fread(rawData, width * height * 3, 1, fp);
+	fclose(fp);
+	if (read != 1)
+	{
+		std::cerr << "error parsing ppm file, incomplete data" << std::endl;
+		delete[] rawData;
+		width = 0;
+		height = 0;
+		return NULL;
+	}
+
+	return rawData;
 }
 

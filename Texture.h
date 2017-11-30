@@ -1,21 +1,27 @@
-#pragma once
-
+#ifndef TEXTURE
+#define TEXTURE
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <string>
-using namespace std;
+#include <cstdio>
+#include <iostream>
 
-class CubeMapTexture {
-
-public:
+class Texture {
 
 	GLuint textureID;
 
-	void loadCubeMapTexture(vector<std::string> faces);
+public:
+
+	Texture();
+
+	void loadTexture(const char* filename);
 	GLuint getTextureID();
 
 private:
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
+
+	
 };
+
+#endif
