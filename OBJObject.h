@@ -25,11 +25,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
-#include "Texture.h"
+#include "Material.h"
 
 class OBJObject
 {
-
 
 	//Model Geometry Data
 	std::vector<GLuint> indices;
@@ -42,6 +41,7 @@ class OBJObject
 	//model center
 	glm::vec3 modelCenter;
 
+
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
 
@@ -50,15 +50,12 @@ class OBJObject
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
 
-	//object's shader program
-	GLuint shaderProgram;
-
-	//object's texture
-	Texture texture;
+	//object's material
+	Material material;
 	
 public:
 
-	OBJObject(const char* filepath, GLuint sp);
+	OBJObject(const char* filepath, Material m);
 	~OBJObject();
 	void parse(const char* filepath);
 
@@ -70,7 +67,7 @@ public:
 
 	void setModelCenter(glm::vec3 newCenter);
 
-	void setTexture(Texture t);
+	void setMaterial(Material m);
 };
 
 #endif

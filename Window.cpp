@@ -4,9 +4,6 @@ const char* window_title = "GLFW Starter Project";
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 
-//Shader Programs
-GLint AsteroidShaderProgram;
-
 // Camera parameters
 float cam_dist(30.0f);
 const glm::vec3 intial_cam_pos(0.0f, 0, cam_dist);
@@ -35,8 +32,7 @@ glm::mat4 Window::V;
 CubeMap* lakeView;
 
 //Asteroid
-OBJObject* asteroid;
-Texture asteroidTexture;
+Asteroid* testAsteroid;
 
 void Window::initialize_objects()
 {
@@ -48,30 +44,26 @@ void Window::initialize_objects()
 
 	//vector of skybox face names
 	vector<string> faceNames;
-	faceNames.push_back("skybox/right.ppm");
 	faceNames.push_back("skybox/left.ppm");
+	faceNames.push_back("skybox/right.ppm");
 	faceNames.push_back("skybox/top.ppm");
 	faceNames.push_back("skybox/bottom.ppm");
-	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
+	faceNames.push_back("skybox/back.ppm");
 
+	//init cubemap
 	lakeView = new CubeMap();
 	lakeView->loadCubeMapTexture(faceNames);
 
-	AsteroidShaderProgram = LoadShaders(VERTEX_SHADER_PATH, "../shader_asteroid.frag");
-
-	asteroid = new OBJObject("Models/AsteroidSample.obj", AsteroidShaderProgram);
-	asteroidTexture.loadTexture("Textures/AsteroidTexture.ppm");
-	asteroid->setTexture(asteroidTexture);
-
+	Asteroid::initStatics();
+	testAsteroid = new Asteroid(0);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
+	delete testAsteroid;
 	delete lakeView;
-
-	glDeleteProgram(AsteroidShaderProgram);
 
 }
 
@@ -143,7 +135,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	lakeView->setPosition(cam_pos);
-	
+	testAsteroid->update();
+	testAsteroid->rotate(glm::pi<float>() / 120.0f);
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -153,7 +146,7 @@ void Window::display_callback(GLFWwindow* window)
 	//draw skybox cubemap	
 	lakeView->draw();	
 
-	asteroid->draw();
+	testAsteroid->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers
@@ -183,8 +176,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 		if (button == GLFW_MOUSE_BUTTON_LEFT) {
 			isLeftMouseButtonDown = true;
 			lastPoint = trackBallMap(glm::vec2(mousePosition.x, mousePosition.y));
-			
-			
+						
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {

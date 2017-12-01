@@ -17,7 +17,6 @@ uniform vec3 inColor;
 
 void main()
 {
-	//color = vec4(0,1,0, 1);				//for testing
 	color = texture(skybox, TexCoords);		//for skybox
 	
 }

@@ -30,7 +30,10 @@
     <ClInclude Include="..\CubeMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Texture.h">
+    <ClInclude Include="..\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Asteroid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +53,10 @@
     <ClCompile Include="..\CubeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Texture.cpp">
+    <ClCompile Include="..\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Asteroid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +68,10 @@
     <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_asteroid.frag">
+    <None Include="..\shader_textureANDnormal.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_default.frag">
+    <None Include="..\shader_color.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

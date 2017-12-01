@@ -13,7 +13,8 @@
 #include "shader.h"
 #include "OBJObject.h"
 #include "CubeMap.h"
-#include "Texture.h"
+#include "Material.h"
+#include "Asteroid.h"
 using namespace std;
 
 class Window

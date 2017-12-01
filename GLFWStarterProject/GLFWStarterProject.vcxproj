@@ -19,24 +19,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Asteroid.h" />
     <ClInclude Include="..\CubeMap.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
-    <ClInclude Include="..\Texture.h" />
+    <ClInclude Include="..\Material.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Asteroid.cpp" />
     <ClCompile Include="..\CubeMap.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
-    <ClCompile Include="..\Texture.cpp" />
+    <ClCompile Include="..\Material.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader_asteroid.frag" />
-    <None Include="..\shader_default.frag" />
+    <None Include="..\shader_textureANDnormal.frag" />
+    <None Include="..\shader_color.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />
     <None Include="packages.config" />

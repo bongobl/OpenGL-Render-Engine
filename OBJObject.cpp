@@ -9,12 +9,12 @@
 using namespace std;
 
 
-OBJObject::OBJObject(const char *filepath, GLuint sp) 
+OBJObject::OBJObject(const char *filepath, Material m) 
 {
 	
 	//read in geometry data disk
 	parse(filepath);
-	shaderProgram = sp;
+	material = m;
 
 	modelCenter = glm::vec3(0, 0, 0);
 	toWorld = glm::mat4(1.0f);
@@ -161,13 +161,13 @@ void OBJObject::parse(const char *filepath)
 void OBJObject::setToWorld(glm::mat4 M_new) {
 	this->toWorld = M_new;
 }
-void OBJObject::setTexture(Texture t) {
-	texture = t;
+void OBJObject::setMaterial(Material m) {
+	material = m;
 }
 void OBJObject::draw()
 {
 
-	glUseProgram(shaderProgram);
+	glUseProgram(material.getShaderProgram());
 
 	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
 	// Calculate the combination of the model and view (camera inverse) matrices
@@ -175,9 +175,9 @@ void OBJObject::draw()
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(shaderProgram, "projection");
-	uModelview = glGetUniformLocation(shaderProgram, "modelview");
-	uToWorld = glGetUniformLocation(shaderProgram, "toWorld");
+	uProjection = glGetUniformLocation(material.getShaderProgram(), "projection");
+	uModelview = glGetUniformLocation(material.getShaderProgram(), "modelview");
+	uToWorld = glGetUniformLocation(material.getShaderProgram(), "toWorld");
 
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
@@ -189,11 +189,21 @@ void OBJObject::draw()
 	glBindVertexArray(VAO);
 	
 	
-	//texture properties
-	if (texture.getTextureID() != 0) {		
+	//material properties
+	glUniform3f(glGetUniformLocation(material.getShaderProgram(), "material.color"), material.getColor().r, material.getColor().g, material.getColor().b);
+	if (material.getTextureID() != 0) {	
+		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.image"), 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		glBindTexture(GL_TEXTURE_2D, material.getTextureID());
+
 	}
+	if (material.getNormalMapID() != 0) {
+		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.normalMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, material.getNormalMapID());
+	}
+
+
 
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	
