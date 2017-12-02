@@ -21,49 +21,85 @@ OBJObject::OBJObject(const char *filepath, Material m)
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &VBO2);
+	glGenBuffers(1, &VBO_positions);
+	glGenBuffers(1, &VBO_normals);
+	glGenBuffers(1, &VBO_uvs);
+	glGenBuffers(1, &VBO_tangents);
+	glGenBuffers(1, &VBO_bitangents);
 	glGenBuffers(1, &EBO);
 	
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(VAO);
 
-	// Now bind a VBO to it as a GL_ARRAY_BUFFER. The GL_ARRAY_BUFFER is an array containing relevant data to what
-	// you want to draw, such as vertices, normals, colors, etc.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// glBufferData populates the most recently bound buffer with data starting at the 3rd argument and ending after
-	// the 2nd argument number of indices. How does OpenGL know how long an index spans? Go to glVertexAttribPointer.
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-	// Enable the usage of layout location 0 (check the vertex shader to see what this is)
+
+	//Vertex Position
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_positions);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
+	glVertexAttribPointer(
+		0,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
 		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
 		GL_FLOAT, // What type these components are
 		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
 		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
 		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
 
-					 // We've sent the vertex data over to OpenGL, but there's still something missing.
-					 // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
-
-
-	// Unbind the VAO now so we don't accidentally tamper with it.
-	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
-
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
+	//NORMALS
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_normals);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
-		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
-		GL_FLOAT, // What type these components are
-		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
-		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
-		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
+	glVertexAttribPointer(
+		1,
+		3, 
+		GL_FLOAT, 
+		GL_FALSE,
+		3 * sizeof(GLfloat), 
+		(GLvoid*)0); 
+
+
+	//UVS
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_uvs);
+	glBufferData(GL_ARRAY_BUFFER, UVs.size() * sizeof(glm::vec2), UVs.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(
+		2,
+		2, 
+		GL_FLOAT, 
+		GL_FALSE, 
+		2 * sizeof(GLfloat), 
+		(GLvoid*)0); 
+
+	//TANGENTS
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tangents);
+	glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), tangents.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(
+		3,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		3 * sizeof(GLfloat),
+		(GLvoid*)0);
+
+	//TANGENTS
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_bitangents);
+	glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), bitangents.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(
+		4,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		3 * sizeof(GLfloat),
+		(GLvoid*)0);
+
+
+	// We've sent the vertex data over to OpenGL, but there's still something missing.
+	// In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
 
 
 	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
@@ -75,7 +111,7 @@ OBJObject::OBJObject(const char *filepath, Material m)
 
 OBJObject::~OBJObject() {
 	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &VBO_positions);
 	glDeleteBuffers(1, &EBO);
 }
 void OBJObject::parse(const char *filepath) 
@@ -86,7 +122,7 @@ void OBJObject::parse(const char *filepath)
 	char currLine[BUFSIZ];
 	GLfloat x, y, z;
 	GLfloat r, g, b;
-	GLuint v1, v2, v3, n1, n2, n3;
+	GLuint v1, v2, v3, n1, n2, n3, t1, t2, t3;
 
 	GLfloat lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
 
@@ -102,13 +138,13 @@ void OBJObject::parse(const char *filepath)
 
 	while (fgets(currLine, BUFSIZ, fp) != NULL) {
 
-		//Process vertex or vertex normal
+		//Process vertex attributes
 		if (currLine[0] == 'v') {
+
+			//process vertex position
 			if (currLine[1] == ' ') {
 				sscanf(currLine + 2, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
-				vertices.push_back(x);
-				vertices.push_back(y);
-				vertices.push_back(z);
+				vertices.push_back(glm::vec3(x,y,z));
 
 				//Code to calc center of mass
 				if (firstVertex) {
@@ -125,18 +161,26 @@ void OBJObject::parse(const char *filepath)
 				if (z < lowestZ)	lowestZ = z;
 
 			}
+
+			//process vertex normal
 			else if (currLine[1] == 'n' && currLine[2] == ' ') {
 				sscanf(currLine + 3, "%f %f %f", &x, &y, &z);
 				GLfloat magnitude = sqrt(x * x + y * y + z * z);
 
-				normals.push_back(x / magnitude);
-				normals.push_back(y / magnitude);
-				normals.push_back(z / magnitude);
+				normals.push_back(glm::vec3(x / magnitude, y / magnitude, z / magnitude));
+
+			}
+
+			//process vertex texture UVs
+			else if (currLine[1] == 't' && currLine[2] == ' ') {
+				sscanf(currLine + 3, "%f %f", &x, &y);
+				UVs.push_back(glm::vec2(x, y));
 			}
 		}
 		//process face
 		else if (currLine[0] == 'f' && currLine[1] == ' ') {		
-			sscanf(currLine + 2, "%i//%i %i//%i %i//%i", &v1, &n1, &v2, &n2, &v3, &n3);
+			//sscanf(currLine + 2, "%i//%i %i//%i %i//%i", &v1, &n1, &v2, &n2, &v3, &n3);
+			sscanf(currLine + 2, "%i/%i/%i %i/%i/%i %i/%i/%i", &v1, &n1, &t1, &v2, &n2, &t2, &v3, &n3, &t3);
 			indices.push_back(v1 - 1);
 			indices.push_back(v2 - 1);
 			indices.push_back(v3 - 1);
@@ -153,8 +197,44 @@ void OBJObject::parse(const char *filepath)
 
 	cout << "num vertices: " << vertices.size() << endl;
 	cout << "num normals: " << normals.size() << endl;
+	cout << "num texCoords: " << UVs.size() << endl;
 	cout << "num indices: " << indices.size() << endl;	
+	
+	//Calc Tangents and Bitangents
+	for (unsigned int i = 0; i< vertices.size(); i += 3) {
 
+		// Shortcuts for vertices
+		glm::vec3 & v0 = vertices[i + 0];
+		glm::vec3 & v1 = vertices[i + 1];
+		glm::vec3 & v2 = vertices[i + 2];
+
+		// Shortcuts for UVs
+		glm::vec2 & uv0 = UVs[i + 0];
+		glm::vec2 & uv1 = UVs[i + 1];
+		glm::vec2 & uv2 = UVs[i + 2];
+
+		// Edges of the triangle : postion delta
+		glm::vec3 deltaPos1 = v1 - v0;
+		glm::vec3 deltaPos2 = v2 - v0;
+
+		// UV delta
+		glm::vec2 deltaUV1 = uv1 - uv0;
+		glm::vec2 deltaUV2 = uv2 - uv0;
+
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+		glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+		glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+
+		tangents.push_back(tangent);
+		tangents.push_back(tangent);
+		tangents.push_back(tangent);
+
+		// Same thing for binormals
+		bitangents.push_back(bitangent);
+		bitangents.push_back(bitangent);
+		bitangents.push_back(bitangent);
+
+	}//END FOR
 }
 
 
@@ -190,14 +270,18 @@ void OBJObject::draw()
 	
 	
 	//material properties
-	glUniform3f(glGetUniformLocation(material.getShaderProgram(), "material.color"), material.getColor().r, material.getColor().g, material.getColor().b);
-	if (material.getTextureID() != 0) {	
-		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.image"), 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, material.getTextureID());
-
+	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useColor"), material.useColor);
+	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useTexture"), material.useTexture);
+	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useNormalMap"), material.useNormalMap);
+	if (material.useColor) {		
+		glUniform3f(glGetUniformLocation(material.getShaderProgram(), "material.color"), material.getColor().r, material.getColor().g, material.getColor().b);
 	}
-	if (material.getNormalMapID() != 0) {
+	if (material.useTexture) {		
+		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.texture"), 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, material.getTextureID());	
+	}
+	if (material.useNormalMap) {		
 		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.normalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, material.getNormalMapID());
@@ -205,7 +289,7 @@ void OBJObject::draw()
 
 
 
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size() , GL_UNSIGNED_INT, 0);
 	
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);

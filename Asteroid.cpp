@@ -8,13 +8,14 @@ Material Asteroid::asteroidMaterial;
 
 void Asteroid::initStatics() {
 
-	//create asteroid material
-	asteroidMaterial.setColor(glm::vec3(0, 0, 1));
+	//Create Asteroid Material
+	asteroidMaterial.setColor(glm::vec3(1.6, 1.6, 1.6));
 	asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
-	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");
-	asteroidMaterial.setShaderProgram(LoadShaders("../shader.vert", "../shader_textureANDnormal.frag"));
+	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+
+	//Create Template of Asteroids
 	asteroidTemplates = new OBJObject[2]{	OBJObject("Models/Asteroid0.obj", asteroidMaterial),
-									OBJObject("Models/Asteroid1.obj", asteroidMaterial) };
+											OBJObject("Models/Asteroid1.obj", asteroidMaterial) };
 }
 
 void Asteroid::cleanUpStatics() {
@@ -24,7 +25,7 @@ void Asteroid::cleanUpStatics() {
 Asteroid::Asteroid(unsigned int id) {
 
 	if (asteroidTemplates == NULL) {
-		cerr << "No Asteroid templaes, make sure you call Asteroid::InitStatics() before initializing an asteroid" << endl;
+		cerr << "No Asteroid templates, make sure you call Asteroid::InitStatics() before initializing an asteroid" << endl;
 		exit(-1);
 	}
 	asteroidOBJ = &asteroidTemplates[id];

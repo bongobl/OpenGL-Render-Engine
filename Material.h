@@ -9,29 +9,37 @@
 
 class Material {
 
+	//static fields
+	static GLuint shaderProgram;
+
+	//member fields
 	glm::vec3 color;
 	GLuint textureID;
 	GLuint normalMapID;
 
-	GLuint shaderProgram;
-
+	
 public:
+	bool useColor;
+	bool useTexture;
+	bool useNormalMap;
 
+	static void initStatics();
+	static void cleanUpStatics();
 	Material();
 	~Material();
+
+	void setColor(glm::vec3 c);
 	void loadTexture(const char* filename);
 	void loadNormalMap(const char* filename);
-	void setShaderProgram(GLuint sp);
-	void setColor(glm::vec3 c);
-	GLuint getShaderProgram();
+		
 	GLuint getTextureID();
 	GLuint getNormalMapID();
 	glm::vec3 getColor();
 	
+	GLuint getShaderProgram();
 private:
 	void loadImage(const char* filename, GLuint &currID);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
-
 	
 };
 

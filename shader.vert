@@ -8,6 +8,9 @@
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 uv;
+layout (location = 2) in vec3 tangent;
+layout (location = 2) in vec3 bitangent;
 
 // Uniform variables can be updated by fetching their location and passing values to that location
 
@@ -20,22 +23,27 @@ uniform mat4 toWorld;
 // The default output, gl_Position, should be assigned something. You can define as many
 // extra outputs as you need.
 
-
-out vec3 normalDataOutput;
 out vec3 vertexDataOutput;
+out vec3 normalDataOutput;
+out vec2 uvOutput;
+out vec3 tangentOutput;
+out vec3 bitangentOutput;
+
 out mat4 toWorldMatrix;
-
-
 out vec3 TexCoords;
+
+
 void main()
 {
     // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
     gl_Position = projection * modelview * vec4(position.x, position.y, position.z, 1.0);
 
+	vertexDataOutput = position;
+	normalDataOutput = normal;
+	uvOutput = uv;
+	tangentOutput = tangent;
+	bitangentOutput = bitangent;
 
-	normalDataOutput = vec3(normal);
-	vertexDataOutput = vec3(position);
 	toWorldMatrix = toWorld;
-
 	TexCoords = position;
 }

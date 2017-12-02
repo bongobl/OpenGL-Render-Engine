@@ -1,22 +1,60 @@
 #include "Material.h"
+#include "shader.h"
 
+GLuint Material::shaderProgram = -1;
+void Material::initStatics() {
+	shaderProgram = LoadShaders("../shader.vert", "../shader_material.frag");
+}
+void Material::cleanUpStatics() {
+	glDeleteProgram(shaderProgram);
+}
 Material::Material() {
+
+	useColor = false;
+	useTexture = false;
+	useNormalMap = false;
 
 	textureID = 0;
 	normalMapID = 0;
-	color = glm::vec3(1, 1, 1);
+	color = glm::vec3(0, 0, 0);
+
 }
 Material::~Material() {
-	//glDeleteProgram(shaderProgram);
+	
 }
+
+void Material::setColor(glm::vec3 c) {
+	color = c;
+	useColor = true;
+}
+
 void Material::loadTexture(const char* filename) {
 
 	loadImage(filename, textureID);
+	useTexture = true;
 }
 void Material::loadNormalMap(const char* filename) {
 
 	loadImage(filename, normalMapID);
+	useNormalMap = true;
 }
+
+GLuint Material::getTextureID() {
+	return textureID;	
+}
+
+GLuint Material::getNormalMapID() {
+	return normalMapID;
+}
+
+GLuint Material::getShaderProgram() {
+	return shaderProgram;
+}
+
+glm::vec3 Material::getColor() {
+	return color;
+}
+
 void Material::loadImage(const char* filename, GLuint &currID) {
 
 	int twidth, theight;   // texture width/height [pixels]
@@ -40,8 +78,9 @@ void Material::loadImage(const char* filename, GLuint &currID) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 }
+
 unsigned char* Material::loadPPM(const char* filename, int& width, int& height) {
-	
+
 	const int BUFSIZE = 128;
 	FILE* fp;
 	unsigned int read;
@@ -90,27 +129,4 @@ unsigned char* Material::loadPPM(const char* filename, int& width, int& height) 
 	}
 
 	return rawData;
-}
-
-
-GLuint Material::getTextureID() {
-	return textureID;
-}
-
-GLuint Material::getNormalMapID() {
-	return normalMapID;
-}
-
-void Material::setShaderProgram(GLuint sp) {
-	shaderProgram = sp;
-}
-GLuint Material::getShaderProgram() {
-	return shaderProgram;
-}
-
-void Material::setColor(glm::vec3 c) {
-	color = c;
-}
-glm::vec3 Material::getColor() {
-	return color;
 }

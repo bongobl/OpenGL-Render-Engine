@@ -37,8 +37,7 @@
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader_textureANDnormal.frag" />
-    <None Include="..\shader_color.frag" />
+    <None Include="..\shader_material.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />
     <None Include="packages.config" />

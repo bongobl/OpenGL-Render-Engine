@@ -32,8 +32,11 @@ class OBJObject
 
 	//Model Geometry Data
 	std::vector<GLuint> indices;
-	std::vector<GLfloat> vertices;
-	std::vector<GLfloat> normals;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> UVs;
+	std::vector<glm::vec3> tangents;
+	std::vector<glm::vec3> bitangents;
 
 	//centers model geometry
 	glm::mat4 centerModelMesh;
@@ -46,7 +49,7 @@ class OBJObject
 	glm::mat4 toWorld;
 
 	//Rendering with modern OpenGL
-	GLuint VBO, VBO2, VAO, EBO;
+	GLuint VBO_positions, VBO_normals, VBO_uvs, VBO_tangents, VBO_bitangents, VAO, EBO;
 	GLuint uProjection, uModelview;
 	GLuint uToWorld;
 

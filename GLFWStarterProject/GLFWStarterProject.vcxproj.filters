@@ -68,10 +68,7 @@
     <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_textureANDnormal.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader_color.frag">
+    <None Include="..\shader_material.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
