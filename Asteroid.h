@@ -10,9 +10,14 @@ class Asteroid {
 
 	//member fields
 	OBJObject* asteroidOBJ;
-	glm::vec3 position;
-	glm::vec3 scale;
-	glm::vec3 spinAxis;
+
+
+	glm::vec3 position;		//randomized
+	glm::vec3 scale;		//randomized
+	glm::vec3 spinAxis;		//randomized
+	float rotationSpeed;	//randomized
+
+
 	float rotation;
 
 public:
@@ -22,7 +27,7 @@ public:
 	Asteroid(unsigned int id);
 	~Asteroid();
 
-	void update();
+	void update(float deltaTime);
 	void draw();
 	
 	void setPosition(glm::vec3 pos);
@@ -31,7 +36,7 @@ public:
 	glm::vec3 getScale();
 
 	void setSpinAxis(glm::vec3 spa);
-	void rotate(float deltaRad);
+	void setRotationSpeed(float rs);
 
 
 private:

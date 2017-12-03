@@ -9,7 +9,7 @@ Material Asteroid::asteroidMaterial;
 void Asteroid::initStatics() {
 
 	//Create Asteroid Material
-	asteroidMaterial.setColor(glm::vec3(1.6, 1.6, 1.6));
+	asteroidMaterial.setColor(glm::vec3(1.6f, 1.6f, 1.6f));
 	asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
 	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
 
@@ -39,8 +39,8 @@ Asteroid::~Asteroid() {
 
 }
 
-void Asteroid::update() {
-
+void Asteroid::update(float deltaTime) {
+	rotation += rotationSpeed * deltaTime;
 }
 void Asteroid::draw() {
 	asteroidOBJ->setToWorld(getUpdatedToWorldMatrix());
@@ -66,10 +66,10 @@ glm::vec3 Asteroid::getScale() {
 void Asteroid::setSpinAxis(glm::vec3 spa) {
 	spinAxis = spa;
 }
-
-void Asteroid::rotate(float deltaRad) {
-	rotation += deltaRad;
+void Asteroid::setRotationSpeed(float rs) {
+	rotationSpeed = rs;
 }
+
 
 glm::mat4 Asteroid::getUpdatedToWorldMatrix() {
 	return glm::translate(glm::mat4(1.0f), position) * glm::rotate(glm::mat4(1.0f), rotation, spinAxis) * glm::scale(glm::mat4(1.0f), scale);

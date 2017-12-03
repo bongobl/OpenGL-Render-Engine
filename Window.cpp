@@ -15,6 +15,10 @@ glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 int Window::width;
 int Window::height;
 
+//Time keeping
+float currTime;
+float prevTime;
+
 //trackball variables
 bool Window::isRightMouseButtonDown;
 bool Window::isLeftMouseButtonDown;
@@ -31,9 +35,8 @@ glm::mat4 Window::V;
 //cubeMap
 CubeMap* lakeView;
 
-//Asteroids
-Asteroid* testAsteroid0;
-Asteroid* testAsteroid1;
+//Asteroid Field
+AsteroidField* asteroidField;
 
 //Ship
 OBJObject* ship;
@@ -48,6 +51,7 @@ void Window::initialize_objects()
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 	camRotationMatrix = glm::mat4(1.0f);
+	prevTime = (float)glfwGetTime();
 
 	//vector of skybox face names
 	vector<string> faceNames;
@@ -62,17 +66,13 @@ void Window::initialize_objects()
 	lakeView = new CubeMap();
 	lakeView->loadCubeMapTexture(faceNames);
 
-	//Asteroid Test
-	testAsteroid0 = new Asteroid(0);
-	testAsteroid0->setSpinAxis(glm::vec3(1, 0, 0));
 
-	testAsteroid1 = new Asteroid(1);
-	testAsteroid1->setPosition(glm::vec3(0, 10, 0));
-	testAsteroid1->setSpinAxis(glm::vec3(0, 1, 0));
+	//Asteroid Field
+	asteroidField = new AsteroidField();
 
 	//Ship Test
 	Material shipMaterial;
-	shipMaterial.setColor(glm::vec3(0, 0, 1));
+	shipMaterial.setColor(glm::vec3(1, 0, 0));
 	ship = new OBJObject("Models/Ship.obj", shipMaterial);
 	ship->setToWorld(glm::translate(glm::mat4(1.0f), glm::vec3(0, -10, 0)) * glm::scale(glm::mat4(1.0f), glm::vec3(4,4,4)));
 }
@@ -80,10 +80,9 @@ void Window::initialize_objects()
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete testAsteroid0;
-	delete testAsteroid1;
 	delete ship;
 	delete lakeView;
+	delete asteroidField;
 	Asteroid::cleanUpStatics();
 	Material::cleanUpStatics();
 }
@@ -155,9 +154,13 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
+	currTime = (float)glfwGetTime();
+	float deltaTime = currTime - prevTime;
+	prevTime = currTime;
 	lakeView->setPosition(cam_pos);
-	testAsteroid0->rotate(glm::pi<float>() / 120.0f);
-	testAsteroid1->rotate(-glm::pi<float>() / 120.0f);
+
+
+	asteroidField->update(deltaTime);
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -166,10 +169,9 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 	//draw skybox cubemap	
 	lakeView->draw();	
-
-	testAsteroid0->draw();
-	testAsteroid1->draw();
 	ship->draw();
+	asteroidField->draw();
+
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers

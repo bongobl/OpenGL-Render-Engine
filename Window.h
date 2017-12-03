@@ -15,6 +15,7 @@
 #include "CubeMap.h"
 #include "Material.h"
 #include "Asteroid.h"
+#include "AsteroidField.h"
 using namespace std;
 
 class Window

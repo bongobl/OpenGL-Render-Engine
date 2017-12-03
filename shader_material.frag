@@ -21,7 +21,6 @@ in vec3 tangentOutput;
 in vec3 bitangentOutput;
 
 in mat4 toWorldMatrix;
-in vec3 TexCoords;
 
 out vec4 outColor;
 
@@ -37,20 +36,23 @@ void main()
 	vec3 world_tangent = vec3(toWorldMatrix * vec4(tangentOutput,1));
 	vec3 world_bitangent = vec3(toWorldMatrix * vec4(bitangentOutput,1));
 
-	
-
 	//LIGHT DIRECTION
 	vec3 L = normalize(vec3(1,-0.5f,1));		
 
 	outColor = vec4(1,1,1,1);
 
+	mat3 tangent2World = mat3(
+		world_tangent,
+		world_bitangent,
+		world_normal
+	);
 	
 	if(material.useColor)
 		outColor *= material.color;
 	if(material.useTexture)
-		outColor *= texture(material.texture, vec2(TexCoords));
+		outColor *= texture2D(material.texture, uvOutput);
 	if(material.useNormalMap){
-		vec3 normalOffset = normalize(texture( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
+		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset);
 	}
 

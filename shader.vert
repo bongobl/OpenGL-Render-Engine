@@ -30,7 +30,6 @@ out vec3 tangentOutput;
 out vec3 bitangentOutput;
 
 out mat4 toWorldMatrix;
-out vec3 TexCoords;
 
 
 void main()
@@ -45,5 +44,4 @@ void main()
 	bitangentOutput = bitangent;
 
 	toWorldMatrix = toWorld;
-	TexCoords = position;
 }
