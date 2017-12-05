@@ -6,11 +6,10 @@ const char* window_title = "GLFW Starter Project";
 
 // Camera parameters
 float cam_dist(30.0f);
-const glm::vec3 intial_cam_pos(0.0f, 0, cam_dist);
 glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
-
+glm::mat4 Window::camRotationMatrix;
 
 int Window::width;
 int Window::height;
@@ -26,7 +25,7 @@ glm::vec2 Window::mousePosition;
 glm::vec2 Window::lastMousePosition;
 glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
-glm::mat4 Window::camRotationMatrix;
+
 
 //Camera
 glm::mat4 Window::P;
@@ -241,7 +240,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 			if (!isnan(rotAngle)) {		
 
 				camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
-				cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+				cam_pos = camRotationMatrix * glm::vec4(0, 0, cam_dist, 0);
 				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 			}
 		}
@@ -266,7 +265,7 @@ void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yof
 	
 	
 	cam_dist += -10 * (float)yoffset;
-	cam_pos = camRotationMatrix * glm::vec4(intial_cam_pos.x, intial_cam_pos.y, cam_dist, 0);
+	cam_pos = camRotationMatrix * glm::vec4(0, 0, cam_dist, 0);
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	
 }

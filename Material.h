@@ -22,12 +22,14 @@ public:
 	bool useColor;
 	bool useTexture;
 	bool useNormalMap;
+	bool useLighting;
 
 	static void initStatics();
 	static void cleanUpStatics();
 	Material();
 	~Material();
 
+	void setUseLighting(bool opt);
 	void setColor(glm::vec3 c);
 	void loadTexture(const char* filename);
 	void loadNormalMap(const char* filename);
@@ -37,6 +39,8 @@ public:
 	glm::vec3 getColor();
 	
 	GLuint getShaderProgram();
+
+	void applySettings();
 private:
 	void loadImage(const char* filename, GLuint &currID);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);

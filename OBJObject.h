@@ -71,6 +71,8 @@ public:
 	void setModelCenter(glm::vec3 newCenter);
 
 	void setMaterial(Material m);
+
+	std::vector<glm::vec3> getVertices();
 };
 
 #endif

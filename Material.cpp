@@ -13,7 +13,7 @@ Material::Material() {
 	useColor = false;
 	useTexture = false;
 	useNormalMap = false;
-
+	useLighting = true;
 	textureID = 0;
 	normalMapID = 0;
 	color = glm::vec3(0, 0, 0);
@@ -23,6 +23,9 @@ Material::~Material() {
 	
 }
 
+void Material::setUseLighting(bool opt) {
+	useLighting = opt;
+}
 void Material::setColor(glm::vec3 c) {
 	color = c;
 	useColor = true;
@@ -53,6 +56,28 @@ GLuint Material::getShaderProgram() {
 
 glm::vec3 Material::getColor() {
 	return color;
+}
+
+void Material::applySettings() {
+
+	//material properties
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useLighting"), useLighting);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useColor"), useColor);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), useTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useNormalMap"), useNormalMap);
+	if (useColor) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "material.color"), color.r, color.g, color.b);
+	}
+	if (useTexture) {
+		glUniform1i(glGetUniformLocation(shaderProgram, "material.texture"), 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	}
+	if (useNormalMap) {
+		glUniform1i(glGetUniformLocation(shaderProgram, "material.normalMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalMapID);
+	}
 }
 
 void Material::loadImage(const char* filename, GLuint &currID) {

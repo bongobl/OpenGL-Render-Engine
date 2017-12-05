@@ -2,6 +2,7 @@
 #include "OBJObject.h"
 #include "Material.h"
 #include "shader.h"
+#include "BoundingBox.h"
 class Asteroid {
 
 	//static fields
@@ -10,7 +11,7 @@ class Asteroid {
 
 	//member fields
 	OBJObject* asteroidOBJ;
-
+	BoundingBox* boundingBox;
 
 	glm::vec3 position;		//randomized
 	glm::vec3 scale;		//randomized
@@ -38,7 +39,6 @@ public:
 	void setSpinAxis(glm::vec3 spa);
 	void setRotationSpeed(float rs);
 
-
-private:
 	glm::mat4 getUpdatedToWorldMatrix();
+	
 };

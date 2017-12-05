@@ -83,7 +83,7 @@ OBJObject::OBJObject(const char *filepath, Material m)
 		3 * sizeof(GLfloat),
 		(GLvoid*)0);
 
-	//TANGENTS
+	//BITANGENTS
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_bitangents);
 	glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), bitangents.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(4);
@@ -251,7 +251,7 @@ void OBJObject::draw()
 
 	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * toWorld * modelCenterMatrix * centerModelMesh;
+	glm::mat4 modelview = Window::V * toWorld * modelCenterMatrix;// *centerModelMesh;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -269,7 +269,9 @@ void OBJObject::draw()
 	glBindVertexArray(VAO);
 	
 	
+	
 	//material properties
+	/*
 	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useColor"), material.useColor);
 	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useTexture"), material.useTexture);
 	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useNormalMap"), material.useNormalMap);
@@ -285,8 +287,9 @@ void OBJObject::draw()
 		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.normalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, material.getNormalMapID());
-	}
-
+	}*/
+	material.applySettings();
+	
 
 
 	glDrawElements(GL_TRIANGLES, indices.size() , GL_UNSIGNED_INT, 0);
@@ -300,4 +303,6 @@ void OBJObject::setModelCenter(glm::vec3 newCenter) {
 	modelCenter = newCenter;
 }
 
-
+std::vector<glm::vec3> OBJObject::getVertices() {
+	return vertices;
+}

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Asteroid.h" />
     <ClInclude Include="..\AsteroidField.h" />
+    <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\CubeMap.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\OBJObject.h" />
@@ -31,6 +32,7 @@
   <ItemGroup>
     <ClCompile Include="..\Asteroid.cpp" />
     <ClCompile Include="..\AsteroidField.cpp" />
+    <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\CubeMap.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />

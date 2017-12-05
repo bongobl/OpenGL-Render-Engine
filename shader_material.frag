@@ -5,6 +5,7 @@ struct Material{
 	bool useColor;
 	bool useTexture;
 	bool useNormalMap;
+	bool useLighting;
 
 	vec3 color;
 	sampler2D texture;
@@ -55,7 +56,7 @@ void main()
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset);
 	}
-
-	outColor *= max( dot(world_normal, L), 0.0f);	
+	if(material.useLighting)
+		outColor *= max( dot(world_normal, L), 0.0f);	
 
 }

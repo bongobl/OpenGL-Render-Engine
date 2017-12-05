@@ -21,6 +21,7 @@ void Asteroid::initStatics() {
 void Asteroid::cleanUpStatics() {
 
 	delete[] asteroidTemplates;
+	
 }
 Asteroid::Asteroid(unsigned int id) {
 
@@ -33,10 +34,12 @@ Asteroid::Asteroid(unsigned int id) {
 	scale = glm::vec3(3, 3, 3);
 	spinAxis = glm::vec3(0, 1, 0);
 	rotation = 0;
+
+	boundingBox = new BoundingBox(asteroidOBJ->getVertices());
 }
 
 Asteroid::~Asteroid() {
-
+	delete boundingBox;
 }
 
 void Asteroid::update(float deltaTime) {
@@ -45,6 +48,9 @@ void Asteroid::update(float deltaTime) {
 void Asteroid::draw() {
 	asteroidOBJ->setToWorld(getUpdatedToWorldMatrix());
 	asteroidOBJ->draw();
+
+	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
+	boundingBox->draw();
 }
 
 void Asteroid::setPosition(glm::vec3 pos) {
