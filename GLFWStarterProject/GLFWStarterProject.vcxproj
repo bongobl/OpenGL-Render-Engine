@@ -27,6 +27,7 @@
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Material.h" />
+    <ClInclude Include="..\Ship.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +39,7 @@
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Material.cpp" />
+    <ClCompile Include="..\Ship.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

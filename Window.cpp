@@ -4,6 +4,8 @@ const char* window_title = "GLFW Starter Project";
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 
+//main window
+GLFWwindow* Window::mainWindow;
 // Camera parameters
 float cam_dist(30.0f);
 glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera
@@ -26,7 +28,6 @@ glm::vec2 Window::lastMousePosition;
 glm::vec3 Window::currPoint;
 glm::vec3 Window::lastPoint;
 
-
 //Camera
 glm::mat4 Window::P;
 glm::mat4 Window::V;
@@ -38,7 +39,7 @@ CubeMap* lakeView;
 AsteroidField* asteroidField;
 
 //Ship
-OBJObject* ship;
+Ship* player;
 
 void Window::initialize_objects()
 {
@@ -69,17 +70,13 @@ void Window::initialize_objects()
 	//Asteroid Field
 	asteroidField = new AsteroidField();
 
-	//Ship Test
-	Material shipMaterial;
-	shipMaterial.setColor(glm::vec3(1, 0, 0));
-	ship = new OBJObject("Models/Ship.obj", shipMaterial);
-	ship->setToWorld(glm::translate(glm::mat4(1.0f), glm::vec3(0, -10, 0)) * glm::scale(glm::mat4(1.0f), glm::vec3(4,4,4)));
+	//player
+	player = new Ship();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete ship;
 	delete lakeView;
 	delete asteroidField;
 	Asteroid::cleanUpStatics();
@@ -130,7 +127,7 @@ GLFWwindow* Window::create_window(int width, int height)
 	// Call the resize callback to make sure things get drawn immediately
 	Window::resize_callback(window, width, height);
 
-
+	mainWindow = window;
 	return window;
 }
 
@@ -157,9 +154,14 @@ void Window::idle_callback()
 	float deltaTime = currTime - prevTime;
 	prevTime = currTime;
 	lakeView->setPosition(cam_pos);
-
-
 	asteroidField->update(deltaTime);
+	/*
+	player->update(deltaTime,	glfwGetKey(mainWindow, GLFW_KEY_LEFT),
+								glfwGetKey(mainWindow, GLFW_KEY_RIGHT),
+								glfwGetKey(mainWindow, GLFW_KEY_UP),
+								glfwGetKey(mainWindow, GLFW_KEY_DOWN));
+								*/
+	//Window::V = glm::rotate(glm::mat4(1.0f), glm::pi<float>() , glm::vec3(0,1,0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,-1.5,7)) * glm::inverse(player->getToWorld());
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -168,9 +170,8 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 	//draw skybox cubemap	
 	lakeView->draw();	
-	ship->draw();
 	asteroidField->draw();
-
+	player->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers

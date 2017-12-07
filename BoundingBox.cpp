@@ -17,6 +17,8 @@ BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	glGenBuffers(1, &VBO);
 }
 BoundingBox::~BoundingBox() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 	
 }
 
@@ -103,14 +105,13 @@ void BoundingBox::draw() {
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &identity[0][0]);
 
-
-	//set line width for all lines
-	glLineWidth(3);
-
-
+	
 	material.applySettings();
 
+	
+	//Bind VAO for box and draw 
 	glBindVertexArray(VAO);
+	glLineWidth(3);
 	glDrawArrays(GL_LINES, 0, boxVertices.size());
 	glBindVertexArray(0);
 
@@ -118,5 +119,18 @@ void BoundingBox::draw() {
 
 bool BoundingBox::isCollidingWith(BoundingBox* other) {
 
-	
+	if(this->highest.x < other->lowest.x)
+		return false;
+	if (this->lowest.x > other->highest.x)
+		return false;
+	if (this->highest.y < other->lowest.y)
+		return false;
+	if (this->lowest.y > other->highest.y)
+		return false;
+	if (this->highest.z < other->lowest.z)
+		return false;
+	if (this->lowest.z > other->highest.z)
+		return false;
+
+	return true;
 }

@@ -17,7 +17,7 @@ class Asteroid {
 	glm::vec3 scale;		//randomized
 	glm::vec3 spinAxis;		//randomized
 	float rotationSpeed;	//randomized
-
+	glm::vec3 velocity;		//randomized
 
 	float rotation;
 
@@ -36,6 +36,9 @@ public:
 	void setScale(glm::vec3 sc);
 	glm::vec3 getScale();
 
+	void setVelocity(glm::vec3 vel);
+	glm::vec3 getVelocity();
+	BoundingBox*  getBoundingBox();
 	void setSpinAxis(glm::vec3 spa);
 	void setRotationSpeed(float rs);
 

@@ -16,6 +16,7 @@
 #include "Material.h"
 #include "Asteroid.h"
 #include "AsteroidField.h"
+#include "Ship.h"
 using namespace std;
 
 class Window
@@ -23,6 +24,8 @@ class Window
 	
 public:
 
+	//single window
+	static GLFWwindow* mainWindow;
 
 	//Window Variables
 	static int width;
