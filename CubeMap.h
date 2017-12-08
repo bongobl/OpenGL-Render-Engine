@@ -34,7 +34,7 @@ public:
 
 	void setScale(float sc);
 	void setPosition(glm::vec3 pos);
-
+	glm::vec3 getPosition();
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
 	GLuint uProjection, uModelview;

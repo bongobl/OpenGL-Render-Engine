@@ -4,10 +4,10 @@
 class AsteroidField {
 
 	std::vector<Asteroid*> asteroids;
-	glm::vec3 center;
+	
 	float fieldSize;
 public:
-	
+	glm::vec3 center;
 	AsteroidField();
 	~AsteroidField();
 

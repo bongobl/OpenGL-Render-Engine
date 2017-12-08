@@ -53,7 +53,7 @@ void Asteroid::draw() {
 	asteroidOBJ->draw();
 
 	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
-	boundingBox->draw();
+	//boundingBox->draw();
 }
 
 void Asteroid::setPosition(glm::vec3 pos) {

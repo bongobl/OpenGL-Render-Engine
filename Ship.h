@@ -14,6 +14,7 @@ public:
 	void update(float deltaTime, bool turningLeft, bool turningRight, bool turningUp, bool turningDown);
 	void draw();
 	glm::mat4 getToWorld();
+	glm::vec3 getPosition();
 
 
 

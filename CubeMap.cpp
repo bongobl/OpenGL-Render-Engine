@@ -62,6 +62,10 @@ void CubeMap::setPosition(glm::vec3 pos) {
 	position = pos;
 }
 
+glm::vec3 CubeMap::getPosition() {
+	return position;
+}
+
 void CubeMap::draw()
 { 
 

@@ -39,6 +39,9 @@ glm::mat4 Ship::getToWorld(){
 	return toWorld;
 }
 
+glm::vec3 Ship::getPosition() {
+	return glm::vec3(toWorld[3][0], toWorld[3][1], toWorld[3][2]);
+}
 
 	
 

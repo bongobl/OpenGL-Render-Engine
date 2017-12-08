@@ -33,7 +33,7 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 //cubeMap
-CubeMap* lakeView;
+CubeMap* spaceView;
 
 //Asteroid Field
 AsteroidField* asteroidField;
@@ -63,8 +63,8 @@ void Window::initialize_objects()
 	faceNames.push_back("skybox/back.ppm");
 
 	//init cubemap
-	lakeView = new CubeMap();
-	lakeView->loadCubeMapTexture(faceNames);
+	spaceView = new CubeMap();
+	spaceView->loadCubeMapTexture(faceNames);
 
 
 	//Asteroid Field
@@ -77,7 +77,7 @@ void Window::initialize_objects()
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete lakeView;
+	delete spaceView;
 	delete asteroidField;
 	Asteroid::cleanUpStatics();
 	Material::cleanUpStatics();
@@ -150,18 +150,27 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
+	//calc delta time
 	currTime = (float)glfwGetTime();
 	float deltaTime = currTime - prevTime;
 	prevTime = currTime;
-	lakeView->setPosition(cam_pos);
-	asteroidField->update(deltaTime);
-	/*
+
+
+	spaceView->setPosition(cam_pos);
+	
+	
+	asteroidField->setCenter(player->getPosition());
+	
+	spaceView->setPosition(player->getPosition());
+	
 	player->update(deltaTime,	glfwGetKey(mainWindow, GLFW_KEY_LEFT),
 								glfwGetKey(mainWindow, GLFW_KEY_RIGHT),
 								glfwGetKey(mainWindow, GLFW_KEY_UP),
 								glfwGetKey(mainWindow, GLFW_KEY_DOWN));
-								*/
-	//Window::V = glm::rotate(glm::mat4(1.0f), glm::pi<float>() , glm::vec3(0,1,0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,-1.5,7)) * glm::inverse(player->getToWorld());
+								
+	Window::V = glm::rotate(glm::mat4(1.0f), glm::pi<float>() , glm::vec3(0,1,0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,-1.5,7)) * glm::inverse(player->getToWorld());
+	
+	asteroidField->update(deltaTime);
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -169,7 +178,7 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 	//draw skybox cubemap	
-	lakeView->draw();	
+	spaceView->draw();	
 	asteroidField->draw();
 	player->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
