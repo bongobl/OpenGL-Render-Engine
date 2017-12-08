@@ -28,7 +28,7 @@ void Ship::update(float deltaTime, bool turningLeft, bool turningRight, bool tur
 	}
 
 	//move forward
-	toWorld = toWorld * glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 25 * deltaTime));
+	toWorld = toWorld * glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 50 * deltaTime));
 }
 void Ship::draw() {
 	modelMesh->setToWorld(toWorld);
