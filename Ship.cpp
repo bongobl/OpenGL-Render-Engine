@@ -9,6 +9,8 @@ Ship::Ship() {
 	toWorld = glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 4, glm::vec3(0, 1, 0))  *  glm::scale(glm::mat4(1.0f), glm::vec3(4, 4, 4));
 	banking = 0;
 	pitch = 0;
+
+	boundingBox = new BoundingBox(modelMesh->getVertices());
 }
 Ship::~Ship() {
 
@@ -57,24 +59,23 @@ void Ship::update(float deltaTime, bool turningLeft, bool turningRight, bool tur
 			pitch -= 2.6f * deltaTime;
 	}
 
-
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
-
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
-
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));
-	
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));
-
+	//use pitch and banking to calc toWorld
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));	
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));
 
 	//move forward
 	toWorld = toWorld * glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 50 * deltaTime));
-	
 }
 void Ship::draw() {
-	modelMesh->setToWorld(toWorld	* glm::rotate(glm::mat4(1.0f), banking, glm::vec3(0, 0, 1)) 
-									* glm::rotate(glm::mat4(1.0f), 0.5f * pitch, glm::vec3(-1, 0, 0)));
+	modelMesh->setToWorld(toWorld * glm::rotate(glm::mat4(1.0f), banking, glm::vec3(0, 0, 1)) 
+								  * glm::rotate(glm::mat4(1.0f), 0.5f * pitch, glm::vec3(-1, 0, 0)));
 	modelMesh->draw();
+
+	boundingBox->updateToWorld(toWorld	* glm::rotate(glm::mat4(1.0f), banking, glm::vec3(0, 0, 1))
+										* glm::rotate(glm::mat4(1.0f), 0.5f * pitch, glm::vec3(-1, 0, 0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,0,2)));
+	boundingBox->draw();
 }
 
 glm::mat4 Ship::getToWorld(){

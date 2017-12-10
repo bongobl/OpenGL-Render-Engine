@@ -116,15 +116,15 @@ void AsteroidField::genRandomAsteroid(glm::vec2 xRange, glm::vec2 yRange, glm::v
 		}
 		++tries;
 		if (tries > 10) {
-			std::cout << "10 tries" << std::endl;
+			std::cerr << ">10 tries, reseeding" << std::endl;
 			srand((unsigned int)time(0));
 			rand();
 		}
-		if (tries > 30) {
+		if (tries > 20) {
+			std::cerr << "20 tries, break" << std::endl;
 			break;
 		}
 		
-
 	} while (isColliding);
 	
 	asteroids.push_back(newAsteroid);

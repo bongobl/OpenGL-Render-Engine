@@ -163,6 +163,7 @@ void Window::idle_callback()
 	
 	spaceView->setPosition(player->getPosition());
 	
+	
 	player->update(deltaTime,	glfwGetKey(mainWindow, GLFW_KEY_LEFT),
 								glfwGetKey(mainWindow, GLFW_KEY_RIGHT),
 								glfwGetKey(mainWindow, GLFW_KEY_UP),
