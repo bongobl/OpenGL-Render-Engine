@@ -4,7 +4,8 @@ class Ship {
 
 	OBJObject* modelMesh;
 	glm::mat4 toWorld;
-
+	float banking;
+	float pitch;
 
 public:
 	

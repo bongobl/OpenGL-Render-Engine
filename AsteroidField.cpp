@@ -33,36 +33,36 @@ void AsteroidField::update(float deltaTime) {
 		if ((*iter)->getPosition().x < center.x - fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x, center.x + fieldSize), glm::vec2(center.y - fieldSize, center.y + fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
+			genRandomAsteroid(glm::vec2(center.x + fieldSize/ 3.0f, center.x + fieldSize), glm::vec2(center.y - fieldSize, center.y + fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
 		}
 		else if ((*iter)->getPosition().x > center.x + fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x, center.x - fieldSize), glm::vec2(center.y - fieldSize, center.y + fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
+			genRandomAsteroid(glm::vec2(center.x - fieldSize / 3.0f, center.x - fieldSize), glm::vec2(center.y - fieldSize, center.y + fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
 		}
 
 		//Y
 		else if ((*iter)->getPosition().y < center.y - fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x -fieldSize, center.x+ fieldSize), glm::vec2(center.y, center.y + fieldSize), glm::vec2(center.z -fieldSize, center.z + fieldSize));
+			genRandomAsteroid(glm::vec2(center.x -fieldSize, center.x+ fieldSize), glm::vec2(center.y + fieldSize / 3.0f, center.y + fieldSize), glm::vec2(center.z -fieldSize, center.z + fieldSize));
 		}
 		else if ((*iter)->getPosition().y > center.y + fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x - fieldSize, center.x + fieldSize), glm::vec2(center.y, center.y - fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
+			genRandomAsteroid(glm::vec2(center.x - fieldSize, center.x + fieldSize), glm::vec2(center.y - fieldSize / 3.0f, center.y - fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
 		}
 
 		//Z
 		else if ((*iter)->getPosition().z < center.z - fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x -fieldSize,center.x + fieldSize), glm::vec2(center.y - fieldSize, center.z +fieldSize), glm::vec2(center.z, center.z + fieldSize));
+			genRandomAsteroid(glm::vec2(center.x -fieldSize,center.x + fieldSize), glm::vec2(center.y - fieldSize, center.z +fieldSize), glm::vec2(center.z + fieldSize / 3.0f, center.z + fieldSize));
 		}
 		else if ((*iter)->getPosition().z > center.z + fieldSize) {
 			delete *iter;
 			asteroids.erase(iter);
-			genRandomAsteroid(glm::vec2(center.x - fieldSize, center.x + fieldSize), glm::vec2(center.y - fieldSize, center.z + fieldSize), glm::vec2(center.z, center.z - fieldSize));
+			genRandomAsteroid(glm::vec2(center.x - fieldSize, center.x + fieldSize), glm::vec2(center.y - fieldSize, center.z + fieldSize), glm::vec2(center.z - fieldSize / 3.0f, center.z - fieldSize));
 		}
 		else {
 			++iter;
@@ -117,6 +117,10 @@ void AsteroidField::genRandomAsteroid(glm::vec2 xRange, glm::vec2 yRange, glm::v
 		++tries;
 		if (tries > 10) {
 			std::cout << "10 tries" << std::endl;
+			srand((unsigned int)time(0));
+			rand();
+		}
+		if (tries > 30) {
 			break;
 		}
 		

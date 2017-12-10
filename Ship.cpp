@@ -7,6 +7,8 @@ Ship::Ship() {
 	modelMesh = new OBJObject("Models/Ship.obj", shipMaterial);
 	modelMesh->setModelCenter(glm::vec3(0, 0, 2));
 	toWorld = glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 4, glm::vec3(0, 1, 0))  *  glm::scale(glm::mat4(1.0f), glm::vec3(4, 4, 4));
+	banking = 0;
+	pitch = 0;
 }
 Ship::~Ship() {
 
@@ -14,24 +16,64 @@ Ship::~Ship() {
 
 void Ship::update(float deltaTime, bool turningLeft, bool turningRight, bool turningUp, bool turningDown){
 	
+	//calc banking
 	if (turningLeft) {
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0));
+		if (banking > -glm::pi<float>() / 4) {
+			banking -= 2.6f * deltaTime;
+		}
 	}
+	else {
+		if (banking < 0)
+			banking += 2.6f * deltaTime;
+	}
+
 	if (turningRight) {
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), -deltaTime, glm::vec3(0, 1, 0));
+		if (banking < glm::pi<float>() / 4) {
+			banking += 2.6f * deltaTime;
+		}
+	}else {
+		if (banking > 0)
+			banking -= 2.6f * deltaTime;		
 	}
-	if (turningUp) {
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(1, 0, 0));
-	}
+
+	//calc pitch
 	if (turningDown) {
-		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), -deltaTime, glm::vec3(1, 0, 0));
+		if (pitch > -glm::pi<float>() / 4) {
+			pitch -= 2.6f * deltaTime;
+		}
 	}
+	else {
+		if (pitch < 0)
+			pitch += 2.6f * deltaTime;
+	}
+
+	if (turningUp) {
+		if (pitch < glm::pi<float>() / 4) {
+			pitch += 2.6f * deltaTime;
+		}
+	}
+	else {
+		if (pitch > 0)
+			pitch -= 2.6f * deltaTime;
+	}
+
+
+		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
+
+		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), banking * -deltaTime, glm::vec3(0, 1, 0));
+
+		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));
+	
+		toWorld = toWorld * glm::rotate(glm::mat4(1.0f), pitch * -deltaTime, glm::vec3(1, 0, 0));
+
 
 	//move forward
 	toWorld = toWorld * glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 50 * deltaTime));
+	
 }
 void Ship::draw() {
-	modelMesh->setToWorld(toWorld);
+	modelMesh->setToWorld(toWorld	* glm::rotate(glm::mat4(1.0f), banking, glm::vec3(0, 0, 1)) 
+									* glm::rotate(glm::mat4(1.0f), 0.5f * pitch, glm::vec3(-1, 0, 0)));
 	modelMesh->draw();
 }
 

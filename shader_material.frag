@@ -55,6 +55,7 @@ void main()
 	if(material.useNormalMap){
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset);
+		
 	}
 	if(material.useLighting)
 		outColor *= max( dot(world_normal, L), 0.0f);	
