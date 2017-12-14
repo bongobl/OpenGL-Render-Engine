@@ -2,14 +2,18 @@
 #include "shader.h"
 
 GLuint Material::shaderProgram = -1;
+std::vector<GLuint> Material::allIDs;
 void Material::initStatics() {
 	shaderProgram = LoadShaders("../shader.vert", "../shader_material.frag");
+
 }
 void Material::cleanUpStatics() {
+	for (unsigned int i = 0; i < allIDs.size(); ++i) {
+		glDeleteTextures(1, &allIDs.at(i));
+	}
 	glDeleteProgram(shaderProgram);
 }
 Material::Material() {
-
 	useColor = false;
 	useTexture = false;
 	useNormalMap = false;
@@ -17,7 +21,6 @@ Material::Material() {
 	textureID = 0;
 	normalMapID = 0;
 	color = glm::vec3(0, 0, 0);
-
 }
 Material::~Material() {
 	
@@ -102,6 +105,7 @@ void Material::loadImage(const char* filename, GLuint &currID) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	allIDs.push_back(currID);
 }
 
 unsigned char* Material::loadPPM(const char* filename, int& width, int& height) {

@@ -50,7 +50,6 @@ void Asteroid::update(float deltaTime) {
 }
 void Asteroid::draw() {
 	asteroidOBJ->setToWorld(getUpdatedToWorldMatrix());
-	asteroidOBJ->draw();
 
 	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
 	//boundingBox->draw();

@@ -1,26 +1,10 @@
 #ifndef OBJOBJECT_H
 #define OBJOBJECT_H
 
-
 #define GLFW_INCLUDE_GLEXT
-
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#include <OpenGL/glext.h>
-//#include <OpenGL/gl.h> // Remove this line in future projects
-#else
-
 #include <GL/glew.h>
-
-#endif
-
-
 #include <GLFW/glfw3.h>
-
-#ifndef GLM_FORCE_RADIANS
 #define GLM_FORCE_RADIANS
-#endif
-
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -65,14 +49,13 @@ public:
 	//to manipulate toWorld
 	void setToWorld(glm::mat4 M_new);
 
-	//OpenGL draw function
-	void draw();
-
 	void setModelCenter(glm::vec3 newCenter);
 
 	void setMaterial(Material m);
 
 	std::vector<glm::vec3> getVertices();
+
+	friend class Scene;
 };
 
 #endif

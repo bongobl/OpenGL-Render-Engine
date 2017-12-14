@@ -4,7 +4,8 @@
 class Ship {
 
 	OBJObject* modelMesh;
-	glm::mat4 toWorld;
+	glm::mat4 generalMotionMatrix;
+	glm::vec3 centerOffset;
 	float banking;
 	float pitch;
 	
@@ -17,7 +18,7 @@ public:
 
 	void update(float deltaTime, bool turningLeft, bool turningRight, bool turningUp, bool turningDown);
 	void draw();
-	glm::mat4 getToWorld();
+	glm::mat4 getGeneralMotionMatrix();
 	glm::vec3 getPosition();
 
 

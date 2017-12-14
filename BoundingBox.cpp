@@ -15,11 +15,11 @@ BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	//prepare buffers
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glBufferData(GL_ARRAY_BUFFER, boxVertices.size() * sizeof(glm::vec3), boxVertices.data(), GL_STATIC_DRAW);
 }
 BoundingBox::~BoundingBox() {
 	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	
+	glDeleteBuffers(1, &VBO);	
 }
 
 void BoundingBox::updateToWorld(glm::mat4 toWorld) {
@@ -84,6 +84,7 @@ void BoundingBox::updateToWorld(glm::mat4 toWorld) {
 	glBufferData(GL_ARRAY_BUFFER, boxVertices.size() * sizeof(glm::vec3), boxVertices.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 void BoundingBox::draw() {

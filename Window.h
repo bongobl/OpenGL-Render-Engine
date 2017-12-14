@@ -4,17 +4,10 @@
 #include <iostream>
 
 #define GLFW_INCLUDE_GLEXT
-#ifdef __APPLE__
-#define GLFW_INCLUDE_GLCOREARB
-#else
+
 #include <GL/glew.h>
-#endif
 #include <GLFW/glfw3.h>
-#include "shader.h"
-#include "OBJObject.h"
 #include "CubeMap.h"
-#include "Material.h"
-#include "Asteroid.h"
 #include "AsteroidField.h"
 #include "Ship.h"
 using namespace std;

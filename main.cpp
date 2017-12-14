@@ -1,5 +1,10 @@
-#include "main.h"
-
+//#define GLFW_INCLUDE_GLEXT
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "window.h"
+#include "GameManager.h"
 GLFWwindow* window;
 
 void error_callback(int error, const char* description)
@@ -25,8 +30,7 @@ void setup_callbacks()
 
 void setup_glew()
 {
-	// Initialize GLEW. Not needed on OSX systems.
-#ifndef __APPLE__
+
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -35,15 +39,12 @@ void setup_glew()
 		glfwTerminate();
 	}
 	fprintf(stdout, "Current GLEW version: %s\n", glewGetString(GLEW_VERSION));
-#endif
 }
 
 void setup_opengl_settings()
 {
-#ifndef __APPLE__
-	// Setup GLEW. Don't do this on OSX systems.
+
 	setup_glew();
-#endif
 	// Enable depth buffering
 	glEnable(GL_DEPTH_TEST);
 	// Related to shaders and z value comparisons for the depth buffer
@@ -71,29 +72,37 @@ void print_versions()
 
 int main(void)
 {
-	// Create the GLFW window
-	window = Window::create_window(640, 480);
-	// Print OpenGL and GLSL versions
-	print_versions();
-	// Setup callbacks
-	setup_callbacks();
-	// Setup OpenGL settings, including lighting, materials, etc.
-	setup_opengl_settings();
-	// Initialize objects/pointers for rendering
-	Window::initialize_objects();
-
-	// Loop while GLFW window should stay open
-	while (!glfwWindowShouldClose(window))
+	// Initialize GLFW
+	if (!glfwInit())
 	{
-		// Main render display callback. Rendering of objects is done here.
-		Window::display_callback(window);
-		// Idle callback. Updating objects, etc. can be done here.
-		Window::idle_callback();
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		return 0;
 	}
 
-	Window::clean_up();
-	// Destroy the window
-	glfwDestroyWindow(window);
+	//create window
+	if (!SceneManager::createWindow("Alex Lui", 640, 480))
+		exit(-1);
+
+	// Print OpenGL and GLSL versions
+	print_versions();
+	// Setup OpenGL settings, including lighting, materials, etc.
+	setup_opengl_settings();
+
+	SceneManager::initObjects();
+
+	// Loop while GameManager window is open
+	while (SceneManager::isWindowOpen())
+	{
+		
+		// Main render draw Rendering of objects is done here.
+		SceneManager::draw();
+
+		// Updating objects, etc. can be done here.
+		SceneManager::update();
+	}
+
+	SceneManager::dispose();
+
 	// Terminate GLFW
 	glfwTerminate();
 

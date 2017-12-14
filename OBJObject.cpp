@@ -1,17 +1,14 @@
-//NOTE SOMETHING WROTE WITH std::vectors
-
-//#define GLEW_GET_FUN
 #include <iostream>
 #include <string>
 #include <cmath>
 #include "OBJObject.h"
-#include "Window.h"
+//#include "Window.h"
+#include "GameManager.h"
 using namespace std;
 
 
 OBJObject::OBJObject(const char *filepath, Material m) 
 {
-	
 	//read in geometry data disk
 	parse(filepath);
 	material = m;
@@ -104,7 +101,6 @@ OBJObject::OBJObject(const char *filepath, Material m)
 
 	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
 
 }
@@ -112,6 +108,10 @@ OBJObject::OBJObject(const char *filepath, Material m)
 OBJObject::~OBJObject() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO_positions);
+	glDeleteBuffers(1, &VBO_normals);
+	glDeleteBuffers(1, &VBO_uvs);
+	glDeleteBuffers(1, &VBO_tangents);
+	glDeleteBuffers(1, &VBO_bitangents);
 	glDeleteBuffers(1, &EBO);
 }
 void OBJObject::parse(const char *filepath) 
@@ -179,7 +179,6 @@ void OBJObject::parse(const char *filepath)
 		}
 		//process face
 		else if (currLine[0] == 'f' && currLine[1] == ' ') {		
-			//sscanf(currLine + 2, "%i//%i %i//%i %i//%i", &v1, &n1, &v2, &n2, &v3, &n3);
 			sscanf(currLine + 2, "%i/%i/%i %i/%i/%i %i/%i/%i", &v1, &n1, &t1, &v2, &n2, &t2, &v3, &n3, &t3);
 			indices.push_back(v1 - 1);
 			indices.push_back(v2 - 1);
@@ -243,60 +242,6 @@ void OBJObject::setToWorld(glm::mat4 M_new) {
 }
 void OBJObject::setMaterial(Material m) {
 	material = m;
-}
-void OBJObject::draw()
-{
-
-	glUseProgram(material.getShaderProgram());
-
-	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
-	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * toWorld * modelCenterMatrix;// *centerModelMesh;
-	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
-	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
-	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(material.getShaderProgram(), "projection");
-	uModelview = glGetUniformLocation(material.getShaderProgram(), "modelview");
-	uToWorld = glGetUniformLocation(material.getShaderProgram(), "toWorld");
-
-	// Now send these values to the shader program
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
-
-
-	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
-	glBindVertexArray(VAO);
-	
-	
-	
-	//material properties
-	/*
-	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useColor"), material.useColor);
-	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useTexture"), material.useTexture);
-	glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.useNormalMap"), material.useNormalMap);
-	if (material.useColor) {		
-		glUniform3f(glGetUniformLocation(material.getShaderProgram(), "material.color"), material.getColor().r, material.getColor().g, material.getColor().b);
-	}
-	if (material.useTexture) {		
-		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.texture"), 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, material.getTextureID());	
-	}
-	if (material.useNormalMap) {		
-		glUniform1i(glGetUniformLocation(material.getShaderProgram(), "material.normalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, material.getNormalMapID());
-	}*/
-	material.applySettings();
-	
-
-
-	glDrawElements(GL_TRIANGLES, indices.size() , GL_UNSIGNED_INT, 0);
-	
-	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
-	glBindVertexArray(0);
-
 }
 
 void OBJObject::setModelCenter(glm::vec3 newCenter) {

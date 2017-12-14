@@ -9,14 +9,13 @@ AsteroidField::AsteroidField() {
 	rand();
 
 	//define field size
-	fieldSize = 600;
+	fieldSize = 700;
 	center = glm::vec3(0, 0, 0);
 	//generate 20 random asteroids
-	for (int i = 0; i < 300; ++i) {
+	for (int i = 0; i < 100; ++i) {
 		genRandomAsteroid(glm::vec2(center.x - fieldSize, center.x + fieldSize), glm::vec2(center.y - fieldSize, center.y + fieldSize), glm::vec2(center.z - fieldSize, center.z + fieldSize));
 	}
 
-	
 }
 AsteroidField::~AsteroidField() {
 	for (unsigned int i = 0; i < asteroids.size(); ++i) {
@@ -67,6 +66,7 @@ void AsteroidField::update(float deltaTime) {
 		else {
 			++iter;
 		}
+		
 	}//END FOR
 
 	/*
@@ -89,7 +89,7 @@ void AsteroidField::genRandomAsteroid(glm::vec2 xRange, glm::vec2 yRange, glm::v
 
 	int randID = getRandomInt(0, 1);
 	glm::vec3 randPosition(getRandomFloat(xRange.x, xRange.y), getRandomFloat(yRange.x, yRange.y), getRandomFloat(zRange.x, zRange.y));
-	float randomScale = getRandomFloat(1, 30);
+	float randomScale = getRandomFloat(1, 50);
 	glm::vec3 randomSpinAxis(getRandomFloat(-1, 1), getRandomFloat(-1, 1), getRandomFloat(-1, 1));
 	float randomRotationSpeed = getRandomFloat(0, glm::pi<float>() / 6);
 	glm::vec3 randomVelocity(getRandomFloat(-10, 10), getRandomFloat(-10, 10), getRandomFloat(-10, 10));

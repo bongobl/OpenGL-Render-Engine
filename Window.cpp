@@ -1,9 +1,6 @@
 #include "window.h"
 const char* window_title = "GLFW Starter Project";
 
-// On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../shader.vert"
-
 //main window
 GLFWwindow* Window::mainWindow;
 // Camera parameters
@@ -77,6 +74,7 @@ void Window::initialize_objects()
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
+	delete player;
 	delete spaceView;
 	delete asteroidField;
 	Asteroid::cleanUpStatics();
@@ -94,15 +92,6 @@ GLFWwindow* Window::create_window(int width, int height)
 
 	// 4x antialiasing
 	glfwWindowHint(GLFW_SAMPLES, 4);
-
-#ifdef __APPLE__ // Because Apple hates comforming to standards
-	// Ensure that minimum OpenGL version is 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Enable forward compatibility and allow a modern OpenGL context
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
 	// Create the GLFW window
 	GLFWwindow* window = glfwCreateWindow(width, height, window_title, NULL, NULL);
@@ -133,9 +122,6 @@ GLFWwindow* Window::create_window(int width, int height)
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
 {
-#ifdef __APPLE__
-	glfwGetFramebufferSize(window, &width, &height); // In case your Mac has a retina display
-#endif
 	Window::width = width;
 	Window::height = height;
 	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
@@ -169,7 +155,7 @@ void Window::idle_callback()
 								glfwGetKey(mainWindow, GLFW_KEY_UP),
 								glfwGetKey(mainWindow, GLFW_KEY_DOWN));
 								
-	Window::V = glm::rotate(glm::mat4(1.0f), glm::pi<float>() , glm::vec3(0,1,0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,-1.5,7)) * glm::inverse(player->getToWorld());
+	Window::V = glm::rotate(glm::mat4(1.0f), glm::pi<float>() , glm::vec3(0,1,0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0,-1.5,7)) * glm::inverse(player->getGeneralMotionMatrix());
 	
 	asteroidField->update(deltaTime);
 }
@@ -179,7 +165,7 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 	//draw skybox cubemap	
-	spaceView->draw();	
+	//spaceView->draw();	
 	asteroidField->draw();
 	player->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -252,6 +238,7 @@ void Window:: cursor_position_callback(GLFWwindow * window, double xpos, double 
 
 				camRotationMatrix = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * camRotationMatrix;
 				cam_pos = camRotationMatrix * glm::vec4(0, 0, cam_dist, 0);
+				cam_look_at = camRotationMatrix * glm::vec4(0, 0, cam_dist - 1, 0);
 				V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 			}
 		}
@@ -276,7 +263,9 @@ void Window::mouse_wheel_callback(GLFWwindow* window, double xoffset, double yof
 	
 	
 	cam_dist += -10 * (float)yoffset;
+
 	cam_pos = camRotationMatrix * glm::vec4(0, 0, cam_dist, 0);
+	cam_look_at = camRotationMatrix * glm::vec4(0, 0, cam_dist - 1, 0);
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	
 }

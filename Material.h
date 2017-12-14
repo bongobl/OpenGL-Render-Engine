@@ -1,16 +1,17 @@
-#ifndef TEXTURE
-#define TEXTURE
+#ifndef MATERIAL
+#define MATERIAL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstdio>
 #include <iostream>
-
+#include <vector>
 class Material {
 
 	//static fields
 	static GLuint shaderProgram;
+	static std::vector<GLuint> allIDs;
 
 	//member fields
 	glm::vec3 color;

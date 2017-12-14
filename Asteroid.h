@@ -44,4 +44,5 @@ public:
 
 	glm::mat4 getUpdatedToWorldMatrix();
 	
+	friend class Scene;
 };
