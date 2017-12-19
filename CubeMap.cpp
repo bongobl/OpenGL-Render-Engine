@@ -1,12 +1,12 @@
 #include "CubeMap.h"
 #include "Window.h"
+#include "Scene.h"
 
 CubeMap::CubeMap()
 {
-	
 	scale = 1000;
 	position = glm::vec3(1.0f, 1.0f, 1.0f);
-	this->shaderProgram = LoadShaders("../shader.vert", "../shader_skybox.frag");
+	shaderProgram = LoadShaders("../shader.vert", "../shader_skybox.frag");
 	
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);
@@ -55,6 +55,40 @@ CubeMap::~CubeMap()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+}
+
+void CubeMap::draw(Scene* currScene) {
+
+	glUseProgram(shaderProgram);
+
+	toWorld = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+
+	// Calculate the combination of the model and view (camera inverse) matrices
+	glm::mat4 modelview = currScene->V * toWorld;
+	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
+	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
+	// Get the location of the uniform variables "projection" and "modelview"
+	GLuint uProjection = glGetUniformLocation(shaderProgram, "projection");
+	GLuint uModelview = glGetUniformLocation(shaderProgram, "modelview");
+	// Now send these values to the shader program
+	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &(currScene->P[0][0]));
+	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
+	// Now draw the cube. We simply need to bind the VAO associated with it.
+	glBindVertexArray(VAO);
+
+
+	glDepthMask(GL_FALSE);
+
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	glDepthMask(GL_TRUE);
+	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
+	glBindVertexArray(0);
 }
 
 void CubeMap::setScale(float sc) {

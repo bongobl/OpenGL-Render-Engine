@@ -13,6 +13,10 @@ void Material::cleanUpStatics() {
 	}
 	glDeleteProgram(shaderProgram);
 }
+
+Material Material::basic() {
+	return Material();
+}
 Material::Material() {
 	useColor = false;
 	useTexture = false;

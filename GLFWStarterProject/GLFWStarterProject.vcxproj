@@ -23,7 +23,8 @@
     <ClInclude Include="..\AsteroidField.h" />
     <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\CubeMap.h" />
-    <ClInclude Include="..\GameManager.h" />
+    <ClInclude Include="..\SampleScene.h" />
+    <ClInclude Include="..\SceneManager.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\Scene.h" />
     <ClInclude Include="..\shader.h" />
@@ -36,7 +37,8 @@
     <ClCompile Include="..\AsteroidField.cpp" />
     <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\CubeMap.cpp" />
-    <ClCompile Include="..\GameManager.cpp" />
+    <ClCompile Include="..\SampleScene.cpp" />
+    <ClCompile Include="..\SceneManager.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\Scene.cpp" />

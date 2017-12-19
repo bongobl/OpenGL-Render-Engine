@@ -13,11 +13,11 @@ class Asteroid {
 	OBJObject* asteroidOBJ;
 	BoundingBox* boundingBox;
 
-	glm::vec3 position;		//randomized
-	glm::vec3 scale;		//randomized
-	glm::vec3 spinAxis;		//randomized
-	float rotationSpeed;	//randomized
-	glm::vec3 velocity;		//randomized
+	glm::vec3 position;		
+	glm::vec3 scale;		
+	glm::vec3 spinAxis;		
+	float rotationSpeed;
+	glm::vec3 velocity;
 
 	float rotation;
 
@@ -29,7 +29,7 @@ public:
 	~Asteroid();
 
 	void update(float deltaTime);
-	void draw();
+	void draw(Scene* currScene);
 	
 	void setPosition(glm::vec3 pos);
 	glm::vec3 getPosition();

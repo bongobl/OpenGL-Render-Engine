@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 
+class Scene;
 class CubeMap
 {
 	float scale;
@@ -23,12 +24,12 @@ public:
 
 	glm::mat4 toWorld;
 
+	void draw(Scene* currScene);
 	void setScale(float sc);
 	void setPosition(glm::vec3 pos);
 	glm::vec3 getPosition();
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview;
 
 	void loadCubeMapTexture(std::vector<std::string> faces);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);

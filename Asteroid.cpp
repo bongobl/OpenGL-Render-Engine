@@ -48,11 +48,12 @@ void Asteroid::update(float deltaTime) {
 	rotation += rotationSpeed * deltaTime;
 	position += velocity * deltaTime;
 }
-void Asteroid::draw() {
+void Asteroid::draw(Scene* currScene) {
 	asteroidOBJ->setToWorld(getUpdatedToWorldMatrix());
+	asteroidOBJ->draw(currScene);
 
 	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
-	//boundingBox->draw();
+	boundingBox->draw(currScene);
 }
 
 void Asteroid::setPosition(glm::vec3 pos) {

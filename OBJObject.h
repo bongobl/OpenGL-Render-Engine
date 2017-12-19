@@ -11,6 +11,7 @@
 #include <vector>
 #include "Material.h"
 
+class Scene;
 class OBJObject
 {
 
@@ -34,8 +35,6 @@ class OBJObject
 
 	//Rendering with modern OpenGL
 	GLuint VBO_positions, VBO_normals, VBO_uvs, VBO_tangents, VBO_bitangents, VAO, EBO;
-	GLuint uProjection, uModelview;
-	GLuint uToWorld;
 
 	//object's material
 	Material material;
@@ -46,6 +45,7 @@ public:
 	~OBJObject();
 	void parse(const char* filepath);
 
+	void draw(Scene* currScene);
 	//to manipulate toWorld
 	void setToWorld(glm::mat4 M_new);
 

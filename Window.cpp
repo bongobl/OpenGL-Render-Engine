@@ -166,7 +166,7 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 	//draw skybox cubemap	
 	//spaceView->draw();	
-	asteroidField->draw();
+	//asteroidField->draw();
 	player->draw();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

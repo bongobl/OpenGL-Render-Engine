@@ -42,10 +42,13 @@
     <ClInclude Include="..\Ship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\GameManager.h">
+    <ClInclude Include="..\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Scene.h">
+    <ClInclude Include="..\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SampleScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,10 +83,13 @@
     <ClCompile Include="..\Ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\GameManager.cpp">
+    <ClCompile Include="..\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Scene.cpp">
+    <ClCompile Include="..\SceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SampleScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

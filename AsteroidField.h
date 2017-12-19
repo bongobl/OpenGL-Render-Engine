@@ -12,7 +12,7 @@ public:
 	~AsteroidField();
 
 	void update(float deltaTime);
-	void draw();
+	void draw(Scene* currScene);
 
 	void setCenter(glm::vec3 c);
 private:

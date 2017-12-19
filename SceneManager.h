@@ -7,7 +7,7 @@
 class Scene;
 class SceneManager {
 
-	static GLFWwindow* window;
+	
 
 	//Window Variables
 	static int windowWidth;
@@ -22,6 +22,7 @@ class SceneManager {
 
 public:
 	
+	static GLFWwindow* window;
 
 	static int createWindow(const char* title, int window_width, int window_height);
 	static void initObjects();
@@ -39,5 +40,4 @@ public:
 	
 	static bool isWindowOpen();
 
-	friend class Scene;
 };

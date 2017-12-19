@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include "Material.h"
+
+class Scene;
 class BoundingBox {
 	
 	//fields
@@ -25,5 +27,5 @@ public:
 
 	bool isCollidingWith(BoundingBox* other);
 	void updateToWorld(glm::mat4 toWorld);
-	void draw();
+	void draw(Scene* currScene);
 };

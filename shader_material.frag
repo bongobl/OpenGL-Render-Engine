@@ -1,6 +1,11 @@
 #version 330 core
 // This is a texture and normal fragment shader.
 
+struct DirectionalLight{
+	vec3 direction;
+	vec3 color;
+};
+
 struct Material{
 	bool useColor;
 	bool useTexture;
@@ -13,7 +18,7 @@ struct Material{
 };
 
 uniform Material material;
-
+uniform DirectionalLight directionalLight;
 
 in vec3 vertexDataOutput;
 in vec3 normalDataOutput;
@@ -38,7 +43,7 @@ void main()
 	vec3 world_bitangent = vec3(toWorldMatrix * vec4(bitangentOutput,1));
 
 	//LIGHT DIRECTION
-	vec3 L = normalize(vec3(1,-0.5f,1));		
+	vec3 L = normalize(directionalLight.direction);		
 
 	outColor = vec4(1,1,1,1);
 
@@ -58,6 +63,6 @@ void main()
 		
 	}
 	if(material.useLighting)
-		outColor *= max( dot(world_normal, L), 0.0f);	
+		outColor *= vec4(directionalLight.color,1) * max( dot(world_normal, L), 0.0f);	
 
 }

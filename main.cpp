@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "window.h"
-#include "GameManager.h"
+#include "SceneManager.h"
 GLFWwindow* window;
 
 void error_callback(int error, const char* description)

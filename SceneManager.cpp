@@ -1,6 +1,7 @@
-#include "GameManager.h"
+#include "SceneManager.h"
 #include "Asteroid.h"
 #include "Scene.h"
+#include "SampleScene.h"
 //Static members
 GLFWwindow* SceneManager::window;
 int SceneManager::windowWidth;
@@ -58,7 +59,7 @@ void SceneManager::initObjects() {
 	prevTime = (float)glfwGetTime();
 	
 	//create scene
-	currScene = new Scene();
+	currScene = new SampleScene();
 	currScene->initObjects();
 
 	// Call the resize callback to make sure things get drawn immediately
@@ -128,5 +129,5 @@ void SceneManager::mouse_wheel_callback(GLFWwindow* window, double xoffset, doub
 }
 
 bool SceneManager::isWindowOpen() {
-	return !glfwWindowShouldClose(SceneManager::window);
+	return !glfwWindowShouldClose(window);
 }

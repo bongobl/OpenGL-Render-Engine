@@ -80,9 +80,9 @@ void AsteroidField::update(float deltaTime) {
 		}
 	}*/
 }
-void AsteroidField::draw() {
+void AsteroidField::draw(Scene* currScene) {
 	for (unsigned int i = 0; i < asteroids.size(); ++i) {
-		asteroids.at(i)->draw();
+		asteroids.at(i)->draw(currScene);
 	}
 }
 void AsteroidField::genRandomAsteroid(glm::vec2 xRange, glm::vec2 yRange, glm::vec2 zRange) {

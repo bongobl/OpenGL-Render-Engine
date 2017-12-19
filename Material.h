@@ -27,6 +27,7 @@ public:
 
 	static void initStatics();
 	static void cleanUpStatics();
+	static Material basic();
 	Material();
 	~Material();
 
