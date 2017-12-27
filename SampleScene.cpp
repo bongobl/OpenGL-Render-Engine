@@ -1,25 +1,25 @@
 #include "SampleScene.h"
 
 void SampleScene::initObjects() {
-	cam_pos = glm::vec3(0.0f, 0, 30);
-	cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f);
-	cam_up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	mainCam = new Camera(glm::vec3(30, 30, 60), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 0,0);
 
 	asteroid = new Asteroid(0);
-	asteroid->setRotationSpeed(3);
+	asteroid->setRotationSpeed(2);
 	asteroid->setScale(glm::vec3(7, 7, 7));
 
 	//vector of skybox face names
 	std::vector<std::string> faceNames;
-	faceNames.push_back("skybox/left.ppm");
 	faceNames.push_back("skybox/right.ppm");
+	faceNames.push_back("skybox/left.ppm");
 	faceNames.push_back("skybox/top.ppm");
 	faceNames.push_back("skybox/bottom.ppm");
-	faceNames.push_back("skybox/front.ppm");
 	faceNames.push_back("skybox/back.ppm");
+	faceNames.push_back("skybox/front.ppm");
 
 	//init cubemap
 	spaceView.loadCubeMapTexture(faceNames);
+	
 }
 void SampleScene::dispose() {
 	delete asteroid;
@@ -72,4 +72,13 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 }
 void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	std::cout << yoffset << std::endl;
+}
+
+void SampleScene::resize_event(int width, int height) {
+	
+	mainCam->resize((float)width, (float)height);
+}
+
+Camera* SampleScene::getActiveCamera() {
+	return mainCam;
 }

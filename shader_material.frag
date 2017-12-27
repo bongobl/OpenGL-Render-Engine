@@ -1,5 +1,5 @@
 #version 330 core
-// This is a texture and normal fragment shader.
+// This is the material fragment shader.
 
 struct DirectionalLight{
 	vec3 direction;
@@ -10,15 +10,18 @@ struct Material{
 	bool useColor;
 	bool useTexture;
 	bool useNormalMap;
+	bool useReflectionTexture;
 	bool useLighting;
 
 	vec3 color;
 	sampler2D texture;
 	sampler2D normalMap;
+	samplerCube reflectionTexture;
 };
 
 uniform Material material;
 uniform DirectionalLight directionalLight;
+uniform vec3 camPosition;
 
 in vec3 vertexDataOutput;
 in vec3 normalDataOutput;
@@ -45,14 +48,15 @@ void main()
 	//LIGHT DIRECTION
 	vec3 L = normalize(directionalLight.direction);		
 
-	outColor = vec4(1,1,1,1);
+	
 
 	mat3 tangent2World = mat3(
 		world_tangent,
 		world_bitangent,
 		world_normal
 	);
-	
+	outColor = vec4(1,1,1,1);
+
 	if(material.useColor)
 		outColor *= material.color;
 	if(material.useTexture)
@@ -60,8 +64,14 @@ void main()
 	if(material.useNormalMap){
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset);
-		
 	}
+	
+	if(material.useReflectionTexture){
+		vec3 I = normalize(world_position - camPosition);
+		vec3 R = reflect(I, normalize(world_normal));
+		outColor *= vec4(texture(material.reflectionTexture, R).rgb, 1.0);
+	}
+	
 	if(material.useLighting)
 		outColor *= vec4(directionalLight.color,1) * max( dot(world_normal, L), 0.0f);	
 

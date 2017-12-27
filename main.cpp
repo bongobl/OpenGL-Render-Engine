@@ -80,7 +80,7 @@ int main(void)
 	}
 
 	//create window
-	if (!SceneManager::createWindow("Alex Lui", 640, 480))
+	if (!SceneManager::createWindow("Alex Lui", 1280, 720))
 		exit(-1);
 
 	// Print OpenGL and GLSL versions

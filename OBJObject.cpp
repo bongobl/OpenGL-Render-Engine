@@ -238,21 +238,25 @@ void OBJObject::parse(const char *filepath)
 
 void OBJObject::draw(Scene* currScene) {
 
-	glUseProgram(material.getShaderProgram());
+	glUseProgram(Material::getShaderProgram());
+
+	Camera* activeCamera = currScene->getActiveCamera();
 
 	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = currScene->V * toWorld;
+	glm::mat4 modelview = activeCamera->ViewMatrix * toWorld;
 
-	GLuint uProjection = glGetUniformLocation(material.getShaderProgram(), "projection");
-	GLuint uModelview = glGetUniformLocation(material.getShaderProgram(), "modelview");
-	GLuint uToWorld = glGetUniformLocation(material.getShaderProgram(), "toWorld");
+	GLuint uProjection = glGetUniformLocation(Material::getShaderProgram(), "projection");
+	GLuint uModelview = glGetUniformLocation(Material::getShaderProgram(), "modelview");
+	GLuint uToWorld = glGetUniformLocation(Material::getShaderProgram(), "toWorld");
 
 	// Now send these values to the shader program
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &currScene->P[0][0]);
+	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &activeCamera->ProjectionMatrix[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
 
+	//send camera properties to shader program
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "camPosition"), activeCamera->position.x, activeCamera->position.y, activeCamera->position.z);
 
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
@@ -262,8 +266,8 @@ void OBJObject::draw(Scene* currScene) {
 	//apply light properties
 	glm::vec3 lightDirection(1, 1, 1);
 	glm::vec3 lightColor(1, 1, 1);
-	glUniform3f(glGetUniformLocation(material.getShaderProgram(), "directionalLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-	glUniform3f(glGetUniformLocation(material.getShaderProgram(), "directionalLight.color"), lightColor.r, lightColor.g, lightColor.b);
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "directionalLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "directionalLight.color"), lightColor.r, lightColor.g, lightColor.b);
 
 	//material properties
 	material.applySettings();

@@ -8,10 +8,21 @@ Material Asteroid::asteroidMaterial;
 
 void Asteroid::initStatics() {
 
+	
 	//Create Asteroid Material
-	asteroidMaterial.setColor(glm::vec3(1.6f, 1.6f, 1.6f));
-	asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
-	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+	asteroidMaterial.setColor(glm::vec3(2, 2, 2));
+	//asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
+	//asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+	
+	
+	std::vector<std::string> faceNames;
+	faceNames.push_back("skybox/right.ppm");
+	faceNames.push_back("skybox/left.ppm");
+	faceNames.push_back("skybox/top.ppm");
+	faceNames.push_back("skybox/bottom.ppm");
+	faceNames.push_back("skybox/back.ppm");
+	faceNames.push_back("skybox/front.ppm");
+	asteroidMaterial.loadReflectionTexture(faceNames);
 
 	//Create Template of Asteroids
 	asteroidTemplates = new OBJObject[2]{	OBJObject("Models/Asteroid0.obj", asteroidMaterial),

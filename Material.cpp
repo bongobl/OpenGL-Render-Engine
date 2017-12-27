@@ -21,9 +21,12 @@ Material::Material() {
 	useColor = false;
 	useTexture = false;
 	useNormalMap = false;
+	useReflectionTexture = false;
 	useLighting = true;
+
 	textureID = 0;
 	normalMapID = 0;
+	reflectionTextureID = 0;
 	color = glm::vec3(0, 0, 0);
 }
 Material::~Material() {
@@ -48,7 +51,12 @@ void Material::loadNormalMap(const char* filename) {
 	loadImage(filename, normalMapID);
 	useNormalMap = true;
 }
-
+void Material::loadReflectionTexture(std::vector<std::string> faces) {
+	
+	loadCubeMapTexture(faces, reflectionTextureID);
+	useReflectionTexture = true;
+	
+}
 GLuint Material::getTextureID() {
 	return textureID;	
 }
@@ -67,11 +75,12 @@ glm::vec3 Material::getColor() {
 
 void Material::applySettings() {
 
-	//material properties
-	glUniform1i(glGetUniformLocation(shaderProgram, "material.useLighting"), useLighting);
+	//material properties	
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useColor"), useColor);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), useTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useNormalMap"), useNormalMap);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useReflectionTexture"), useReflectionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useLighting"), useLighting);
 	if (useColor) {
 		glUniform3f(glGetUniformLocation(shaderProgram, "material.color"), color.r, color.g, color.b);
 	}
@@ -84,6 +93,12 @@ void Material::applySettings() {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.normalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, normalMapID);
+	}
+	
+	if (useReflectionTexture) {
+		glUniform1i(glGetUniformLocation(shaderProgram, "material.reflectionTexture"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectionTextureID);
 	}
 }
 
@@ -111,6 +126,37 @@ void Material::loadImage(const char* filename, GLuint &currID) {
 
 	allIDs.push_back(currID);
 }
+
+void Material::loadCubeMapTexture(std::vector<std::string> faces, GLuint &currID) {
+
+	glGenTextures(1, &currID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, currID);
+
+	int width, height;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char *data = loadPPM(faces[i].c_str(), width, height);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	std::cout << "loaded cubemap texture" << std::endl;
+}
+
 
 unsigned char* Material::loadPPM(const char* filename, int& width, int& height) {
 
