@@ -3,6 +3,7 @@ const char* window_title = "GLFW Starter Project";
 
 //main window
 GLFWwindow* Window::mainWindow;
+
 // Camera parameters
 float cam_dist(30.0f);
 glm::vec3 cam_pos(0.0f, 0, cam_dist);		// e  | Position of camera

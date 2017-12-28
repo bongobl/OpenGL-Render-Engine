@@ -9,7 +9,17 @@ class SampleScene : public Scene {
 	Asteroid* asteroid;
 	CubeMap spaceView;
 
+	//Camera
 	Camera* mainCam;
+	float camDist;
+	glm::mat4 camRotationMatrix;
+
+	//Trackball controls
+	bool isRightMouseButtonDown;
+	bool isLeftMouseButtonDown;
+	glm::vec2 mousePosition;
+	glm::vec3 currPoint;
+	glm::vec3 lastPoint;
 
 public: 
 
@@ -22,10 +32,12 @@ public:
 	Camera* getActiveCamera();
 
 
-	//events from callbacks, overloaded
+	//events from callbacks, overloaded from Scene
 	void key_event(int key, int scancode, int action, int mods);
 	void mouse_button_event(int button, int action, int mods);
 	void cursor_position_event(double xpos, double ypos);
 	void mouse_wheel_event(double xoffset, double yoffset);
-	void resize_event(int width, int height);
+
+private:
+	glm::vec3 trackBallMap(glm::vec2 point);
 };

@@ -67,7 +67,12 @@ void SceneManager::initObjects() {
 	
 }
 void SceneManager::dispose() {
+
 	currScene->dispose();
+
+	Asteroid::cleanUpStatics();
+	Material::cleanUpStatics();
+
 	glfwDestroyWindow(window);
 }
 

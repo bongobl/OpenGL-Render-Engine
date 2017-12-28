@@ -21,6 +21,9 @@ class Asteroid {
 
 	float rotation;
 
+	//trackball
+	glm::mat4 trackBallRotate;
+
 public:
 
 	static void initStatics();
@@ -42,6 +45,7 @@ public:
 	void setSpinAxis(glm::vec3 spa);
 	void setRotationSpeed(float rs);
 
+	void updateTrackBall(glm::mat4 delta);
 	glm::mat4 getUpdatedToWorldMatrix();
 	
 	friend class Scene;

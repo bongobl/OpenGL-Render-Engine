@@ -18,7 +18,8 @@ Material Material::basic() {
 	return Material();
 }
 Material::Material() {
-	useColor = false;
+	useDiffuse = false;
+	useSpecular = false;
 	useTexture = false;
 	useNormalMap = false;
 	useReflectionTexture = false;
@@ -27,7 +28,8 @@ Material::Material() {
 	textureID = 0;
 	normalMapID = 0;
 	reflectionTextureID = 0;
-	color = glm::vec3(0, 0, 0);
+	diffuse = glm::vec3(0, 0, 0);
+	specular = glm::vec3(0, 0, 0);
 }
 Material::~Material() {
 	
@@ -36,11 +38,15 @@ Material::~Material() {
 void Material::setUseLighting(bool opt) {
 	useLighting = opt;
 }
-void Material::setColor(glm::vec3 c) {
-	color = c;
-	useColor = true;
+void Material::setDiffuseColor(glm::vec3 c) {
+	diffuse = c;
+	useDiffuse = true;
 }
 
+void Material::setSpecularColor(glm::vec3 c) {
+	specular = c;
+	useSpecular = true;
+}
 void Material::loadTexture(const char* filename) {
 
 	loadImage(filename, textureID);
@@ -69,20 +75,27 @@ GLuint Material::getShaderProgram() {
 	return shaderProgram;
 }
 
-glm::vec3 Material::getColor() {
-	return color;
+glm::vec3 Material::getDiffuseColor() {
+	return diffuse;
 }
 
+glm::vec3 Material::getSpecularColor() {
+	return specular;
+}
 void Material::applySettings() {
 
 	//material properties	
-	glUniform1i(glGetUniformLocation(shaderProgram, "material.useColor"), useColor);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useDiffuse"), useDiffuse);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSpecular"), useSpecular);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), useTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useNormalMap"), useNormalMap);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useReflectionTexture"), useReflectionTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useLighting"), useLighting);
-	if (useColor) {
-		glUniform3f(glGetUniformLocation(shaderProgram, "material.color"), color.r, color.g, color.b);
+	if (useDiffuse) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "material.diffuse"), diffuse.r, diffuse.g, diffuse.b);
+	}
+	if (useSpecular) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "material.specular"), specular.r, specular.g, specular.b);
 	}
 	if (useTexture) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.texture"), 0);
@@ -155,6 +168,8 @@ void Material::loadCubeMapTexture(std::vector<std::string> faces, GLuint &currID
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	std::cout << "loaded cubemap texture" << std::endl;
+
+	allIDs.push_back(currID);
 }
 
 

@@ -10,7 +10,7 @@ BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	}
 
 	//init material
-	material.setColor(glm::vec3(1, 1, 1));
+	material.setDiffuseColor(glm::vec3(1, 1, 1));
 	material.setUseLighting(false);
 
 	//prepare buffers

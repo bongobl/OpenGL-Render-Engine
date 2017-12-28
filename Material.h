@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
 class Material {
 
 	//static fields
@@ -15,14 +16,18 @@ class Material {
 	static std::vector<GLuint> allIDs;
 
 	//member fields
-	glm::vec3 color;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+
 	GLuint textureID;
 	GLuint normalMapID;
 	GLuint reflectionTextureID;
 
 	
 public:
-	bool useColor;
+	bool useDiffuse;
+	bool useSpecular;
+
 	bool useTexture;
 	bool useNormalMap;
 	bool useReflectionTexture;
@@ -36,13 +41,19 @@ public:
 	~Material();
 
 	void setUseLighting(bool opt);
-	void setColor(glm::vec3 c);
+
+	void setDiffuseColor(glm::vec3 c);
+	glm::vec3 getDiffuseColor();
+
+	void setSpecularColor(glm::vec3 c);
+	glm::vec3 getSpecularColor();
+
 	void loadTexture(const char* filename);
 	void loadNormalMap(const char* filename);
 	void loadReflectionTexture(std::vector<std::string> faces);
 	GLuint getTextureID();
 	GLuint getNormalMapID();
-	glm::vec3 getColor();
+	
 	
 	static GLuint getShaderProgram();
 

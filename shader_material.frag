@@ -7,13 +7,15 @@ struct DirectionalLight{
 };
 
 struct Material{
-	bool useColor;
+	bool useDiffuse;
+	bool useSpecular;
 	bool useTexture;
 	bool useNormalMap;
 	bool useReflectionTexture;
 	bool useLighting;
 
-	vec3 color;
+	vec3 diffuse;
+	vec3 specular;
 	sampler2D texture;
 	sampler2D normalMap;
 	samplerCube reflectionTexture;
@@ -57,8 +59,8 @@ void main()
 	);
 	outColor = vec4(1,1,1,1);
 
-	if(material.useColor)
-		outColor *= material.color;
+	if(material.useDiffuse)
+		outColor *= material.diffuse;
 	if(material.useTexture)
 		outColor *= texture2D(material.texture, uvOutput);
 	if(material.useNormalMap){
@@ -72,7 +74,16 @@ void main()
 		outColor *= vec4(texture(material.reflectionTexture, R).rgb, 1.0);
 	}
 	
-	if(material.useLighting)
-		outColor *= vec4(directionalLight.color,1) * max( dot(world_normal, L), 0.0f);	
+	if(material.useLighting){
+		outColor *= vec4(directionalLight.color,1) * max( dot(world_normal, L), 0.0f);
+		
+		if(material.useSpecular){
+			vec3 R = 2 * dot(world_normal, L) * world_normal - L;
+			vec3 e = normalize(camPosition - world_position);
+			outColor += material.specular * directionalLight.color * pow( max(dot(R, e),0) , 30);
+		}
+		
+
+	}
 
 }

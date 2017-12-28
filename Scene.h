@@ -9,9 +9,11 @@
 #include "Camera.h"
 class Scene {
 
+protected:
+	int window_width;
+	int window_height;
 public:
 	
-
 	virtual void initObjects() = 0;
 	virtual void dispose() = 0;
 	virtual void update(float deltaTime) = 0;
@@ -25,5 +27,5 @@ public:
 	virtual void cursor_position_event(double xpos, double ypos) = 0;
 	virtual void mouse_wheel_event(double xoffset, double yoffset) = 0;
 
-	virtual void resize_event(int width, int height) = 0;
+	void resize_event(int width, int height);
 };

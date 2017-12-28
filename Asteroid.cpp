@@ -10,7 +10,9 @@ void Asteroid::initStatics() {
 
 	
 	//Create Asteroid Material
-	asteroidMaterial.setColor(glm::vec3(2, 2, 2));
+	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 0));
+	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
+
 	//asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
 	//asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
 	
@@ -48,6 +50,8 @@ Asteroid::Asteroid(unsigned int id) {
 	velocity = glm::vec3(0, 0, 0);
 
 	boundingBox = new BoundingBox(asteroidOBJ->getVertices());
+
+	trackBallRotate = glm::mat4(1.0f);
 	
 }
 
@@ -105,6 +109,10 @@ void Asteroid::setRotationSpeed(float rs) {
 	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
 }
 
+
+void Asteroid::updateTrackBall(glm::mat4 delta) {
+	trackBallRotate = delta * trackBallRotate;
+}
 glm::mat4 Asteroid::getUpdatedToWorldMatrix() {
-	return glm::translate(glm::mat4(1.0f), position) * glm::rotate(glm::mat4(1.0f), rotation, spinAxis) * glm::scale(glm::mat4(1.0f), scale);
+	return glm::translate(glm::mat4(1.0f), position) * glm::rotate(glm::mat4(1.0f), rotation, spinAxis) * trackBallRotate * glm::scale(glm::mat4(1.0f), scale);
 }

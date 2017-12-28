@@ -3,7 +3,7 @@
 Ship::Ship() {
 	
 	Material shipMaterial;
-	shipMaterial.setColor(glm::vec3(1, 0, 0));
+	shipMaterial.setDiffuseColor(glm::vec3(1, 0, 0));
 	modelMesh = new OBJObject("Models/Ship.obj", shipMaterial);
 	generalMotionMatrix = glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 4, glm::vec3(0, 1, 0))  *  glm::scale(glm::mat4(1.0f), glm::vec3(4, 4, 4));
 	centerOffset = glm::vec3(0, 0, 2);
