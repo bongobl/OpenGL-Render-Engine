@@ -18,6 +18,7 @@ class Material {
 	//member fields
 	glm::vec3 diffuse;
 	glm::vec3 specular;
+	glm::vec3 ambient;
 
 	GLuint textureID;
 	GLuint normalMapID;
@@ -27,12 +28,11 @@ class Material {
 public:
 	bool useDiffuse;
 	bool useSpecular;
+	bool useAmbient;
 
 	bool useTexture;
 	bool useNormalMap;
 	bool useReflectionTexture;
-
-	bool useLighting;
 
 	static void initStatics();
 	static void cleanUpStatics();
@@ -40,13 +40,14 @@ public:
 	Material();
 	~Material();
 
-	void setUseLighting(bool opt);
-
 	void setDiffuseColor(glm::vec3 c);
 	glm::vec3 getDiffuseColor();
 
 	void setSpecularColor(glm::vec3 c);
 	glm::vec3 getSpecularColor();
+
+	void setAmbientColor(glm::vec3 c);
+	glm::vec3 getAmbientColor();
 
 	void loadTexture(const char* filename);
 	void loadNormalMap(const char* filename);

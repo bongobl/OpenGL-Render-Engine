@@ -9,13 +9,14 @@ struct DirectionalLight{
 struct Material{
 	bool useDiffuse;
 	bool useSpecular;
+	bool useAmbient;
 	bool useTexture;
 	bool useNormalMap;
 	bool useReflectionTexture;
-	bool useLighting;
 
 	vec3 diffuse;
 	vec3 specular;
+	vec3 ambient;
 	sampler2D texture;
 	sampler2D normalMap;
 	samplerCube reflectionTexture;
@@ -59,31 +60,34 @@ void main()
 	);
 	outColor = vec4(1,1,1,1);
 
-	if(material.useDiffuse)
-		outColor *= material.diffuse;
-	if(material.useTexture)
-		outColor *= texture2D(material.texture, uvOutput);
+	vec4 textureColor = vec4(1,1,1,1);
+	vec4 reflectionTextureColor = vec4(1,1,1,1);
+
+	if(material.useTexture){
+		textureColor = texture2D(material.texture, uvOutput);
+		outColor *= textureColor;
+	}
 	if(material.useNormalMap){
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset);
-	}
-	
+	}	
 	if(material.useReflectionTexture){
 		vec3 I = normalize(world_position - camPosition);
 		vec3 R = reflect(I, normalize(world_normal));
-		outColor *= vec4(texture(material.reflectionTexture, R).rgb, 1.0);
+		reflectionTextureColor = vec4(texture(material.reflectionTexture, R).rgb, 1.0);
+		outColor *= reflectionTextureColor;
 	}
 	
-	if(material.useLighting){
-		outColor *= vec4(directionalLight.color,1) * max( dot(world_normal, L), 0.0f);
+	if(material.useDiffuse)
+		outColor *= material.diffuse * vec4(directionalLight.color,1) * max( dot(world_normal, L), 0);
 		
-		if(material.useSpecular){
-			vec3 R = 2 * dot(world_normal, L) * world_normal - L;
-			vec3 e = normalize(camPosition - world_position);
-			outColor += material.specular * directionalLight.color * pow( max(dot(R, e),0) , 30);
-		}
-		
-
+	if(material.useSpecular){
+		vec3 R = 2 * dot(world_normal, L) * world_normal - L;
+		vec3 e = normalize(camPosition - world_position);
+		outColor += material.specular * directionalLight.color * pow( max(dot(R, e),0) , 20);
+	}		
+	if(material.useAmbient){
+		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor;
 	}
-
+		
 }
