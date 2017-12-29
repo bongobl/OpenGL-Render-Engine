@@ -23,6 +23,7 @@ class Material {
 	GLuint textureID;
 	GLuint normalMapID;
 	GLuint reflectionTextureID;
+	float reflectiveness;
 
 	
 public:
@@ -52,6 +53,10 @@ public:
 	void loadTexture(const char* filename);
 	void loadNormalMap(const char* filename);
 	void loadReflectionTexture(std::vector<std::string> faces);
+
+	void setReflectiveness(float r);
+	float getReflectiveness();
+
 	GLuint getTextureID();
 	GLuint getNormalMapID();
 	

@@ -3,7 +3,6 @@
 #include <cmath>
 #include "OBJObject.h"
 #include "Scene.h"
-
 using namespace std;
 
 
@@ -241,6 +240,8 @@ void OBJObject::draw(Scene* currScene) {
 	glUseProgram(Material::getShaderProgram());
 
 	Camera* activeCamera = currScene->getActiveCamera();
+	Light* activeLight = currScene->getActiveLight();
+
 
 	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
 	// Calculate the combination of the model and view (camera inverse) matrices
@@ -264,10 +265,12 @@ void OBJObject::draw(Scene* currScene) {
 
 
 	//apply light properties
-	glm::vec3 lightDirection(1, 1, 1);
-	glm::vec3 lightColor(1, 1, 1);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "directionalLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "directionalLight.color"), lightColor.r, lightColor.g, lightColor.b);
+	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "light.type"), activeLight->type);
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), activeLight->color.r, activeLight->color.g, activeLight->color.b);
+	glUniform1f(glGetUniformLocation(Material::getShaderProgram(), "light.brightness"), activeLight->brightness);
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.position"), activeLight->position.x, activeLight->position.y, activeLight->position.z);
+	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.direction"), activeLight->direction.x, activeLight->direction.y, activeLight->direction.z);
+	
 
 	//material properties
 	material.applySettings();

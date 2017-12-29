@@ -1,9 +1,13 @@
 #version 330 core
 // This is the material fragment shader.
 
-struct DirectionalLight{
-	vec3 direction;
+struct Light{
+	int type;
 	vec3 color;
+	float brightness;
+	vec3 position;
+	vec3 direction;
+	
 };
 
 struct Material{
@@ -20,10 +24,11 @@ struct Material{
 	sampler2D texture;
 	sampler2D normalMap;
 	samplerCube reflectionTexture;
+	float reflectiveness;
 };
 
 uniform Material material;
-uniform DirectionalLight directionalLight;
+uniform Light light;
 uniform vec3 camPosition;
 
 in vec3 vertexDataOutput;
@@ -36,6 +41,10 @@ in mat4 toWorldMatrix;
 
 out vec4 outColor;
 
+
+//constants
+const int DIRECTIONAL_LIGHT = 0;
+const int POINT_LIGHT = 1;
 void main()
 {
 
@@ -48,16 +57,20 @@ void main()
 	vec3 world_tangent = vec3(toWorldMatrix * vec4(tangentOutput,1));
 	vec3 world_bitangent = vec3(toWorldMatrix * vec4(bitangentOutput,1));
 
-	//LIGHT DIRECTION
-	vec3 L = normalize(directionalLight.direction);		
+	vec3 L = vec3(1,1,1);
+	float C_l = 1;
+	if(light.type == DIRECTIONAL_LIGHT){
+		L = -normalize(light.direction);
+		C_l = light.brightness;
+	}else if(light.type == POINT_LIGHT){
+		
+		L = normalize(light.position - world_position);
+		C_l = light.brightness / length(light.position - world_position);
 
-	
 
-	mat3 tangent2World = mat3(
-		world_tangent,
-		world_bitangent,
-		world_normal
-	);
+	}
+
+	//Starting Color: white, each material property will cut away at it
 	outColor = vec4(1,1,1,1);
 
 	vec4 textureColor = vec4(1,1,1,1);
@@ -74,20 +87,23 @@ void main()
 	if(material.useReflectionTexture){
 		vec3 I = normalize(world_position - camPosition);
 		vec3 R = reflect(I, normalize(world_normal));
-		reflectionTextureColor = vec4(texture(material.reflectionTexture, R).rgb, 1.0);
+		reflectionTextureColor =  1 - (material.reflectiveness * (1 - vec4(texture(material.reflectionTexture, R).rgb, 1.0)));
 		outColor *= reflectionTextureColor;
 	}
 	
 	if(material.useDiffuse)
-		outColor *= material.diffuse * vec4(directionalLight.color,1) * max( dot(world_normal, L), 0);
+		outColor *= vec4(material.diffuse,1) * max( dot(world_normal, L), 0);
 		
 	if(material.useSpecular){
 		vec3 R = 2 * dot(world_normal, L) * world_normal - L;
 		vec3 e = normalize(camPosition - world_position);
-		outColor += material.specular * directionalLight.color * pow( max(dot(R, e),0) , 20);
+		outColor += material.specular * pow( max(dot(R, e),0) , 20);
 	}		
+	outColor *= vec4(light.color * C_l ,1);
+
 	if(material.useAmbient){
 		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor;
 	}
+	
 		
 }

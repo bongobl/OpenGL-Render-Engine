@@ -7,6 +7,7 @@
 #include "Asteroid.h"
 #include "CubeMap.h"
 #include "Camera.h"
+#include "Light.h"
 class Scene {
 
 protected:
@@ -20,6 +21,7 @@ public:
 	virtual void draw() = 0;
 
 	virtual Camera* getActiveCamera() = 0;
+	virtual Light* getActiveLight() = 0;
 
 	//events from callbacks
 	virtual void key_event(int key, int scancode, int action, int mods) = 0;	

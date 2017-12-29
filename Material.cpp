@@ -28,8 +28,12 @@ Material::Material() {
 	textureID = 0;
 	normalMapID = 0;
 	reflectionTextureID = 0;
+	reflectiveness = 0;
 	diffuse = glm::vec3(0, 0, 0);
 	specular = glm::vec3(0, 0, 0);
+	ambient = glm::vec3(0, 0, 0);
+	reflectiveness = 1.0f;
+
 }
 Material::~Material() {
 	
@@ -47,6 +51,10 @@ void Material::setSpecularColor(glm::vec3 c) {
 void Material::setAmbientColor(glm::vec3 c) {
 	ambient = c;
 	useAmbient = true;
+}
+
+void Material::setReflectiveness(float r) {
+	reflectiveness = r;
 }
 void Material::loadTexture(const char* filename) {
 
@@ -87,6 +95,10 @@ glm::vec3 Material::getSpecularColor() {
 glm::vec3 Material::getAmbientColor() {
 	return ambient;
 }
+
+float Material::getReflectiveness() {
+	return reflectiveness;
+}
 void Material::applySettings() {
 
 	//material properties	
@@ -120,6 +132,8 @@ void Material::applySettings() {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.reflectionTexture"), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectionTextureID);
+
+		glUniform1f(glGetUniformLocation(shaderProgram, "material.reflectiveness"), reflectiveness);
 	}
 }
 

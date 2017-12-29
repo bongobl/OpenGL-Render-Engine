@@ -17,17 +17,19 @@ void Asteroid::initStatics() {
 	faceNames.push_back("skybox/front.ppm");
 	
 	//Create Asteroid Material
-	asteroidMaterial.setDiffuseColor(glm::vec3(1, 0.5f, 1));
-	asteroidMaterial.setSpecularColor(glm::vec3(0.9, 0.45f, 0.9));
-	asteroidMaterial.setAmbientColor(glm::vec3(0.06, 0.03f, 0.06));
+	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
+	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
+	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
 	//asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
 	//asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
 	asteroidMaterial.loadReflectionTexture(faceNames);
+	asteroidMaterial.setReflectiveness(1.0f);
 
 	//Create Template of Asteroids
-	asteroidTemplates = new OBJObject[3]{	OBJObject("Models/Asteroid0.obj", asteroidMaterial),
+	asteroidTemplates = new OBJObject[4]{	OBJObject("Models/Asteroid0.obj", asteroidMaterial),
 											OBJObject("Models/Asteroid1.obj", asteroidMaterial),
-											OBJObject("Models/Sphere.obj", asteroidMaterial) };
+											OBJObject("Models/Sphere.obj", asteroidMaterial),
+											OBJObject("Models/filletCube.obj", asteroidMaterial) };
 }
 
 void Asteroid::cleanUpStatics() {
@@ -67,7 +69,7 @@ void Asteroid::draw(Scene* currScene) {
 	asteroidOBJ->draw(currScene);
 
 	boundingBox->updateToWorld(getUpdatedToWorldMatrix());
-	//boundingBox->draw(currScene);
+	boundingBox->draw(currScene);
 }
 
 void Asteroid::setPosition(glm::vec3 pos) {

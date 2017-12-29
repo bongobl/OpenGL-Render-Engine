@@ -2,7 +2,6 @@
 #include "Scene.h"
 #include "Asteroid.h"
 #include "CubeMap.h"
-
 class SampleScene : public Scene {
 
 	//Scene Objects
@@ -14,6 +13,12 @@ class SampleScene : public Scene {
 	float camDist;
 	glm::mat4 camRotationMatrix;
 
+	//Lights
+	Light* sceneLights;
+	float pointLightDist;
+	glm::mat4 pointLightRotationMatrix;
+	OBJObject* pointLightGraphic;
+
 	//Trackball controls
 	bool isRightMouseButtonDown;
 	bool isLeftMouseButtonDown;
@@ -21,7 +26,14 @@ class SampleScene : public Scene {
 	glm::vec3 currPoint;
 	glm::vec3 lastPoint;
 
+	//modes
+	enum EditMode { EDIT_MODEL, EDIT_LIGHT };
+	enum ActiveLight { DIRECTIONAL_LIGHT, POINT_LIGHT };
+	unsigned int currEditMode;
+	unsigned int currActiveLight;
+
 public: 
+
 
 	//basic, overloaded
 	void initObjects();
@@ -30,6 +42,7 @@ public:
 	void draw();
 
 	Camera* getActiveCamera();
+	Light* getActiveLight();
 
 
 	//events from callbacks, overloaded from Scene
