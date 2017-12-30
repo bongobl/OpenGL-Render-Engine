@@ -24,10 +24,10 @@ struct Material{
 	bool useAmbient;
 	vec3 ambient;
 
-	//TEXTURE
-	bool useTexture;
-	sampler2D texture;
-	float textureStrength;
+	//SURFACE TEXTURE
+	bool useSurfaceTexture;
+	sampler2D surfaceTexture;
+	float surfaceTextureStrength;
 
 	//NORMAL MAP
 	bool useNormalMap;
@@ -93,8 +93,8 @@ void main()
 	vec4 reflectionTextureColor = vec4(1,1,1,1);
 
 	//Textures
-	if(material.useTexture){
-		textureColor = (1 -  material.textureStrength * (1 - texture2D(material.texture, uvTexCoord)));
+	if(material.useSurfaceTexture){
+		textureColor = (1 -  material.surfaceTextureStrength * (1 - texture2D(material.surfaceTexture, uvTexCoord)));
 		outColor *= textureColor;
 	}
 	if(material.useNormalMap){

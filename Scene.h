@@ -4,10 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "SceneManager.h"
-#include "Asteroid.h"
-#include "CubeMap.h"
 #include "Camera.h"
 #include "Light.h"
+
 class Scene {
 
 protected:

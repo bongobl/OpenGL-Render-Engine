@@ -1,7 +1,7 @@
-#include "CubeMap.h"
+#include "SkyBox.h"
 #include "Scene.h"
 
-CubeMap::CubeMap()
+SkyBox::SkyBox()
 {
 	scale = 1000;
 	position = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -47,7 +47,7 @@ CubeMap::CubeMap()
 	
 }
 
-CubeMap::~CubeMap()
+SkyBox::~SkyBox()
 {
 	// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a 
 	// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
@@ -56,7 +56,7 @@ CubeMap::~CubeMap()
 	glDeleteBuffers(1, &EBO);
 }
 
-void CubeMap::draw(Scene* currScene) {
+void SkyBox::draw(Scene* currScene) {
 
 	glUseProgram(shaderProgram);
 
@@ -82,7 +82,7 @@ void CubeMap::draw(Scene* currScene) {
 	//send cubemap textureID to shader program
 	glUniform1i(glGetUniformLocation(shaderProgram, "skybox"), 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture.id);
 
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -92,18 +92,22 @@ void CubeMap::draw(Scene* currScene) {
 	glBindVertexArray(0);
 }
 
-void CubeMap::setScale(float sc) {
+void SkyBox::setScale(float sc) {
 	scale = sc;
 }
-void CubeMap::setPosition(glm::vec3 pos) {
+void SkyBox::setPosition(glm::vec3 pos) {
 	position = pos;
 }
 
-glm::vec3 CubeMap::getPosition() {
+glm::vec3 SkyBox::getPosition() {
 	return position;
 }
 
-void CubeMap::loadCubeMapTexture(std::vector<std::string> faces) {
+void SkyBox::loadCubeMapTexture(Texture cube_map_texture) {
 
-	Material::loadCubeMapTexture(faces, textureID);
+	if(cube_map_texture.type == Texture::CUBE_MAP)
+		this->cubeMapTexture = cube_map_texture;
+	else {
+		std::cerr << "ERROR: texture for skybox must be a of type cubemap" << std::endl;
+	}
 }

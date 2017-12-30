@@ -1,12 +1,13 @@
 #pragma once
 #include "Scene.h"
 #include "Asteroid.h"
-#include "CubeMap.h"
+#include "Texture.h"
+#include "SkyBox.h"
 class SampleScene : public Scene {
 
 	//Scene Objects
 	Asteroid* asteroid;
-	CubeMap spaceView;
+	SkyBox oceanView;
 
 	//Camera
 	Camera* mainCam;

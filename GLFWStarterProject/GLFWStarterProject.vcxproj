@@ -20,10 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Asteroid.h" />
-    <ClInclude Include="..\AsteroidField.h" />
     <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\Camera.h" />
-    <ClInclude Include="..\CubeMap.h" />
+    <ClInclude Include="..\SkyBox.h" />
     <ClInclude Include="..\Light.h" />
     <ClInclude Include="..\SampleScene.h" />
     <ClInclude Include="..\SceneManager.h" />
@@ -31,15 +30,13 @@
     <ClInclude Include="..\Scene.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Material.h" />
-    <ClInclude Include="..\Ship.h" />
-    <ClInclude Include="..\Window.h" />
+    <ClInclude Include="..\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Asteroid.cpp" />
-    <ClCompile Include="..\AsteroidField.cpp" />
     <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Camera.cpp" />
-    <ClCompile Include="..\CubeMap.cpp" />
+    <ClCompile Include="..\SkyBox.cpp" />
     <ClCompile Include="..\SampleScene.cpp" />
     <ClCompile Include="..\Scene.cpp" />
     <ClCompile Include="..\SceneManager.cpp" />
@@ -47,9 +44,8 @@
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Material.cpp" />
-    <ClCompile Include="..\Ship.cpp" />
     <ClCompile Include="..\Light.cpp" />
-    <ClCompile Include="..\Window.cpp" />
+    <ClCompile Include="..\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shader_material.frag" />

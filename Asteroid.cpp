@@ -20,18 +20,29 @@ void Asteroid::initStatics() {
 
 	///diffuse
 	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
+
 	///specular
 	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
+
 	///ambient
 	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
-	///texture
-	asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
-	asteroidMaterial.setTextureStrength(0.3f);
+
+	///surface texture
+	Texture asteroidTexture;
+	asteroidTexture.loadStandardTexture("Textures/AsteroidTexture.ppm");
+	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
+	asteroidMaterial.setSurfaceTextureStrength(0.3f);
+
 	///normal map
-	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+	Texture normalMapTexture;
+	normalMapTexture.loadStandardTexture("Textures/AsteroidNormalMap.ppm");
+	asteroidMaterial.loadNormalMap(normalMapTexture);	
 	asteroidMaterial.setNormalMapStrength(0.3f);
+
 	///reflection texture
-	asteroidMaterial.loadReflectionTexture(faceNames);
+	Texture reflection;
+	reflection.loadCubeMap(faceNames);
+	asteroidMaterial.loadReflectionTexture(reflection);
 	asteroidMaterial.setReflectiveness(1.0f);
 
 	//Create Template of Asteroids

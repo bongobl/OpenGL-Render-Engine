@@ -9,18 +9,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <string>
+#include "shader.h"
+#include "Texture.h"
 
 class Scene;
-class CubeMap
+class SkyBox
 {
 	float scale;
 	glm::vec3 position;
 
 	GLuint shaderProgram;
-	GLuint textureID;
+	Texture cubeMapTexture;
 public:
-	CubeMap();
-	~CubeMap();
+	SkyBox();
+	~SkyBox();
 
 	glm::mat4 toWorld;
 
@@ -31,10 +33,9 @@ public:
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
 
-	void loadCubeMapTexture(std::vector<std::string> faces);
-	unsigned char* loadPPM(const char* filename, int& width, int& height);
+	void loadCubeMapTexture(Texture cube_map_texture);
 
-	friend class Scene;
+	
 };
 
 // Define the coordinates and indices needed to draw the cube. Note that it is not necessary

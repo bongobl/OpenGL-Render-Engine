@@ -17,7 +17,7 @@ void SampleScene::initObjects() {
 
 	//init lights
 	sceneLights = new Light[2]{
-		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 2, glm::vec3(-1,0,0)),
+		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(-1,0,0)),
 		Light(Light::POINT,glm::vec3(1,1,1), 10, glm::vec3(20,0,0))
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
@@ -40,9 +40,11 @@ void SampleScene::initObjects() {
 	faceNames.push_back("skybox/bottom.ppm");
 	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
-
+	
+	Texture oceanViewCubeMap;
+	oceanViewCubeMap.loadCubeMap(faceNames);
 	//init cubemap
-	spaceView.loadCubeMapTexture(faceNames);
+	oceanView.loadCubeMapTexture(oceanViewCubeMap);
 	
 }
 void SampleScene::dispose() {
@@ -56,14 +58,14 @@ void SampleScene::update(float deltaTime) {
 	
 	pointLightGraphic->setToWorld(glm::translate(glm::mat4(1.0f), sceneLights[1].position) * 
 									glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 1)));
-	spaceView.setPosition(mainCam->position);
+	oceanView.setPosition(mainCam->position);
 	asteroid->update(deltaTime);
 	
 }
 void SampleScene::draw() {
 	if(currActiveLight == 1)
 		pointLightGraphic->draw(this);
-	spaceView.draw(this);
+	oceanView.draw(this);
 	asteroid->draw(this);
 }
 

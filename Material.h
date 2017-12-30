@@ -1,5 +1,4 @@
-#ifndef MATERIAL
-#define MATERIAL
+#pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
@@ -8,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "Texture.h"
 
 class Material {
 
@@ -27,20 +27,21 @@ class Material {
 	bool useAmbient;
 	glm::vec3 ambient;
 
-	//texture
-	bool useTexture;
-	GLuint textureID;
-	float textureStrength;
-
+	//surface texture
+	bool useSurfaceTexture;
+	Texture surfaceTexture;
+	float surfaceTextureStrength;
+	
 	//normal map
 	bool useNormalMap;
-	GLuint normalMapID;
 	float normalMapStrength;
+	Texture normalMap;
 
 	//relection texture
 	bool useReflectionTexture;
-	GLuint reflectionTextureID;
+	Texture reflectionTexture;
 	float reflectiveness;
+	
 
 public:
 	
@@ -67,24 +68,24 @@ public:
 	void setAmbientColor(glm::vec3 c);
 	glm::vec3 getAmbientColor();
 
-	//texture
-	void setUseTexture(bool opt);
-	void loadTexture(const char* filename);
-	GLuint getTextureID();
-	void setTextureStrength(float f);
-	float getTextureStrength();
+	//surface texture
+	void setUseSurfaceTexture(bool opt);
+	void loadSurfaceTexture(Texture surface_texture);
+	Texture& getSurfaceTexture();
+	void setSurfaceTextureStrength(float f);
+	float getSurfaceTextureStrength();
 
 	//normal map
 	void setUseNormalMap(bool opt);
-	void loadNormalMap(const char* filename);
-	GLuint getNormalMapID();
+	void loadNormalMap(Texture normal_map);
+	Texture& getNormalMap();
 	void setNormalMapStrength(float f);
 	float getNormalMapStrength();
 
 	//reflection texture
 	void setUseReflectionTexture(bool opt);
-	void loadReflectionTexture(std::vector<std::string> faces);
-	GLuint getReflectionTextureID();
+	void loadReflectionTexture(Texture reflection_texture);
+	Texture& getReflectionTexture();
 	void setReflectiveness(float r);
 	float getReflectiveness();
 	
@@ -93,12 +94,5 @@ public:
 
 	//sent material settings to static shader program
 	void applySettings();
-	
-	//Helper Statics
-	static void loadImage(const char* filename, GLuint &currID);
-	static void loadCubeMapTexture(std::vector<std::string> faces, GLuint &currID);
-	static unsigned char* loadPPM(const char* filename, int& width, int& height);
-	
-};
 
-#endif
+};

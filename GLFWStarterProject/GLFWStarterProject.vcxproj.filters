@@ -15,16 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\OBJObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CubeMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Material.h">
@@ -33,13 +27,7 @@
     <ClInclude Include="..\Asteroid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\AsteroidField.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\BoundingBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Ship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Scene.h">
@@ -57,6 +45,12 @@
     <ClInclude Include="..\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\SkyBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -65,13 +59,7 @@
     <ClCompile Include="..\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\OBJObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CubeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Material.cpp">
@@ -80,13 +68,7 @@
     <ClCompile Include="..\Asteroid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\AsteroidField.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\BoundingBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\SceneManager.cpp">
@@ -102,6 +84,12 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SkyBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

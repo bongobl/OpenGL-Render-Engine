@@ -7,7 +7,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "CubeMap.h"
+#include "SkyBox.h"
 #include "AsteroidField.h"
 #include "Ship.h"
 using namespace std;

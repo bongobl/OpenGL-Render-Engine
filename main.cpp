@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "window.h"
 #include "SceneManager.h"
 GLFWwindow* window;
 
@@ -17,14 +16,6 @@ void setup_callbacks()
 {
 	// Set the error callback
 	glfwSetErrorCallback(error_callback);
-	// Set the key callback
-	glfwSetKeyCallback(window, Window::key_callback);
-	// Set the window resize callback
-	glfwSetFramebufferSizeCallback(window, Window::resize_callback);
-
-	glfwSetMouseButtonCallback(window, Window::mouse_button_callback);
-	glfwSetCursorPosCallback(window, Window::cursor_position_callback);
-	glfwSetScrollCallback(window, Window::mouse_wheel_callback);
 	
 }
 

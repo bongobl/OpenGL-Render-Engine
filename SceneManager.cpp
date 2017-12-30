@@ -1,5 +1,4 @@
 #include "SceneManager.h"
-#include "Asteroid.h"
 #include "Scene.h"
 #include "SampleScene.h"
 //Static members

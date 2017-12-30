@@ -31,7 +31,7 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 //cubeMap
-CubeMap* spaceView;
+SkyBox* spaceView;
 
 //Asteroid Field
 AsteroidField* asteroidField;
@@ -61,7 +61,7 @@ void Window::initialize_objects()
 	faceNames.push_back("skybox/back.ppm");
 
 	//init cubemap
-	spaceView = new CubeMap();
+	spaceView = new SkyBox();
 	spaceView->loadCubeMapTexture(faceNames);
 
 
