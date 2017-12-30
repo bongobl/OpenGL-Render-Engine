@@ -17,11 +17,20 @@ void Asteroid::initStatics() {
 	faceNames.push_back("skybox/front.ppm");
 	
 	//Create Asteroid Material
+
+	///diffuse
 	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
+	///specular
 	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
+	///ambient
 	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
-	//asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
-	//asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+	///texture
+	asteroidMaterial.loadTexture("Textures/AsteroidTexture.ppm");
+	asteroidMaterial.setTextureStrength(0.3f);
+	///normal map
+	asteroidMaterial.loadNormalMap("Textures/AsteroidNormalMap.ppm");	
+	asteroidMaterial.setNormalMapStrength(0.3f);
+	///reflection texture
 	asteroidMaterial.loadReflectionTexture(faceNames);
 	asteroidMaterial.setReflectiveness(1.0f);
 

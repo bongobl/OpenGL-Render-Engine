@@ -110,10 +110,10 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="..\shader_skybox.frag">
+    <None Include="..\shader_material.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\shader_material.frag">
+    <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

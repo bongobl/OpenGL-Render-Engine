@@ -11,31 +11,45 @@ struct Light{
 };
 
 struct Material{
-	bool useDiffuse;
-	bool useSpecular;
-	bool useAmbient;
-	bool useTexture;
-	bool useNormalMap;
-	bool useReflectionTexture;
 
+	//DIFFUSE
+	bool useDiffuse;
 	vec3 diffuse;
+
+	//SPECULAR
+	bool useSpecular;
 	vec3 specular;
+
+	//AMBIENT
+	bool useAmbient;
 	vec3 ambient;
+
+	//TEXTURE
+	bool useTexture;
 	sampler2D texture;
+	float textureStrength;
+
+	//NORMAL MAP
+	bool useNormalMap;
 	sampler2D normalMap;
+	float normalMapStrength;
+
+	//REFLECTIONTEXTURE
+	bool useReflectionTexture;
 	samplerCube reflectionTexture;
 	float reflectiveness;
+	
 };
 
 uniform Material material;
 uniform Light light;
 uniform vec3 camPosition;
 
-in vec3 vertexDataOutput;
-in vec3 normalDataOutput;
-in vec2 uvOutput;
-in vec3 tangentOutput;
-in vec3 bitangentOutput;
+in vec3 objectSpacePosition;
+in vec3 objectSpaceNormal;
+in vec2 uvTexCoord;
+in vec3 objectSpaceTangent;
+in vec3 objectSpaceBitangent;
 
 in mat4 toWorldMatrix;
 
@@ -45,20 +59,23 @@ out vec4 outColor;
 //constants
 const int DIRECTIONAL_LIGHT = 0;
 const int POINT_LIGHT = 1;
+
+
 void main()
 {
 
 	//FIND POSITION, NORMAL AND TANGENTS IN WORLD COORDINATES
-	vec3 world_position = vec3(toWorldMatrix * vec4(vertexDataOutput,1));
+	vec3 world_position = vec3(toWorldMatrix * vec4(objectSpacePosition,1));
 
-	mat3 normalMatrix = mat3(transpose(inverse(toWorldMatrix)));	
-	vec3 world_normal = normalize(normalMatrix * normalDataOutput);			
-	
-	vec3 world_tangent = vec3(toWorldMatrix * vec4(tangentOutput,1));
-	vec3 world_bitangent = vec3(toWorldMatrix * vec4(bitangentOutput,1));
+	mat3 refinedToWorld = mat3(transpose(inverse(toWorldMatrix)));	
+	vec3 world_normal = normalize(refinedToWorld * objectSpaceNormal);				
+	vec3 world_tangent = normalize(refinedToWorld * objectSpaceTangent);
+	vec3 world_bitangent = normalize(refinedToWorld * objectSpaceBitangent);
 
-	vec3 L = vec3(1,1,1);
-	float C_l = 1;
+
+	//find values L and C_l based on light properties
+	vec3 L;
+	float C_l;
 	if(light.type == DIRECTIONAL_LIGHT){
 		L = -normalize(light.direction);
 		C_l = light.brightness;
@@ -66,7 +83,6 @@ void main()
 		
 		L = normalize(light.position - world_position);
 		C_l = light.brightness / length(light.position - world_position);
-
 
 	}
 
@@ -76,13 +92,15 @@ void main()
 	vec4 textureColor = vec4(1,1,1,1);
 	vec4 reflectionTextureColor = vec4(1,1,1,1);
 
+	//Textures
 	if(material.useTexture){
-		textureColor = texture2D(material.texture, uvOutput);
+		textureColor = (1 -  material.textureStrength * (1 - texture2D(material.texture, uvTexCoord)));
 		outColor *= textureColor;
 	}
 	if(material.useNormalMap){
-		vec3 normalOffset = normalize(texture2D( material.normalMap, uvOutput ).rgb*2.0 - 1.0);
-		world_normal = normalize(world_normal + normalOffset);
+		vec3 normalOffset = normalize(texture2D( material.normalMap, uvTexCoord ).rgb * 2.0 - 1.0);
+		world_normal = normalize(world_normal + normalOffset * material.normalMapStrength);
+
 	}	
 	if(material.useReflectionTexture){
 		vec3 I = normalize(world_position - camPosition);
@@ -91,6 +109,7 @@ void main()
 		outColor *= reflectionTextureColor;
 	}
 	
+	//Lighting Modes
 	if(material.useDiffuse)
 		outColor *= vec4(material.diffuse,1) * max( dot(world_normal, L), 0);
 		
@@ -104,6 +123,6 @@ void main()
 	if(material.useAmbient){
 		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor;
 	}
-	
 		
 }
+

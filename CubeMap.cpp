@@ -79,7 +79,8 @@ void CubeMap::draw(Scene* currScene) {
 
 	glDepthMask(GL_FALSE);
 
-
+	//send cubemap textureID to shader program
+	glUniform1i(glGetUniformLocation(shaderProgram, "skybox"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 

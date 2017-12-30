@@ -18,20 +18,32 @@ Material Material::basic() {
 	return Material();
 }
 Material::Material() {
-	useDiffuse = false;
-	useSpecular = false;
-	useAmbient = false;
-	useTexture = false;
-	useNormalMap = false;
-	useReflectionTexture = false;
 
-	textureID = 0;
-	normalMapID = 0;
-	reflectionTextureID = 0;
-	reflectiveness = 0;
+	//diffuse
+	useDiffuse = false;
 	diffuse = glm::vec3(0, 0, 0);
+
+	//specular
+	useSpecular = false;
 	specular = glm::vec3(0, 0, 0);
+
+	//ambient
+	useAmbient = false;
 	ambient = glm::vec3(0, 0, 0);
+
+	//texture
+	useTexture = false;
+	textureID = 0;
+	textureStrength = 1.0f;
+
+	//normal map
+	useNormalMap = false;
+	normalMapID = 0;
+	normalMapStrength = 1.0f;
+
+	//relection texture
+	useReflectionTexture = false;
+	reflectionTextureID = 0;
 	reflectiveness = 1.0f;
 
 }
@@ -39,66 +51,119 @@ Material::~Material() {
 	
 }
 
+//diffuse
+void Material::setUseDiffuse(bool opt) {
+	useDiffuse = opt;
+}
 void Material::setDiffuseColor(glm::vec3 c) {
 	diffuse = c;
 	useDiffuse = true;
 }
+glm::vec3 Material::getDiffuseColor() {
+	return diffuse;
+}
 
+//specular
+void Material::setUseSpecular(bool opt) {
+	useSpecular = opt;
+}
 void Material::setSpecularColor(glm::vec3 c) {
 	specular = c;
 	useSpecular = true;
-}
-void Material::setAmbientColor(glm::vec3 c) {
-	ambient = c;
-	useAmbient = true;
-}
-
-void Material::setReflectiveness(float r) {
-	reflectiveness = r;
-}
-void Material::loadTexture(const char* filename) {
-
-	loadImage(filename, textureID);
-	useTexture = true;
-}
-void Material::loadNormalMap(const char* filename) {
-
-	loadImage(filename, normalMapID);
-	useNormalMap = true;
-}
-void Material::loadReflectionTexture(std::vector<std::string> faces) {
-	
-	loadCubeMapTexture(faces, reflectionTextureID);
-	useReflectionTexture = true;
-	
-}
-GLuint Material::getTextureID() {
-	return textureID;	
-}
-
-GLuint Material::getNormalMapID() {
-	return normalMapID;
-}
-
-GLuint Material::getShaderProgram() {
-	return shaderProgram;
-}
-
-glm::vec3 Material::getDiffuseColor() {
-	return diffuse;
 }
 
 glm::vec3 Material::getSpecularColor() {
 	return specular;
 }
 
+//ambient
+void Material::setUseAmbient(bool opt) {
+	useAmbient = opt;
+}
+void Material::setAmbientColor(glm::vec3 c) {
+	ambient = c;
+	useAmbient = true;
+}
 glm::vec3 Material::getAmbientColor() {
 	return ambient;
 }
 
+//texture
+void Material::setUseTexture(bool opt) {
+	if (opt == true && textureID == 0) {
+		std::cerr << "ERROR: No texture map loaded" << std::endl;
+		return;
+	}
+	useTexture = opt;
+}
+void Material::loadTexture(const char* filename) {
+
+	loadImage(filename, textureID);
+	useTexture = true;
+}
+GLuint Material::getTextureID() {
+	return textureID;
+}
+void Material::setTextureStrength(float f) {
+	textureStrength = f;
+}
+float Material::getTextureStrength() {
+	return textureStrength;
+}
+
+//normal map
+void Material::setUseNormalMap(bool opt) {
+	if (opt == true && normalMapID == 0) {
+		std::cerr << "ERROR: No normal map loaded" << std::endl;
+		return;
+	}
+	useNormalMap = opt;
+}
+void Material::loadNormalMap(const char* filename) {
+
+	loadImage(filename, normalMapID);
+	useNormalMap = true;
+}
+GLuint Material::getNormalMapID() {
+	return normalMapID;
+}
+void Material::setNormalMapStrength(float f) {
+	normalMapStrength = f;
+}
+float Material::getNormalMapStrength() {
+	return normalMapStrength;
+}
+
+
+//reflection texture
+void Material::setUseReflectionTexture(bool opt) {
+	if (opt == true && reflectionTextureID == 0) {
+		std::cerr << "ERROR: No reflection texture loaded" << std::endl;
+		return;
+	}
+	useReflectionTexture = opt;
+}
+void Material::loadReflectionTexture(std::vector<std::string> faces) {
+
+	loadCubeMapTexture(faces, reflectionTextureID);
+	useReflectionTexture = true;
+}
+GLuint Material::getReflectionTextureID() {
+	return reflectionTextureID;
+}
+void Material::setReflectiveness(float r) {
+	reflectiveness = r;
+}
 float Material::getReflectiveness() {
 	return reflectiveness;
 }
+
+
+GLuint Material::getShaderProgram() {
+	return shaderProgram;
+}
+
+
 void Material::applySettings() {
 
 	//material properties	
@@ -121,11 +186,13 @@ void Material::applySettings() {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.texture"), 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
+		glUniform1f(glGetUniformLocation(shaderProgram, "material.textureStrength"), textureStrength);
 	}
 	if (useNormalMap) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.normalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, normalMapID);
+		glUniform1f(glGetUniformLocation(shaderProgram, "material.normalMapStrength"), normalMapStrength);
 	}
 	
 	if (useReflectionTexture) {
@@ -137,6 +204,8 @@ void Material::applySettings() {
 	}
 }
 
+
+//STATIC HELPER METHODS
 void Material::loadImage(const char* filename, GLuint &currID) {
 
 	int twidth, theight;   // texture width/height [pixels]

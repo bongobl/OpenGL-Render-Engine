@@ -17,7 +17,7 @@ void SampleScene::initObjects() {
 
 	//init lights
 	sceneLights = new Light[2]{
-		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(-1,0,0)),
+		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 2, glm::vec3(-1,0,0)),
 		Light(Light::POINT,glm::vec3(1,1,1), 10, glm::vec3(20,0,0))
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
@@ -26,10 +26,10 @@ void SampleScene::initObjects() {
 
 	//init modes
 	currEditMode = SampleScene::EDIT_MODEL;
-	currActiveLight = 1;
+	currActiveLight = 0;
 
 	//INIT SCENE OBJECTS
-	asteroid = new Asteroid(1);
+	asteroid = new Asteroid(3);
 	asteroid->setScale(glm::vec3(7, 7, 7));
 
 	//vector of skybox face names
@@ -170,7 +170,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	
 	if (currEditMode == SampleScene::EDIT_MODEL) {
-		camDist += -10 * (float)yoffset;
+		camDist += -5 * (float)yoffset;
 		mainCam->position = camRotationMatrix * glm::vec4(0, 0, camDist, 0);
 		mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
 		mainCam->ViewMatrix = glm::lookAt(mainCam->position, mainCam->look_at, mainCam->up);

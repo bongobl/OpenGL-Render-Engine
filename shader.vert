@@ -23,11 +23,11 @@ uniform mat4 toWorld;
 // The default output, gl_Position, should be assigned something. You can define as many
 // extra outputs as you need.
 
-out vec3 vertexDataOutput;
-out vec3 normalDataOutput;
-out vec2 uvOutput;
-out vec3 tangentOutput;
-out vec3 bitangentOutput;
+out vec3 objectSpacePosition;
+out vec3 objectSpaceNormal;
+out vec2 uvTexCoord;
+out vec3 objectSpaceTangent;
+out vec3 objectSpaceBitangent;
 
 out mat4 toWorldMatrix;
 
@@ -37,11 +37,11 @@ void main()
     // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
     gl_Position = projection * modelview * vec4(position, 1.0);
 
-	vertexDataOutput = position;
-	normalDataOutput = normal;
-	uvOutput = uv;
-	tangentOutput = tangent;
-	bitangentOutput = bitangent;
+	objectSpacePosition = position;
+	objectSpaceNormal = normal;
+	uvTexCoord = uv;
+	objectSpaceTangent = tangent;
+	objectSpaceBitangent = bitangent;
 
 	toWorldMatrix = toWorld;
 }
