@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
+#include "Material.h"
 struct Camera {
 	
 	glm::vec3 position;
@@ -14,4 +15,5 @@ struct Camera {
 
 	Camera(glm::vec3 camera_position, glm::vec3 camera_look_at, glm::vec3 camera_up, float camera_width, float camera_height);
 	void resize(float camera_width, float camera_height);
+	void applySettings(GLuint currShaderProgram);
 };

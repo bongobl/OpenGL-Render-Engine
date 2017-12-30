@@ -16,34 +16,44 @@ void Asteroid::initStatics() {
 	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
 	
-	//Create Asteroid Material
 
-	///diffuse
-	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
-
-	///specular
-	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
-
-	///ambient
-	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
-
-	///surface texture
+	//Load Asteroid Textures
 	Texture asteroidTexture;
 	asteroidTexture.loadStandardTexture("Textures/AsteroidTexture.ppm");
-	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
-	asteroidMaterial.setSurfaceTextureStrength(0.3f);
-
-	///normal map
 	Texture normalMapTexture;
 	normalMapTexture.loadStandardTexture("Textures/AsteroidNormalMap.ppm");
-	asteroidMaterial.loadNormalMap(normalMapTexture);	
-	asteroidMaterial.setNormalMapStrength(0.3f);
-
-	///reflection texture
 	Texture reflection;
 	reflection.loadCubeMap(faceNames);
+
+	//Create Asteroid Material
+
+
+	///diffuse
+	asteroidMaterial.setDiffuseColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setUseDiffuse(true);
+
+	///specular
+	asteroidMaterial.setSpecularColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setUseSpecular(true);
+
+	///ambient
+	asteroidMaterial.setAmbientColor(glm::vec3(0, 0.06f, 0.06f));
+	asteroidMaterial.setUseAmbient(true);
+
+	///surface texture
+	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
+	asteroidMaterial.setSurfaceTextureStrength(0.3f);
+	//asteroidMaterial.setUseSurfaceTexture(true);
+
+	///normal map
+	asteroidMaterial.loadNormalMap(normalMapTexture);	
+	asteroidMaterial.setNormalMapStrength(0.9f);
+	//asteroidMaterial.setUseNormalMap(true);
+
+	///reflection texture
 	asteroidMaterial.loadReflectionTexture(reflection);
 	asteroidMaterial.setReflectiveness(1.0f);
+	asteroidMaterial.setUseReflectionTexture(true);
 
 	//Create Template of Asteroids
 	asteroidTemplates = new OBJObject[4]{	OBJObject("Models/Asteroid0.obj", asteroidMaterial),

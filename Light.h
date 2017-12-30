@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
+#include "Material.h"
 struct Light {
 
 	int type;
@@ -13,5 +14,6 @@ struct Light {
 	enum type {DIRECTIONAL, POINT};
 
 	Light(int light_type, glm::vec3 light_color, float light_brightness, glm::vec3 pos_or_dir);
+	void applySettings();
 
 };

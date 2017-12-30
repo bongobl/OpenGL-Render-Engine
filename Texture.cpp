@@ -18,6 +18,9 @@ void Texture::disposeCurrentTexture() {
 	type = Texture::NONE;
 	id = 0;
 }
+unsigned int Texture::getType() {
+	return type;
+}
 GLint Texture::getID() {
 	return id;
 }

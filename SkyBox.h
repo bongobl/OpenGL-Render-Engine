@@ -34,7 +34,8 @@ public:
 	GLuint VBO, VAO, EBO;
 
 	void loadCubeMapTexture(Texture cube_map_texture);
-
+private:
+	void applySettings();
 	
 };
 

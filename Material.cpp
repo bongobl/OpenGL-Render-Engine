@@ -2,15 +2,13 @@
 #include "shader.h"
 
 GLuint Material::shaderProgram = -1;
-std::vector<GLuint> Material::allIDs;
+
 void Material::initStatics() {
 	shaderProgram = LoadShaders("../shader.vert", "../shader_material.frag");
 
 }
 void Material::cleanUpStatics() {
-	for (unsigned int i = 0; i < allIDs.size(); ++i) {
-		glDeleteTextures(1, &allIDs.at(i));
-	}
+
 	glDeleteProgram(shaderProgram);
 }
 
@@ -31,7 +29,7 @@ Material::Material() {
 	useAmbient = false;
 	ambient = glm::vec3(0, 0, 0);
 
-	//texture
+	//surface texture
 	useSurfaceTexture = false;
 	surfaceTextureStrength = 1.0f;
 
@@ -54,7 +52,6 @@ void Material::setUseDiffuse(bool opt) {
 }
 void Material::setDiffuseColor(glm::vec3 c) {
 	diffuse = c;
-	useDiffuse = true;
 }
 glm::vec3 Material::getDiffuseColor() {
 	return diffuse;
@@ -66,9 +63,7 @@ void Material::setUseSpecular(bool opt) {
 }
 void Material::setSpecularColor(glm::vec3 c) {
 	specular = c;
-	useSpecular = true;
 }
-
 glm::vec3 Material::getSpecularColor() {
 	return specular;
 }
@@ -79,7 +74,6 @@ void Material::setUseAmbient(bool opt) {
 }
 void Material::setAmbientColor(glm::vec3 c) {
 	ambient = c;
-	useAmbient = true;
 }
 glm::vec3 Material::getAmbientColor() {
 	return ambient;
@@ -87,7 +81,7 @@ glm::vec3 Material::getAmbientColor() {
 
 //surface texture
 void Material::setUseSurfaceTexture(bool opt) {
-	if (opt == true && surfaceTexture.type != Texture::STANDARD) {
+	if (opt == true && surfaceTexture.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: No texture map loaded" << std::endl;
 		return;
 	}
@@ -95,12 +89,11 @@ void Material::setUseSurfaceTexture(bool opt) {
 }
 void Material::loadSurfaceTexture(Texture surface_texture) {
 
-	if (surface_texture.type != Texture::STANDARD) {
+	if (surface_texture.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: Texture type must be standard" << std::endl;
 		return;
 	}
 	surfaceTexture = surface_texture;
-	useSurfaceTexture = true;
 }
 Texture& Material::getSurfaceTexture() {
 	return surfaceTexture;
@@ -114,7 +107,7 @@ float Material::getSurfaceTextureStrength() {
 
 //normal map
 void Material::setUseNormalMap(bool opt) {
-	if (opt == true && normalMap.id != Texture::STANDARD) {
+	if (opt == true && normalMap.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: No normal map loaded" << std::endl;
 		return;
 	}
@@ -122,12 +115,11 @@ void Material::setUseNormalMap(bool opt) {
 }
 void Material::loadNormalMap(Texture normal_map) {
 
-	if (normal_map.type != Texture::STANDARD) {
+	if (normal_map.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: Normal Map type must be standard" << std::endl;
 		return;
 	}
 	normalMap = normal_map;
-	useNormalMap = true;
 }
 Texture& Material::getNormalMap() {
 	return normalMap;
@@ -139,23 +131,21 @@ float Material::getNormalMapStrength() {
 	return normalMapStrength;
 }
 
-
 //reflection texture
 void Material::setUseReflectionTexture(bool opt) {
-	if (opt == true && reflectionTexture.id != Texture::CUBE_MAP) {
-		std::cerr << "ERROR: No reflection texture loaded" << std::endl;
+	if (opt == true && reflectionTexture.getType() != Texture::CUBE_MAP) {
+		std::cerr << "ERROR: No Reflection texture loaded" << std::endl;
 		return;
 	}
 	useReflectionTexture = opt;
 }
 void Material::loadReflectionTexture(Texture reflection_texture) {
 
-	if (reflection_texture.type != Texture::CUBE_MAP) {
+	if (reflection_texture.getType() != Texture::CUBE_MAP) {
 		std::cerr << "ERROR: Reflection Texture type must be cube map" << std::endl;
 		return;
 	}
 	reflectionTexture = reflection_texture;
-	useReflectionTexture = true;
 }
 Texture& Material::getReflectionTexture() {
 	return reflectionTexture;
@@ -167,7 +157,7 @@ float Material::getReflectiveness() {
 	return reflectiveness;
 }
 
-
+//static shader program for others to use
 GLuint Material::getShaderProgram() {
 	return shaderProgram;
 }
@@ -194,20 +184,22 @@ void Material::applySettings() {
 	if (useSurfaceTexture) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.surfaceTexture"), 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, surfaceTexture.id);
+		glBindTexture(GL_TEXTURE_2D, surfaceTexture.getID());
+
 		glUniform1f(glGetUniformLocation(shaderProgram, "material.surfaceTextureStrength"), surfaceTextureStrength);
 	}
 	if (useNormalMap) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.normalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalMap.id);
+		glBindTexture(GL_TEXTURE_2D, normalMap.getID());
+
 		glUniform1f(glGetUniformLocation(shaderProgram, "material.normalMapStrength"), normalMapStrength);
 	}
 	
 	if (useReflectionTexture) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.reflectionTexture"), 2);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectionTexture.id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectionTexture.getID());
 
 		glUniform1f(glGetUniformLocation(shaderProgram, "material.reflectiveness"), reflectiveness);
 	}

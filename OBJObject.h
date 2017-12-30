@@ -1,5 +1,4 @@
-#ifndef OBJOBJECT_H
-#define OBJOBJECT_H
+#pragma once
 
 #define GLFW_INCLUDE_GLEXT
 #include <GL/glew.h>
@@ -24,11 +23,8 @@ class OBJObject
 	std::vector<glm::vec3> bitangents;
 
 	//centers model geometry
+	bool shouldCenterMesh;
 	glm::mat4 centerModelMesh;
-
-	//model center
-	glm::vec3 modelCenter;
-
 
 	//Transformation Matrices to reflect object properties 
 	glm::mat4 toWorld;
@@ -46,16 +42,14 @@ public:
 	void parse(const char* filepath);
 
 	void draw(Scene* currScene);
+
 	//to manipulate toWorld
 	void setToWorld(glm::mat4 M_new);
 
-	void setModelCenter(glm::vec3 newCenter);
-
 	void setMaterial(Material m);
-
+	void centerMesh(bool opt);
 	std::vector<glm::vec3> getVertices();
 
-	friend class Scene;
+private:
+	void applySettings();
 };
-
-#endif

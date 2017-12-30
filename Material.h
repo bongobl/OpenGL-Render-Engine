@@ -13,7 +13,6 @@ class Material {
 
 	//static fields
 	static GLuint shaderProgram;
-	static std::vector<GLuint> allIDs;
 
 	//diffuse
 	bool useDiffuse;

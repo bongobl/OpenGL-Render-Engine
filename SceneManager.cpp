@@ -53,7 +53,6 @@ void SceneManager::initObjects() {
 
 	//init statics for classes which need them
 	Material::initStatics();
-	Asteroid::initStatics();
 	
 	prevTime = (float)glfwGetTime();
 	
@@ -68,8 +67,6 @@ void SceneManager::initObjects() {
 void SceneManager::dispose() {
 
 	currScene->dispose();
-
-	Asteroid::cleanUpStatics();
 	Material::cleanUpStatics();
 
 	glfwDestroyWindow(window);

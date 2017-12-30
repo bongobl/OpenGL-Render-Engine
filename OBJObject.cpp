@@ -11,9 +11,8 @@ OBJObject::OBJObject(const char *filepath, Material m)
 	//read in geometry data disk
 	parse(filepath);
 	material = m;
-
-	modelCenter = glm::vec3(0, 0, 0);
 	toWorld = glm::mat4(1.0f);
+	shouldCenterMesh = false;
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -29,7 +28,7 @@ OBJObject::OBJObject(const char *filepath, Material m)
 	glBindVertexArray(VAO);
 
 
-	//Vertex Position
+	//Vertex Positions
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_positions);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
@@ -233,7 +232,7 @@ void OBJObject::parse(const char *filepath)
 		bitangents.push_back(bitangent);
 
 	}//END FOR
-}
+}//END PARSE
 
 void OBJObject::draw(Scene* currScene) {
 
@@ -243,56 +242,41 @@ void OBJObject::draw(Scene* currScene) {
 	Light* activeLight = currScene->getActiveLight();
 
 
-	glm::mat4 modelCenterMatrix = glm::translate(glm::mat4(1.0f), modelCenter);
-	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = activeCamera->ViewMatrix * toWorld;
-
-	GLuint uProjection = glGetUniformLocation(Material::getShaderProgram(), "projection");
-	GLuint uModelview = glGetUniformLocation(Material::getShaderProgram(), "modelview");
-	GLuint uToWorld = glGetUniformLocation(Material::getShaderProgram(), "toWorld");
-
-	// Now send these values to the shader program
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &activeCamera->ProjectionMatrix[0][0]);
-	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &toWorld[0][0]);
-
-	//send camera properties to shader program
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "camPosition"), activeCamera->position.x, activeCamera->position.y, activeCamera->position.z);
+	//apply this object's properties
+	this->applySettings();
+	//apply camera properties
+	activeCamera->applySettings(Material::getShaderProgram());
+	//apply light properties
+	activeLight->applySettings();
+	//apply material properties
+	material.applySettings();
 
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-
-	//apply light properties
-	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "light.type"), activeLight->type);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), activeLight->color.r, activeLight->color.g, activeLight->color.b);
-	glUniform1f(glGetUniformLocation(Material::getShaderProgram(), "light.brightness"), activeLight->brightness);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.position"), activeLight->position.x, activeLight->position.y, activeLight->position.z);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.direction"), activeLight->direction.x, activeLight->direction.y, activeLight->direction.z);
-	
-
-	//material properties
-	material.applySettings();
-
-
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 void OBJObject::setToWorld(glm::mat4 M_new) {
-	this->toWorld = M_new;
+	if (shouldCenterMesh)
+		this->toWorld = M_new;
+	else
+		this->toWorld = M_new * centerModelMesh;
 }
 void OBJObject::setMaterial(Material m) {
 	material = m;
 }
 
-void OBJObject::setModelCenter(glm::vec3 newCenter) {
-	modelCenter = newCenter;
+void OBJObject::centerMesh(bool opt) {
+	shouldCenterMesh = opt;
 }
-
 std::vector<glm::vec3> OBJObject::getVertices() {
 	return vertices;
+}
+
+void OBJObject::applySettings() {
+	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorld[0][0]);
 }

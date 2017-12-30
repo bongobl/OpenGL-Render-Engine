@@ -15,7 +15,7 @@ layout (location = 2) in vec3 bitangent;
 // Uniform variables can be updated by fetching their location and passing values to that location
 
 uniform mat4 projection;
-uniform mat4 modelview;
+uniform mat4 view;
 uniform mat4 toWorld;
 
 
@@ -34,8 +34,8 @@ out mat4 toWorldMatrix;
 
 void main()
 {
-    // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
-    gl_Position = projection * modelview * vec4(position, 1.0);
+    // OpenGL maintains the D matrix so you only need to multiply by P, V and M
+    gl_Position = projection * view * toWorld * vec4(position, 1.0);
 
 	objectSpacePosition = position;
 	objectSpaceNormal = normal;

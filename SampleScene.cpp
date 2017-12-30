@@ -2,11 +2,11 @@
 
 void SampleScene::initObjects() {
 
+	Asteroid::initStatics();
+
 	//init trackball controls
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
-	
-	
 
 	//init main camera
 	camDist = 30.0f;
@@ -22,7 +22,13 @@ void SampleScene::initObjects() {
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
 	pointLightDist = 20;
-	pointLightGraphic = new OBJObject("Models/Sphere.obj", Material::basic());
+
+	Material graphicMaterial;
+	graphicMaterial.setDiffuseColor(glm::vec3(0,0,0));
+	graphicMaterial.setUseDiffuse(true);
+	graphicMaterial.setAmbientColor(glm::vec3(0, 1, 0));
+	graphicMaterial.setUseAmbient(true);
+	pointLightGraphic = new OBJObject("Models/Sphere.obj", graphicMaterial);
 
 	//init modes
 	currEditMode = SampleScene::EDIT_MODEL;
@@ -52,6 +58,7 @@ void SampleScene::dispose() {
 	delete mainCam;
 	delete[] sceneLights;
 
+	Asteroid::cleanUpStatics();
 }
 
 void SampleScene::update(float deltaTime) {

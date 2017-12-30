@@ -19,3 +19,9 @@ void Camera::resize(float camera_width, float camera_height) {
 	}
 	
 }
+
+void Camera::applySettings(GLuint currShaderProgram) {
+	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "projection"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "view"), 1, GL_FALSE, &ViewMatrix[0][0]);
+	glUniform3f(glGetUniformLocation(currShaderProgram, "camPosition"), position.x, position.y, position.z);
+}

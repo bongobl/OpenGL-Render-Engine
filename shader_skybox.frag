@@ -8,7 +8,7 @@ in vec3 objectSpacePosition;
 out vec4 color;
 
 uniform samplerCube skybox;
-
+uniform vec3 camPosition;
 
 void main()
 {
