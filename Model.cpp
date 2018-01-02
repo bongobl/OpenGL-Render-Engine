@@ -1,18 +1,17 @@
 #include <iostream>
 #include <string>
 #include <cmath>
-#include "OBJObject.h"
+#include "Model.h"
 #include "Scene.h"
 using namespace std;
 
 
-OBJObject::OBJObject(const char *filepath, Material m) 
+Model::Model(const char *filepath, Material m) 
 {
 	//read in geometry data disk
 	parse(filepath);
 	material = m;
-	toWorld = glm::mat4(1.0f);
-	shouldCenterMesh = false;
+	
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -103,7 +102,7 @@ OBJObject::OBJObject(const char *filepath, Material m)
 
 }
 
-OBJObject::~OBJObject() {
+Model::~Model() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO_positions);
 	glDeleteBuffers(1, &VBO_normals);
@@ -112,7 +111,7 @@ OBJObject::~OBJObject() {
 	glDeleteBuffers(1, &VBO_bitangents);
 	glDeleteBuffers(1, &EBO);
 }
-void OBJObject::parse(const char *filepath) 
+void Model::parse(const char *filepath) 
 {
 
 	// Parsing Variables	
@@ -186,11 +185,10 @@ void OBJObject::parse(const char *filepath)
 	}//END FOR
 	
 	 //define object center
-	glm::vec3 meshCenterOffset;
 	meshCenterOffset.x = (highestX + lowestX) / 2.0f;
 	meshCenterOffset.y = (highestY + lowestY) / 2.0f;
 	meshCenterOffset.z = (highestZ + lowestZ) / 2.0f;
-	centerModelMesh = glm::translate(glm::mat4(1.0f), glm::vec3(-meshCenterOffset.x, -meshCenterOffset.y, -meshCenterOffset.z));
+	centerModelMeshMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-meshCenterOffset.x, -meshCenterOffset.y, -meshCenterOffset.z));
 
 	cout << "num vertices: " << vertices.size() << endl;
 	cout << "num normals: " << normals.size() << endl;
@@ -234,7 +232,7 @@ void OBJObject::parse(const char *filepath)
 	}//END FOR
 }//END PARSE
 
-void OBJObject::draw(Scene* currScene) {
+void Model::draw(Scene* currScene) {
 
 	glUseProgram(Material::getShaderProgram());
 
@@ -259,24 +257,28 @@ void OBJObject::draw(Scene* currScene) {
 
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
+
+	
+	drawAllChildren(currScene);
 }
-void OBJObject::setToWorld(glm::mat4 M_new) {
-	if (shouldCenterMesh)
-		this->toWorld = M_new;
-	else
-		this->toWorld = M_new * centerModelMesh;
-}
-void OBJObject::setMaterial(Material m) {
+void Model::setMaterial(Material m) {
 	material = m;
 }
 
-void OBJObject::centerMesh(bool opt) {
-	shouldCenterMesh = opt;
+void Model::centerMesh(bool opt) {
+	if (opt)
+		centerModelMeshMatrix = glm::translate(glm::mat4(1.0f), meshCenterOffset);
+	else
+		centerModelMeshMatrix = glm::mat4(1.0f);
+
+
 }
-std::vector<glm::vec3> OBJObject::getVertices() {
+std::vector<glm::vec3> Model::getVertices() {
 	return vertices;
 }
 
-void OBJObject::applySettings() {
-	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorld[0][0]);
+void Model::applySettings() {
+
+	glm::mat4 completeToWorld = toWorld * centerModelMeshMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &completeToWorld[0][0]);
 }

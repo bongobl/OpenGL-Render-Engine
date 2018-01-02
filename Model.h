@@ -9,9 +9,10 @@
 
 #include <vector>
 #include "Material.h"
-
+#include "SceneObject.h"
 class Scene;
-class OBJObject
+
+class Model : public SceneObject
 {
 
 	//Model Geometry Data
@@ -23,11 +24,8 @@ class OBJObject
 	std::vector<glm::vec3> bitangents;
 
 	//centers model geometry
-	bool shouldCenterMesh;
-	glm::mat4 centerModelMesh;
-
-	//Transformation Matrices to reflect object properties 
-	glm::mat4 toWorld;
+	glm::vec3 meshCenterOffset;
+	glm::mat4 centerModelMeshMatrix;
 
 	//Rendering with modern OpenGL
 	GLuint VBO_positions, VBO_normals, VBO_uvs, VBO_tangents, VBO_bitangents, VAO, EBO;
@@ -37,14 +35,12 @@ class OBJObject
 	
 public:
 
-	OBJObject(const char* filepath, Material m);
-	~OBJObject();
+	Model(const char* filepath, Material m);
+	~Model();
 	void parse(const char* filepath);
 
+	//override
 	void draw(Scene* currScene);
-
-	//to manipulate toWorld
-	void setToWorld(glm::mat4 M_new);
 
 	void setMaterial(Material m);
 	void centerMesh(bool opt);

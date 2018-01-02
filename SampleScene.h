@@ -1,13 +1,16 @@
 #pragma once
 #include "Scene.h"
-#include "Asteroid.h"
 #include "Texture.h"
 #include "SkyBox.h"
+#include "Model.h"
+#include "BoundingBox.h"
 class SampleScene : public Scene {
 
 	//Scene Objects
-	Asteroid* asteroid;
 	SkyBox oceanView;
+	Model* testModel;
+	Model* childObject;
+	Model* child2;
 
 	//Camera
 	Camera* mainCam;
@@ -18,7 +21,7 @@ class SampleScene : public Scene {
 	Light* sceneLights;
 	float pointLightDist;
 	glm::mat4 pointLightRotationMatrix;
-	OBJObject* pointLightGraphic;
+	Model* pointLightGraphic;
 
 	//Trackball controls
 	bool isRightMouseButtonDown;

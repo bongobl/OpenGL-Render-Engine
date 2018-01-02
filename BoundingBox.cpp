@@ -1,5 +1,4 @@
 #include "BoundingBox.h"
-#include "Window.h"
 #include "Scene.h"
 BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	meshVertices = verts;

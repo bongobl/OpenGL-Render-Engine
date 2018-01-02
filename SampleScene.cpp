@@ -2,7 +2,6 @@
 
 void SampleScene::initObjects() {
 
-	Asteroid::initStatics();
 
 	//init trackball controls
 	isLeftMouseButtonDown = false;
@@ -13,8 +12,6 @@ void SampleScene::initObjects() {
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 0,0);
 	
-	
-
 	//init lights
 	sceneLights = new Light[2]{
 		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(-1,0,0)),
@@ -28,15 +25,13 @@ void SampleScene::initObjects() {
 	graphicMaterial.setUseDiffuse(true);
 	graphicMaterial.setAmbientColor(glm::vec3(0, 1, 0));
 	graphicMaterial.setUseAmbient(true);
-	pointLightGraphic = new OBJObject("Models/Sphere.obj", graphicMaterial);
+	pointLightGraphic = new Model("Models/Sphere.obj", graphicMaterial);
 
 	//init modes
 	currEditMode = SampleScene::EDIT_MODEL;
 	currActiveLight = 0;
 
 	//INIT SCENE OBJECTS
-	asteroid = new Asteroid(3);
-	asteroid->setScale(glm::vec3(7, 7, 7));
 
 	//vector of skybox face names
 	std::vector<std::string> faceNames;
@@ -49,31 +44,81 @@ void SampleScene::initObjects() {
 	
 	Texture oceanViewCubeMap;
 	oceanViewCubeMap.loadCubeMap(faceNames);
+
 	//init cubemap
 	oceanView.loadCubeMapTexture(oceanViewCubeMap);
+
+	//TEST OBJECT
+	//Load Asteroid Textures
+	Texture asteroidTexture;
+	asteroidTexture.loadStandardTexture("Textures/AsteroidTexture.ppm");
+	Texture normalMapTexture;
+	normalMapTexture.loadStandardTexture("Textures/AsteroidNormalMap.ppm");
+
+	//Create Asteroid Material
+	Material asteroidMaterial;
+	///diffuse
+	asteroidMaterial.setDiffuseColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setUseDiffuse(true);
+
+	///specular
+	asteroidMaterial.setSpecularColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setUseSpecular(true);
+
+	///ambient
+	asteroidMaterial.setAmbientColor(glm::vec3(0, 0.06f, 0.06f));
+	asteroidMaterial.setUseAmbient(true);
+
+	///surface texture
+	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
+	asteroidMaterial.setSurfaceTextureStrength(0.3f);
+	asteroidMaterial.setUseSurfaceTexture(true);
+
+	///normal map
+	asteroidMaterial.loadNormalMap(normalMapTexture);
+	asteroidMaterial.setNormalMapStrength(0.9f);
+	//asteroidMaterial.setUseNormalMap(true);
+
+	///reflection texture
+	asteroidMaterial.loadReflectionTexture(oceanViewCubeMap);
+	asteroidMaterial.setReflectiveness(1.0f);
+	asteroidMaterial.setUseReflectionTexture(true);
+
+
+	testModel = new Model("Models/filletCube.obj", asteroidMaterial);
+	testModel->setScale(glm::vec3(7, 7, 7));
+
+	childObject = new Model("Models/Asteroid0.obj", asteroidMaterial);
+	testModel->addChild(childObject);
+	childObject->setPosition(glm::vec3(7, 7, 0));
+	
+	child2 = new Model("Models/Sphere.obj", Material::basic());
+	child2->setPosition(glm::vec3(-7, 2, 0));
+	child2->setScale(glm::vec3(0.5f,0.5f,0.5f));
+	childObject->addChild(child2);
 	
 }
 void SampleScene::dispose() {
-	delete asteroid;
+	delete testModel;
+	delete childObject;
 	delete mainCam;
 	delete[] sceneLights;
-
-	Asteroid::cleanUpStatics();
 }
 
 void SampleScene::update(float deltaTime) {
 	
-	pointLightGraphic->setToWorld(glm::translate(glm::mat4(1.0f), sceneLights[1].position) * 
-									glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 1)));
+
+	testModel->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation());
+	childObject->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation());
+	pointLightGraphic->setPosition(sceneLights[1].position);
 	oceanView.setPosition(mainCam->position);
-	asteroid->update(deltaTime);
 	
 }
 void SampleScene::draw() {
 	if(currActiveLight == 1)
 		pointLightGraphic->draw(this);
 	oceanView.draw(this);
-	asteroid->draw(this);
+	testModel->draw(this);
 }
 
 //events from callbacks
@@ -158,8 +203,9 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 				}
 				else if (isLeftMouseButtonDown) {
 
-					if(currEditMode == SampleScene::EDIT_MODEL)
-						asteroid->updateTrackBall(deltaTrackBall);
+					if (currEditMode == SampleScene::EDIT_MODEL) {
+
+					}
 					else if (currEditMode == SampleScene::EDIT_LIGHT) {
 						if(currActiveLight == 0)
 							sceneLights[currActiveLight].direction = deltaTrackBall * glm::vec4(sceneLights[currActiveLight].direction, 1);
@@ -191,7 +237,6 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 		}
 	}
 }
-
 
 Camera* SampleScene::getActiveCamera() {
 	return mainCam;

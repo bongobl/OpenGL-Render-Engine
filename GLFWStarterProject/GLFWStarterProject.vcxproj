@@ -19,29 +19,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Asteroid.h" />
     <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\Camera.h" />
+    <ClInclude Include="..\SceneObject.h" />
     <ClInclude Include="..\SkyBox.h" />
     <ClInclude Include="..\Light.h" />
     <ClInclude Include="..\SampleScene.h" />
     <ClInclude Include="..\SceneManager.h" />
-    <ClInclude Include="..\OBJObject.h" />
+    <ClInclude Include="..\Model.h" />
     <ClInclude Include="..\Scene.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Material.h" />
     <ClInclude Include="..\Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Asteroid.cpp" />
     <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Camera.cpp" />
+    <ClCompile Include="..\SceneObject.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
     <ClCompile Include="..\SampleScene.cpp" />
     <ClCompile Include="..\Scene.cpp" />
     <ClCompile Include="..\SceneManager.cpp" />
     <ClCompile Include="..\main.cpp" />
-    <ClCompile Include="..\OBJObject.cpp" />
+    <ClCompile Include="..\Model.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Material.cpp" />
     <ClCompile Include="..\Light.cpp" />
