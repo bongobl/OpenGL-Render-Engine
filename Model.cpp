@@ -273,6 +273,9 @@ void Model::centerMesh(bool opt) {
 
 
 }
+glm::mat4 Model::getToWorldWithCenteredMesh() {
+	return toWorld * centerModelMeshMatrix;
+}
 std::vector<glm::vec3> Model::getVertices() {
 	return vertices;
 }

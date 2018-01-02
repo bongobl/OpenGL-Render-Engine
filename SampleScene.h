@@ -11,7 +11,7 @@ class SampleScene : public Scene {
 	Model* testModel;
 	Model* childObject;
 	Model* child2;
-
+	BoundingBox* boundingBox;
 	//Camera
 	Camera* mainCam;
 	float camDist;

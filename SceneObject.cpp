@@ -30,8 +30,12 @@ glm::vec3 SceneObject::getScale() {
 	return scale;
 }
 
-void SceneObject::addChild(SceneObject* sceneObject) {
-	children.push_back(sceneObject);
+glm::mat4 SceneObject::getToWorld() {
+	return toWorld;
+}
+void SceneObject::addChild(SceneObject* newChild) {
+	children.push_back(newChild);
+	updateAllMatrices();
 }
 void SceneObject::updateParentToWorldMatrix(glm::mat4 parent_to_world) {
 	parentToWorld = parent_to_world;

@@ -44,6 +44,7 @@ public:
 
 	void setMaterial(Material m);
 	void centerMesh(bool opt);
+	glm::mat4 getToWorldWithCenteredMesh();
 	std::vector<glm::vec3> getVertices();
 
 private:

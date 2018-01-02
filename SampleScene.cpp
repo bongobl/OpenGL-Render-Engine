@@ -13,19 +13,21 @@ void SampleScene::initObjects() {
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 0,0);
 	
 	//init lights
+	pointLightDist = 20;
 	sceneLights = new Light[2]{
-		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(-1,0,0)),
-		Light(Light::POINT,glm::vec3(1,1,1), 10, glm::vec3(20,0,0))
+		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(0,0,0),glm::vec3(-1,0,0)),
+		Light(Light::POINT,glm::vec3(1,1,1), 30, glm::vec3(pointLightDist,0,0), glm::vec3(0,0,0))
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
-	pointLightDist = 20;
+	
 
 	Material graphicMaterial;
 	graphicMaterial.setDiffuseColor(glm::vec3(0,0,0));
 	graphicMaterial.setUseDiffuse(true);
-	graphicMaterial.setAmbientColor(glm::vec3(0, 1, 0));
+	graphicMaterial.setAmbientColor(glm::vec3(1, 1, 0));
 	graphicMaterial.setUseAmbient(true);
 	pointLightGraphic = new Model("Models/Sphere.obj", graphicMaterial);
+	sceneLights[1].addChild(pointLightGraphic);
 
 	//init modes
 	currEditMode = SampleScene::EDIT_MODEL;
@@ -91,12 +93,14 @@ void SampleScene::initObjects() {
 	childObject = new Model("Models/Asteroid0.obj", asteroidMaterial);
 	testModel->addChild(childObject);
 	childObject->setPosition(glm::vec3(7, 7, 0));
-	
+
+
 	child2 = new Model("Models/Sphere.obj", Material::basic());
 	child2->setPosition(glm::vec3(-7, 2, 0));
 	child2->setScale(glm::vec3(0.5f,0.5f,0.5f));
 	childObject->addChild(child2);
-	
+
+	boundingBox = new BoundingBox(childObject->getVertices());
 }
 void SampleScene::dispose() {
 	delete testModel;
@@ -107,18 +111,18 @@ void SampleScene::dispose() {
 
 void SampleScene::update(float deltaTime) {
 	
-
 	testModel->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation());
 	childObject->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation());
-	pointLightGraphic->setPosition(sceneLights[1].position);
 	oceanView.setPosition(mainCam->position);
-	
+	boundingBox->updateToWorld(childObject->getToWorldWithCenteredMesh());
 }
 void SampleScene::draw() {
-	if(currActiveLight == 1)
-		pointLightGraphic->draw(this);
+	
+	testModel->draw(this);	
+	sceneLights[currActiveLight].draw(this);
+	boundingBox->draw(this);
 	oceanView.draw(this);
-	testModel->draw(this);
+
 }
 
 //events from callbacks
@@ -211,7 +215,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 							sceneLights[currActiveLight].direction = deltaTrackBall * glm::vec4(sceneLights[currActiveLight].direction, 1);
 						else if (currActiveLight == 1) {
 							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
-							sceneLights[currActiveLight].position = deltaTrackBall * glm::vec4(sceneLights[currActiveLight].position, 1);
+							sceneLights[currActiveLight].setPosition(deltaTrackBall * glm::vec4(sceneLights[currActiveLight].getPosition(), 1));
 						}
 					}
 				}
@@ -233,7 +237,7 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	else if (currEditMode == SampleScene::EDIT_LIGHT) {
 		if (currActiveLight == SampleScene::POINT_LIGHT) {
 			pointLightDist += 3 * (float)yoffset;
-			sceneLights[currActiveLight].position = pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0,1);
+			sceneLights[currActiveLight].setPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0,1));
 		}
 	}
 }

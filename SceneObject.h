@@ -4,20 +4,20 @@
 class Scene;
 class SceneObject {
 
-	//Affine transform fields
+protected:
+	//Local transform fields
 	glm::vec3 position;
 	glm::mat4 rotation;
 	glm::vec3 scale;
 
-protected:
-
-	glm::mat4 toWorld;			//global coordinates
 	glm::mat4 toParent;			//local coordinates
 	glm::mat4 parentToWorld;	//parent's toWorld
-
 	std::vector<SceneObject*> children;
 
-	void updateParentToWorldMatrix(glm::mat4 parent_to_world);
+
+
+	glm::mat4 toWorld;			//global coordinates
+
 	void drawAllChildren(Scene* currScene);
 
 public:
@@ -29,13 +29,14 @@ public:
 	glm::mat4 getRotation();
 	void setScale(glm::vec3 sca);
 	glm::vec3 getScale();
+	glm::mat4 getToWorld();
 
-
-	void addChild(SceneObject* sceneObject);
+	void addChild(SceneObject* newChild);
 	
 	virtual void draw(Scene* currScene) = 0;
 
 private:
+	void updateParentToWorldMatrix(glm::mat4 parent_to_world);
 	void updateAllMatrices();
 	
 };

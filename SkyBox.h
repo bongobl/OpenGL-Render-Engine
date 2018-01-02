@@ -11,25 +11,18 @@
 #include <string>
 #include "shader.h"
 #include "Texture.h"
-
+#include "SceneObject.h"
 class Scene;
-class SkyBox
+class SkyBox : public SceneObject
 {
-	float scale;
-	glm::vec3 position;
-
 	GLuint shaderProgram;
 	Texture cubeMapTexture;
 public:
 	SkyBox();
 	~SkyBox();
 
-	glm::mat4 toWorld;
-
 	void draw(Scene* currScene);
-	void setScale(float sc);
-	void setPosition(glm::vec3 pos);
-	glm::vec3 getPosition();
+
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
 

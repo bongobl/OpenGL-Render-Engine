@@ -3,8 +3,7 @@
 
 SkyBox::SkyBox()
 {
-	scale = 1000;
-	position = glm::vec3(1.0f, 1.0f, 1.0f);
+	setScale(glm::vec3(1000,1000,1000));
 	shaderProgram = LoadShaders("../shader.vert", "../shader_skybox.frag");
 	
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -75,17 +74,6 @@ void SkyBox::draw(Scene* currScene) {
 	glBindVertexArray(0);
 }
 
-void SkyBox::setScale(float sc) {
-	scale = sc;
-}
-void SkyBox::setPosition(glm::vec3 pos) {
-	position = pos;
-}
-
-glm::vec3 SkyBox::getPosition() {
-	return position;
-}
-
 void SkyBox::loadCubeMapTexture(Texture cube_map_texture) {
 
 	if(cube_map_texture.getType() == Texture::CUBE_MAP)
@@ -96,9 +84,6 @@ void SkyBox::loadCubeMapTexture(Texture cube_map_texture) {
 }
 
 void SkyBox::applySettings() {
-
-	//calc toWorld
-	toWorld = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
 
 	//send toWorld to shader
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "toWorld"), 1, GL_FALSE, &toWorld[0][0]);
