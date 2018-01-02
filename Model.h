@@ -43,6 +43,7 @@ public:
 	void draw(Scene* currScene);
 
 	void setMaterial(Material m);
+	Material& getMaterial();
 	void centerMesh(bool opt);
 	glm::mat4 getToWorldWithCenteredMesh();
 	std::vector<glm::vec3> getVertices();

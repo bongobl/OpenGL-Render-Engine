@@ -35,7 +35,7 @@ glm::mat4 SceneObject::getToWorld() {
 }
 void SceneObject::addChild(SceneObject* newChild) {
 	children.push_back(newChild);
-	updateAllMatrices();
+	newChild->updateParentToWorldMatrix(toWorld);
 }
 void SceneObject::updateParentToWorldMatrix(glm::mat4 parent_to_world) {
 	parentToWorld = parent_to_world;
@@ -51,7 +51,6 @@ void SceneObject::updateAllMatrices() {
 	for (unsigned int i = 0; i < children.size(); ++i) {
 		children[i]->updateParentToWorldMatrix(toWorld);
 	}
-
 }
 
 void SceneObject::drawAllChildren(Scene* currScene) {

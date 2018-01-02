@@ -94,25 +94,16 @@ void BoundingBox::draw(Scene* currScene) {
 	glUseProgram(material.getShaderProgram());
 
 	Camera* activeCamera = currScene->getActiveCamera();
-	glm::mat4 identity(1.0f);
 
-	glm::mat4 modelview = activeCamera->ViewMatrix;
-	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
-	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
-	// Get the location of the uniform variables "projection" and "modelview"
-	GLuint uProjection = glGetUniformLocation(material.getShaderProgram(), "projection");
-	GLuint uModelview = glGetUniformLocation(material.getShaderProgram(), "modelview");
-	GLuint uToWorld = glGetUniformLocation(material.getShaderProgram(), "toWorld");
+	//apply object boundingbox properties	
+	glUniformMatrix4fv(glGetUniformLocation(material.getShaderProgram(), "toWorld"), 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
 
-	// Now send these values to the shader program
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &activeCamera->ProjectionMatrix[0][0]);
-	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-	glUniformMatrix4fv(uToWorld, 1, GL_FALSE, &identity[0][0]);
-
+	//apply camera properties
+	activeCamera->applySettings(Material::getShaderProgram());
 	
+	//apply material properties
 	material.applySettings();
 
-	
 	//Bind VAO for box and draw 
 	glBindVertexArray(VAO);
 	glLineWidth(3);

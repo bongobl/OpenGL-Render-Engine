@@ -265,6 +265,9 @@ void Model::setMaterial(Material m) {
 	material = m;
 }
 
+Material& Model::getMaterial() {
+	return material;
+}
 void Model::centerMesh(bool opt) {
 	if (opt)
 		centerModelMeshMatrix = glm::translate(glm::mat4(1.0f), meshCenterOffset);

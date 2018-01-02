@@ -12,9 +12,9 @@ Light::Light(int light_type, glm::vec3 light_color, float light_brightness, glm:
 
 void Light::applySettings() {
 
-	//find light world position
+	//find light world position and direction
 	glm::vec3 worldPosition = parentToWorld * glm::vec4(position,1);
-	glm::vec3 worldDirection = parentToWorld * glm::vec4(direction, 1);
+	glm::vec3 worldDirection = parentToWorld * rotation * glm::vec4(direction, 1);
 
 	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "light.type"), type);
 	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), color.r, color.g, color.b);

@@ -72,6 +72,8 @@ void SkyBox::draw(Scene* currScene) {
 	glDepthMask(GL_TRUE);
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
+
+	drawAllChildren(currScene);
 }
 
 void SkyBox::loadCubeMapTexture(Texture cube_map_texture) {

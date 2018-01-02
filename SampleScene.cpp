@@ -98,9 +98,15 @@ void SampleScene::initObjects() {
 	child2 = new Model("Models/Sphere.obj", Material::basic());
 	child2->setPosition(glm::vec3(-7, 2, 0));
 	child2->setScale(glm::vec3(0.5f,0.5f,0.5f));
+	child2->getMaterial().setDiffuseColor(glm::vec3(0, 0, 0));
+	child2->getMaterial().setUseDiffuse(true);
+	child2->getMaterial().setAmbientColor(glm::vec3(1, 0, 0));
+	child2->getMaterial().setUseAmbient(true);
 	childObject->addChild(child2);
+	
 
-	boundingBox = new BoundingBox(childObject->getVertices());
+	boundingBox = new BoundingBox(testModel->getVertices());
+
 }
 void SampleScene::dispose() {
 	delete testModel;
@@ -114,7 +120,7 @@ void SampleScene::update(float deltaTime) {
 	testModel->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation());
 	childObject->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation());
 	oceanView.setPosition(mainCam->position);
-	boundingBox->updateToWorld(childObject->getToWorldWithCenteredMesh());
+	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 }
 void SampleScene::draw() {
 	
@@ -212,7 +218,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 					}
 					else if (currEditMode == SampleScene::EDIT_LIGHT) {
 						if(currActiveLight == 0)
-							sceneLights[currActiveLight].direction = deltaTrackBall * glm::vec4(sceneLights[currActiveLight].direction, 1);
+							sceneLights[currActiveLight].setRotation(deltaTrackBall * sceneLights[currActiveLight].getRotation());
 						else if (currActiveLight == 1) {
 							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
 							sceneLights[currActiveLight].setPosition(deltaTrackBall * glm::vec4(sceneLights[currActiveLight].getPosition(), 1));
