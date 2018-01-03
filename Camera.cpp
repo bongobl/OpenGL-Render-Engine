@@ -4,11 +4,6 @@ Camera::Camera(glm::vec3 camera_position, glm::vec3 camera_look_at, glm::vec3 ca
 	
 	//Camera Mode
 	targetMode = false;
-
-	//Non-target Mode
-	x_basis = glm::vec4(1, 0, 0, 1);
-	y_basis = glm::vec4(0, 1, 0, 1);
-	z_basis = glm::vec4(0, 0, 1, 1);
 	
 	//Target Mode
 	targetObject = NULL;
@@ -43,7 +38,7 @@ void Camera::applySettings(GLuint currShaderProgram) {
 
 	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "projection"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "view"), 1, GL_FALSE, &ViewMatrix[0][0]);
-	glUniform3f(glGetUniformLocation(currShaderProgram, "camPosition"), worldPosition.x, worldPosition.y, worldPosition.z); //TO GLOBAL
+	glUniform3f(glGetUniformLocation(currShaderProgram, "camPosition"), worldPosition.x, worldPosition.y, worldPosition.z);
 }
 
 void Camera::setTargetMode(bool target_mode) {
@@ -66,24 +61,12 @@ void Camera::updateMatrices() {
 		glm::vec3 targetWorldPosition = targetObject->getPosition(SceneObject::WORLD);
 		look_at = targetWorldPosition;
 
-		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), look_at, up);	//NOTE TO CHANGE POSITION TO GLOBAL WHEN EXTENDING SceneObject
+		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), look_at, up);
+		toWorld = glm::inverse(ViewMatrix);
 	}
 	if (!targetMode) {
-
-		glm::vec3 x_new = toWorld * x_basis;
-		glm::vec3 y_new = toWorld * y_basis;
-		glm::vec3 z_new = toWorld * z_basis;
-
-		glm::vec3 position_new = toWorld * glm::vec4(0, 0, 0, 1);
-		glm::vec3 look_at_new = z_new;
-		glm::vec3 up_new = y_new - position_new;
-
-		ViewMatrix = glm::lookAt(position_new, look_at_new, up_new);
-		
-		
+		ViewMatrix = glm::inverse(toWorld);
 	}
-	
-	//ViewMatrix = glm::lookAt(position, look_at, up);
 
 	if (height > 0)
 	{

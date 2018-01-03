@@ -8,11 +8,6 @@ struct Camera : public SceneObject{
 	//Camera Mode
 	bool targetMode;
 
-	//Non-target Mode
-	glm::vec4 x_basis;
-	glm::vec4 y_basis;
-	glm::vec4 z_basis;
-
 	//Target Mode
 	SceneObject* targetObject;
 	glm::vec3 look_at;

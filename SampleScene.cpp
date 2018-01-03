@@ -108,7 +108,8 @@ void SampleScene::initObjects() {
 	boundingBox = new BoundingBox(testModel->getVertices());
 
 	//test cam
-	mainCam->setTargetObject(childObject);
+	childObject->addChild(mainCam);
+	mainCam->setTargetObject(child2);
 	mainCam->setTargetMode(true);
 
 }
@@ -127,7 +128,7 @@ void SampleScene::update(float deltaTime) {
 	oceanView.setLocalPosition(mainCam->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 	
-	mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
+	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 2, glm::vec3(1, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
 	//Note::update camera last so all objects are up to date
 	mainCam->update();
 }
@@ -216,7 +217,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 				if (isRightMouseButtonDown) {
 					camRotationMatrix = deltaTrackBall * camRotationMatrix;
 					
-					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
+					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));	
 					mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
 					mainCam->ViewMatrix = glm::lookAt(mainCam->getPosition(SceneObject::WORLD), mainCam->look_at, mainCam->up);
 				}
