@@ -3,7 +3,7 @@
 
 SkyBox::SkyBox()
 {
-	setScale(glm::vec3(1000,1000,1000));
+	setLocalScale(glm::vec3(1000,1000,1000));
 	shaderProgram = LoadShaders("../shader.vert", "../shader_skybox.frag");
 	
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!

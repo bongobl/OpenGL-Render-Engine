@@ -8,9 +8,9 @@ void SampleScene::initObjects() {
 	isRightMouseButtonDown = false;
 
 	//init main camera
-	camDist = 30.0f;
+	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
-	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 0,0);
+	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 45.0f, 0,0);
 	
 	//init lights
 	pointLightDist = 20;
@@ -88,16 +88,16 @@ void SampleScene::initObjects() {
 
 
 	testModel = new Model("Models/filletCube.obj", asteroidMaterial);
-	testModel->setScale(glm::vec3(7, 7, 7));
+	testModel->setLocalScale(glm::vec3(7, 7, 7));
 
 	childObject = new Model("Models/Asteroid0.obj", asteroidMaterial);
 	testModel->addChild(childObject);
-	childObject->setPosition(glm::vec3(7, 7, 0));
+	childObject->setLocalPosition(glm::vec3(7, 7, 0));
 
 
 	child2 = new Model("Models/Sphere.obj", Material::basic());
-	child2->setPosition(glm::vec3(-7, 2, 0));
-	child2->setScale(glm::vec3(0.5f,0.5f,0.5f));
+	child2->setLocalPosition(glm::vec3(-7, 2, 0));
+	child2->setLocalScale(glm::vec3(0.5f,0.5f,0.5f));
 	child2->getMaterial().setDiffuseColor(glm::vec3(0, 0, 0));
 	child2->getMaterial().setUseDiffuse(true);
 	child2->getMaterial().setAmbientColor(glm::vec3(1, 0, 0));
@@ -106,6 +106,10 @@ void SampleScene::initObjects() {
 	
 
 	boundingBox = new BoundingBox(testModel->getVertices());
+
+	//test cam
+	mainCam->setTargetObject(childObject);
+	mainCam->setTargetMode(true);
 
 }
 void SampleScene::dispose() {
@@ -117,10 +121,15 @@ void SampleScene::dispose() {
 
 void SampleScene::update(float deltaTime) {
 	
-	testModel->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation());
-	childObject->setRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation());
-	oceanView.setPosition(mainCam->position);
+	
+	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
+	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
+	oceanView.setLocalPosition(mainCam->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
+	
+	mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
+	//Note::update camera last so all objects are up to date
+	mainCam->update();
 }
 void SampleScene::draw() {
 	
@@ -207,9 +216,9 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 				if (isRightMouseButtonDown) {
 					camRotationMatrix = deltaTrackBall * camRotationMatrix;
 					
-					mainCam->position = camRotationMatrix * glm::vec4(0, 0, camDist, 0);
+					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
 					mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
-					mainCam->ViewMatrix = glm::lookAt(mainCam->position, mainCam->look_at, mainCam->up);
+					mainCam->ViewMatrix = glm::lookAt(mainCam->getPosition(SceneObject::WORLD), mainCam->look_at, mainCam->up);
 				}
 				else if (isLeftMouseButtonDown) {
 
@@ -218,10 +227,10 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 					}
 					else if (currEditMode == SampleScene::EDIT_LIGHT) {
 						if(currActiveLight == 0)
-							sceneLights[currActiveLight].setRotation(deltaTrackBall * sceneLights[currActiveLight].getRotation());
+							sceneLights[currActiveLight].setLocalRotation(deltaTrackBall * sceneLights[currActiveLight].getRotation(SceneObject::OBJECT));
 						else if (currActiveLight == 1) {
 							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
-							sceneLights[currActiveLight].setPosition(deltaTrackBall * glm::vec4(sceneLights[currActiveLight].getPosition(), 1));
+							sceneLights[currActiveLight].setLocalPosition(deltaTrackBall * glm::vec4(sceneLights[currActiveLight].getPosition(SceneObject::OBJECT), 1));
 						}
 					}
 				}
@@ -236,16 +245,17 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	
 	if (currEditMode == SampleScene::EDIT_MODEL) {
 		camDist += -5 * (float)yoffset;
-		mainCam->position = camRotationMatrix * glm::vec4(0, 0, camDist, 0);
+		mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
 		mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
-		mainCam->ViewMatrix = glm::lookAt(mainCam->position, mainCam->look_at, mainCam->up);
+		mainCam->ViewMatrix = glm::lookAt(mainCam->getPosition(SceneObject::WORLD), mainCam->look_at, mainCam->up);
 	}
 	else if (currEditMode == SampleScene::EDIT_LIGHT) {
 		if (currActiveLight == SampleScene::POINT_LIGHT) {
 			pointLightDist += 3 * (float)yoffset;
-			sceneLights[currActiveLight].setPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0,1));
+			sceneLights[currActiveLight].setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0,1));
 		}
 	}
+	
 }
 
 Camera* SampleScene::getActiveCamera() {

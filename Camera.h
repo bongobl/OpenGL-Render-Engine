@@ -1,19 +1,46 @@
 #pragma once
+#include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Material.h"
-struct Camera {
+#include "SceneObject.h"
+struct Camera : public SceneObject{
 	
-	glm::vec3 position;
+	//Camera Mode
+	bool targetMode;
+
+	//Non-target Mode
+	glm::vec4 x_basis;
+	glm::vec4 y_basis;
+	glm::vec4 z_basis;
+
+	//Target Mode
+	SceneObject* targetObject;
 	glm::vec3 look_at;
 	glm::vec3 up;
 
+	//To define Projection Matrix
+	float fieldOfViewY;
 	float width;
 	float height;
-	glm::mat4 ProjectionMatrix;
+	float near;
+	float far;
+
+	//Camera Matrices
 	glm::mat4 ViewMatrix;
+	glm::mat4 ProjectionMatrix;
+	
 
-
-	Camera(glm::vec3 camera_position, glm::vec3 camera_look_at, glm::vec3 camera_up, float camera_width, float camera_height);
+	Camera(glm::vec3 camera_position, glm::vec3 camera_look_at, glm::vec3 camera_up, float camera_field_of_view_Y, float camera_width, float camera_height);
+	void update();
 	void resize(float camera_width, float camera_height);
 	void applySettings(GLuint currShaderProgram);
+	
+	void setTargetMode(bool targetMode);
+	void setTargetObject(SceneObject* target_object);
+
+	//override
+	void draw(Scene* currScene);
+
+private:
+	void updateMatrices();
 };

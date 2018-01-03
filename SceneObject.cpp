@@ -2,32 +2,60 @@
 #include "Scene.h"
 
 SceneObject::SceneObject() {
-	position = glm::vec3(0, 0, 0);
-	rotation = glm::mat4(1.0f);
-	scale = glm::vec3(1, 1, 1);
+	local_position = glm::vec3(0, 0, 0);
+	local_rotation = glm::mat4(1.0f);
+	local_scale = glm::vec3(1, 1, 1);
 	parentToWorld = glm::mat4(1.0f);
 	updateAllMatrices();
 }
-void SceneObject::setPosition(glm::vec3 pos) {
-	position = pos;
+void SceneObject::setLocalPosition(glm::vec3 pos) {
+	local_position = pos;
 	updateAllMatrices();
 }
-glm::vec3 SceneObject::getPosition() {
-	return position;
+glm::vec3 SceneObject::getPosition(unsigned int coordinate_space) {
+
+	if (coordinate_space == SceneObject::OBJECT) {
+		return local_position;
+	}
+	else if (coordinate_space == SceneObject::WORLD) {
+		return parentToWorld * glm::vec4(local_position,1);
+	}
+	else {
+		std::cerr << "invalid coordinate space specifier" << std::endl;
+		return glm::vec3(0, 0, 0);
+	}
 }
-void SceneObject::setRotation(glm::mat4 rot) {
-	rotation = rot;
+void SceneObject::setLocalRotation(glm::mat4 rot) {
+	local_rotation = rot;
 	updateAllMatrices();
 }
-glm::mat4 SceneObject::getRotation() {
-	return rotation;
+glm::mat4 SceneObject::getRotation(unsigned int coordinate_space) {
+	if (coordinate_space == SceneObject::OBJECT) {
+		return local_rotation;
+	}
+	else if (coordinate_space == SceneObject::WORLD) {
+		return parentToWorld * local_rotation;
+	}
+	else {
+		std::cerr << "invalid coordinate space specifier" << std::endl;
+		return glm::mat4(1.0f);
+	}
 }
-void SceneObject::setScale(glm::vec3 sca) {
-	scale = sca;
+void SceneObject::setLocalScale(glm::vec3 sca) {
+	local_scale = sca;
 	updateAllMatrices();
 }
-glm::vec3 SceneObject::getScale() {
-	return scale;
+glm::vec3 SceneObject::getScale(unsigned int coordinate_space) {
+	if (coordinate_space == SceneObject::OBJECT) {
+		return local_scale;
+	}
+	else if (coordinate_space == SceneObject::WORLD) {
+		return parentToWorld * glm::vec4(local_scale, 1);
+	}
+	else {
+		std::cerr << "invalid coordinate space specifier" << std::endl;
+		return glm::vec3(0, 0, 0);
+	}
 }
 
 glm::mat4 SceneObject::getToWorld() {
@@ -45,7 +73,7 @@ void SceneObject::updateParentToWorldMatrix(glm::mat4 parent_to_world) {
 //Private Helper
 void SceneObject::updateAllMatrices() {
 
-	toParent = glm::translate(glm::mat4(1.0f), position) * rotation * glm::scale(glm::mat4(1.0f), scale);
+	toParent = glm::translate(glm::mat4(1.0f), local_position) * local_rotation * glm::scale(glm::mat4(1.0f), local_scale);
 	toWorld = parentToWorld * toParent;
 
 	for (unsigned int i = 0; i < children.size(); ++i) {

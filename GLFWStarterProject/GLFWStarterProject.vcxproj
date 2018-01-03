@@ -35,10 +35,10 @@
   <ItemGroup>
     <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Camera.cpp" />
+    <ClCompile Include="..\Scene.cpp" />
     <ClCompile Include="..\SceneObject.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
     <ClCompile Include="..\SampleScene.cpp" />
-    <ClCompile Include="..\Scene.cpp" />
     <ClCompile Include="..\SceneManager.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Model.cpp" />

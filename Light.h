@@ -11,13 +11,12 @@ struct Light : public SceneObject{
 
 	glm::vec3 direction;
 
-
 	enum type {DIRECTIONAL, POINT};
 
 	Light(int light_type, glm::vec3 light_color, float light_brightness, glm::vec3 light_position, glm::vec3 light_direction);
 	void applySettings();
 
-	//override
+	//override from SceneObject
 	void draw(Scene* currScene);
 
 };

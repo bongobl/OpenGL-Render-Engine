@@ -6,9 +6,9 @@ class SceneObject {
 
 protected:
 	//Local transform fields
-	glm::vec3 position;
-	glm::mat4 rotation;
-	glm::vec3 scale;
+	glm::vec3 local_position;
+	glm::mat4 local_rotation;
+	glm::vec3 local_scale;
 
 	glm::mat4 toParent;			//local coordinates
 	glm::mat4 parentToWorld;	//parent's toWorld
@@ -22,13 +22,15 @@ protected:
 
 public:
 
+	enum CoordMode {OBJECT, WORLD};
+
 	SceneObject();
-	void setPosition(glm::vec3 pos);
-	glm::vec3 getPosition();
-	void setRotation(glm::mat4 rot);
-	glm::mat4 getRotation();
-	void setScale(glm::vec3 sca);
-	glm::vec3 getScale();
+	void setLocalPosition(glm::vec3 pos);
+	glm::vec3 getPosition(unsigned int coordinate_space);
+	void setLocalRotation(glm::mat4 rot);
+	glm::mat4 getRotation(unsigned int coordinate_space);
+	void setLocalScale(glm::vec3 sca);
+	glm::vec3 getScale(unsigned int coordinate_space);
 	glm::mat4 getToWorld();
 
 	void addChild(SceneObject* newChild);
