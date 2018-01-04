@@ -8,8 +8,8 @@ struct Light : public SceneObject{
 	int type;
 	glm::vec3 color;
 	float brightness;
-
 	glm::vec3 direction;
+
 
 	enum type {DIRECTIONAL, POINT};
 

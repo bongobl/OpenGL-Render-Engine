@@ -10,7 +10,7 @@ void SampleScene::initObjects() {
 	//init main camera
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
-	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1.0f, 0.0f), 45.0f, 0,0);
+	mainCam = new Camera(glm::vec3(0, 0, camDist), 45.0f);
 	
 	//init lights
 	pointLightDist = 20;
@@ -97,25 +97,29 @@ void SampleScene::initObjects() {
 
 	child2 = new Model("Models/Sphere.obj", Material::basic());
 	child2->setLocalPosition(glm::vec3(-7, 2, 0));
-	child2->setLocalScale(glm::vec3(0.5f,0.5f,0.5f));
-	child2->getMaterial().setDiffuseColor(glm::vec3(0, 0, 0));
+	child2->setLocalScale(glm::vec3(0.7f,0.7f,0.7f));
+	child2->getMaterial().setDiffuseColor(glm::vec3(1, 1, 0));
 	child2->getMaterial().setUseDiffuse(true);
-	child2->getMaterial().setAmbientColor(glm::vec3(1, 0, 0));
+	child2->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
+	child2->getMaterial().setUseSpecular(true);
+	child2->getMaterial().setAmbientColor(glm::vec3(0.06f, 0.06f, 0));
 	child2->getMaterial().setUseAmbient(true);
+	child2->getMaterial().loadReflectionTexture(oceanViewCubeMap);
+	child2->getMaterial().setUseReflectionTexture(true);
 	childObject->addChild(child2);
 	
 
 	boundingBox = new BoundingBox(testModel->getVertices());
 
 	//test cam
-	childObject->addChild(mainCam);
 	mainCam->setTargetObject(child2);
 	mainCam->setTargetMode(true);
-
+	childObject->addChild(mainCam);
 }
 void SampleScene::dispose() {
 	delete testModel;
 	delete childObject;
+	delete child2;
 	delete mainCam;
 	delete[] sceneLights;
 }
@@ -128,7 +132,8 @@ void SampleScene::update(float deltaTime) {
 	oceanView.setLocalPosition(mainCam->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 	
-	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 2, glm::vec3(1, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
+	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
+	
 	//Note::update camera last so all objects are up to date
 	mainCam->update();
 }
@@ -138,7 +143,6 @@ void SampleScene::draw() {
 	sceneLights[currActiveLight].draw(this);
 	boundingBox->draw(this);
 	oceanView.draw(this);
-
 }
 
 //events from callbacks
@@ -218,8 +222,6 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 					camRotationMatrix = deltaTrackBall * camRotationMatrix;
 					
 					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));	
-					mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
-					mainCam->ViewMatrix = glm::lookAt(mainCam->getPosition(SceneObject::WORLD), mainCam->look_at, mainCam->up);
 				}
 				else if (isLeftMouseButtonDown) {
 
@@ -247,8 +249,6 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	if (currEditMode == SampleScene::EDIT_MODEL) {
 		camDist += -5 * (float)yoffset;
 		mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
-		mainCam->look_at = camRotationMatrix * glm::vec4(0, 0, camDist - 1, 0);
-		mainCam->ViewMatrix = glm::lookAt(mainCam->getPosition(SceneObject::WORLD), mainCam->look_at, mainCam->up);
 	}
 	else if (currEditMode == SampleScene::EDIT_LIGHT) {
 		if (currActiveLight == SampleScene::POINT_LIGHT) {

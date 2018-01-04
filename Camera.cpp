@@ -1,35 +1,38 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 camera_position, glm::vec3 camera_look_at, glm::vec3 camera_up, float camera_field_of_view_Y, float camera_width, float camera_height) {
+Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	
+	//SceneObject Position
+	setLocalPosition(camera_position);
+
 	//Camera Mode
 	targetMode = false;
 	
 	//Target Mode
-	targetObject = NULL;
-	setLocalPosition(camera_position);
-	look_at = camera_look_at;
-	up = camera_up;
+	targetObject = NULL;	
+	up = glm::vec3(0,1,0);
 
 	//To define Projection Matrix
 	fieldOfViewY = camera_field_of_view_Y;
-	width = camera_width;
-	height = camera_height;
+	width = 1;
+	height = 1;
 	near = 0.1f;
 	far = 100000.0f;
 
 	//update view and projection matrices to reflect camera properties
-	updateMatrices();
+	updateViewMatrix();
+	updateProjectionMatrix();
 }
 void Camera::update() {
 
-	updateMatrices();
+	updateViewMatrix();
 }
 void Camera::resize(float camera_width, float camera_height) {
 
-		width = camera_width;
-		height = camera_height;
-		updateMatrices();	
+	width = camera_width;
+	height = camera_height;
+
+	updateProjectionMatrix();
 }
 
 void Camera::applySettings(GLuint currShaderProgram) {
@@ -52,29 +55,58 @@ void Camera::setTargetObject(SceneObject* target_object) {
 	targetObject = target_object;
 }
 
-//Private Helpers
-void Camera::updateMatrices() {
+void Camera::setCameraUp(glm::vec3 camera_up) {
+	up = camera_up;
+}
 
-	
+void Camera::setFieldOfViewY(float camera_field_of_view_Y) {
+	fieldOfViewY = camera_field_of_view_Y;
+	updateProjectionMatrix();
+}
+float Camera::getFieldOfViewY() {
+	return fieldOfViewY;
+}
+void Camera::setNear(float camera_near) {
+	near = camera_near;
+	updateProjectionMatrix();
+}
+float Camera::getCameraNear() {
+	return near;
+}
+void Camera::setFar(float camera_far) {
+	far = camera_far;
+	updateProjectionMatrix();
+}
+float Camera::getCameraFar() {
+	return far;
+}
+
+void Camera::draw(Scene* currScene) {
+	drawAllChildren(currScene);
+}
+
+//Private Helpers
+void Camera::updateViewMatrix() {
+
+	//target mode
 	if (targetMode && targetObject != NULL) {
 
 		glm::vec3 targetWorldPosition = targetObject->getPosition(SceneObject::WORLD);
-		look_at = targetWorldPosition;
 
-		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), look_at, up);
+		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), targetWorldPosition, up);
 		toWorld = glm::inverse(ViewMatrix);
 	}
+
+	//non target mode
 	if (!targetMode) {
 		ViewMatrix = glm::inverse(toWorld);
 	}
+}
+
+void Camera::updateProjectionMatrix() {
 
 	if (height > 0)
 	{
 		ProjectionMatrix = glm::perspective(fieldOfViewY, (float)width / (float)height, near, far);
 	}
-	
-}
-
-void Camera::draw(Scene* currScene) {
-	//do nothing on purpose
 }

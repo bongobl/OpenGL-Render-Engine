@@ -109,6 +109,8 @@ void main()
 		outColor *= reflectionTextureColor;
 	}
 	
+
+
 	//Lighting Modes
 	if(material.useDiffuse)
 		outColor *= vec4(material.diffuse,1) * max( dot(world_normal, L), 0);
