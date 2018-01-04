@@ -12,10 +12,13 @@ class SampleScene : public Scene {
 	Model* childObject;
 	Model* child2;
 	BoundingBox* boundingBox;
-	//Camera
+
+	//Cameras
+	Camera* currActiveCamera;
 	Camera* mainCam;
 	float camDist;
 	glm::mat4 camRotationMatrix;
+	Camera* camera2;
 
 	//Lights
 	Light* sceneLights;
@@ -45,11 +48,13 @@ public:
 	void update(float deltaTime);
 	void draw();
 
+	//override from Scene
 	Camera* getActiveCamera();
+	std::vector<Camera*> getAllCameras();
 	Light* getActiveLight();
 
 
-	//events from callbacks, overloaded from Scene
+	//events from callbacks, override from Scene
 	void key_event(int key, int scancode, int action, int mods);
 	void mouse_button_event(int button, int action, int mods);
 	void cursor_position_event(double xpos, double ypos);

@@ -7,10 +7,14 @@ void SampleScene::initObjects() {
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 
-	//init main camera
+	//init cameras & set currActiveCamera
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), 45.0f);
+	camera2 = new Camera(glm::vec3(0, 0, -100),45);
+	camera2->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	currActiveCamera = mainCam;
+
 	
 	//init lights
 	pointLightDist = 20;
@@ -115,11 +119,14 @@ void SampleScene::initObjects() {
 	mainCam->setTargetObject(child2);
 	mainCam->setTargetMode(true);
 	childObject->addChild(mainCam);
+	camera2->setTargetObject(childObject);
+	camera2->setTargetMode(true);
 }
 void SampleScene::dispose() {
 	delete testModel;
 	delete childObject;
 	delete child2;
+	delete camera2;
 	delete mainCam;
 	delete[] sceneLights;
 }
@@ -129,13 +136,14 @@ void SampleScene::update(float deltaTime) {
 	
 	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
 	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
-	oceanView.setLocalPosition(mainCam->getPosition(SceneObject::WORLD));
+	oceanView.setLocalPosition(getActiveCamera()->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 	
 	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
 	
 	//Note::update camera last so all objects are up to date
 	mainCam->update();
+	camera2->update();
 }
 void SampleScene::draw() {
 	
@@ -143,6 +151,8 @@ void SampleScene::draw() {
 	sceneLights[currActiveLight].draw(this);
 	boundingBox->draw(this);
 	oceanView.draw(this);
+
+	//Note::You need to draw cameras if they have SceneObject children
 }
 
 //events from callbacks
@@ -170,6 +180,16 @@ void SampleScene::key_event(int key, int scancode, int action, int mods) {
 		if (key == GLFW_KEY_L)
 		{
 			currEditMode = SampleScene::EDIT_LIGHT;
+		}
+		if (key == GLFW_KEY_SPACE) {
+			if (currActiveCamera != NULL) {
+				if (currActiveCamera == mainCam) {
+					currActiveCamera = camera2;
+				}
+				else if (currActiveCamera == camera2) {
+					currActiveCamera = mainCam;
+				}
+			}
 		}
 
 	}
@@ -260,7 +280,15 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 }
 
 Camera* SampleScene::getActiveCamera() {
-	return mainCam;
+	return currActiveCamera;
+}
+
+std::vector<Camera*> SampleScene::getAllCameras() {
+
+	std::vector<Camera*> allCams;
+	allCams.push_back(mainCam);
+	allCams.push_back(camera2);
+	return allCams;
 }
 
 Light* SampleScene::getActiveLight() {

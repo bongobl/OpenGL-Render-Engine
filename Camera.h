@@ -22,6 +22,9 @@ class Camera : public SceneObject{
 	//Camera Matrices
 	glm::mat4 ViewMatrix;
 	glm::mat4 ProjectionMatrix;
+
+	//Camera gizmos
+	std::vector<glm::vec3> gizmosPoints;
 	
 public:
 
