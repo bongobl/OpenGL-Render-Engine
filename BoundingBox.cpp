@@ -12,7 +12,7 @@ BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	material.setUseDiffuse(true);
 	material.setDiffuseColor(glm::vec3(0, 0, 0));
 	material.setUseAmbient(true);
-	material.setAmbientColor(glm::vec3(0, 1, 0));
+	material.setAmbientColor(glm::vec3(0, 0, 1));
 
 	//prepare buffers
 	glGenVertexArrays(1, &VAO);
@@ -91,7 +91,7 @@ void BoundingBox::updateToWorld(glm::mat4 toWorld) {
 }
 void BoundingBox::draw(Scene* currScene) {
 
-	glUseProgram(material.getShaderProgram());
+	glUseProgram(Material::getShaderProgram());
 
 	Camera* activeCamera = currScene->getActiveCamera();
 

@@ -1,5 +1,5 @@
 #include "Camera.h"
-
+#include "Scene.h"
 Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	
 	//SceneObject Position
@@ -24,9 +24,19 @@ Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	updateProjectionMatrix();
 
 	//init gizmos points
-	for (unsigned int i = 0; i < 5; ++i) {
+	for (unsigned int i = 0; i < 16; ++i) {
 		gizmosPoints.push_back(glm::vec3(0, 0, 0));
 	}
+
+	//prepare buffers
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBufferData(GL_ARRAY_BUFFER, gizmosPoints.size() * sizeof(glm::vec3), gizmosPoints.data(), GL_STATIC_DRAW);
+}
+
+Camera::~Camera() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 }
 void Camera::update() {
 
@@ -88,7 +98,7 @@ float Camera::getCameraFar() {
 
 void Camera::draw(Scene* currScene) {
 	drawAllChildren(currScene);
-	drawGizmos();
+	drawGizmos(currScene);
 }
 
 //Private Helpers
@@ -117,13 +127,15 @@ void Camera::updateProjectionMatrix() {
 	}
 }
 
-void Camera::drawGizmos() {
+void Camera::drawGizmos(Scene* currScene) {
 
-	
+	//UPDATE GIZMOS POINTS
 	glm::vec3 pointTemplate;
+	
 	pointTemplate.z = 50; //const
-	pointTemplate.y = pointTemplate.z * tan(fieldOfViewY * glm::pi<float>() / 180);
-	pointTemplate.x = pointTemplate.y *  ((float)width / (float)height);
+	pointTemplate.x = pointTemplate.z *  tan(fieldOfViewY * glm::pi<float>() / 180);
+	pointTemplate.y = pointTemplate.x *  ((float)height / (float)width);
+	
 
 	glm::vec3 centerPoint(0, 0, 0);
 	glm::vec3 upperRight(pointTemplate.x, pointTemplate.y, -pointTemplate.z);
@@ -132,11 +144,56 @@ void Camera::drawGizmos() {
 	glm::vec3 lowerLeft(-pointTemplate.x, -pointTemplate.y, -pointTemplate.z);
 
 
-	centerPoint = toWorld * glm::vec4(centerPoint, 1);
-	upperRight = toWorld * glm::vec4(upperRight,1);
-	lowerRight = toWorld * glm::vec4(lowerRight, 1);
-	upperLeft = toWorld * glm::vec4(upperLeft, 1);
-	lowerLeft = toWorld * glm::vec4(lowerLeft, 1);
+	gizmosPoints[0] = centerPoint;
+	gizmosPoints[1] = upperRight;
+	gizmosPoints[2] = centerPoint;
+	gizmosPoints[3] = lowerRight;
+	gizmosPoints[4] = centerPoint;
+	gizmosPoints[5] = upperLeft;
+	gizmosPoints[6] = centerPoint;
+	gizmosPoints[7] = lowerLeft;
+
+	gizmosPoints[8] = upperRight;
+	gizmosPoints[9] = upperLeft;
+	gizmosPoints[10] = upperLeft;
+	gizmosPoints[11] = lowerLeft;
+	gizmosPoints[12] = lowerLeft;
+	gizmosPoints[13] = lowerRight;
+	gizmosPoints[14] = lowerRight;
+	gizmosPoints[15] = upperRight;
+
+	//update VBO for new box vertices positions
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, gizmosPoints.size() * sizeof(glm::vec3), gizmosPoints.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 
+	//DRAW
+	glUseProgram(Material::getShaderProgram());
+
+	Camera* activeCamera = currScene->getActiveCamera();
+
+	//apply object boundingbox properties	
+	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorld[0][0]);
+
+	//apply camera properties
+	activeCamera->applySettings(Material::getShaderProgram());
+
+	//apply material properties
+	Material m;
+	m.setDiffuseColor(glm::vec3(0, 0, 0));
+	m.setUseDiffuse(true);
+	m.setAmbientColor(glm::vec3(0.5, 1, 0.5));
+	m.setUseAmbient(true);
+	m.applySettings();
+
+	//Bind VAO for box and draw 
+	glBindVertexArray(VAO);
+	glLineWidth(2);
+	glDrawArrays(GL_LINES, 0, gizmosPoints.size());
+	glBindVertexArray(0);
 }

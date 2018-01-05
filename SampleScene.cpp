@@ -10,9 +10,10 @@ void SampleScene::initObjects() {
 	//init cameras & set currActiveCamera
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
-	mainCam = new Camera(glm::vec3(0, 0, camDist), 45.0f);
+	mainCam = new Camera(glm::vec3(0, 0, camDist), 45);
 	camera2 = new Camera(glm::vec3(0, 0, -100),45);
 	camera2->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	dullCam = new Camera(glm::vec3(0, 0, 0), 45);
 	currActiveCamera = mainCam;
 
 	
@@ -64,25 +65,25 @@ void SampleScene::initObjects() {
 	//Create Asteroid Material
 	Material asteroidMaterial;
 	///diffuse
-	asteroidMaterial.setDiffuseColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
 	asteroidMaterial.setUseDiffuse(true);
 
 	///specular
-	asteroidMaterial.setSpecularColor(glm::vec3(0, 1, 1));
+	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
 	asteroidMaterial.setUseSpecular(true);
 
 	///ambient
-	asteroidMaterial.setAmbientColor(glm::vec3(0, 0.06f, 0.06f));
+	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
 	asteroidMaterial.setUseAmbient(true);
 
 	///surface texture
 	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
-	asteroidMaterial.setSurfaceTextureStrength(0.3f);
-	asteroidMaterial.setUseSurfaceTexture(true);
+	asteroidMaterial.setSurfaceTextureStrength(1.0f);
+	//asteroidMaterial.setUseSurfaceTexture(true);
 
 	///normal map
 	asteroidMaterial.loadNormalMap(normalMapTexture);
-	asteroidMaterial.setNormalMapStrength(0.9f);
+	asteroidMaterial.setNormalMapStrength(0.4f);
 	//asteroidMaterial.setUseNormalMap(true);
 
 	///reflection texture
@@ -123,10 +124,15 @@ void SampleScene::initObjects() {
 	camera2->setTargetMode(true);
 }
 void SampleScene::dispose() {
+
+	//dispose textures theoretically
+
+
 	delete testModel;
 	delete childObject;
 	delete child2;
 	delete camera2;
+	delete dullCam;
 	delete mainCam;
 	delete[] sceneLights;
 }
@@ -153,6 +159,9 @@ void SampleScene::draw() {
 	oceanView.draw(this);
 
 	//Note::You need to draw cameras if they have SceneObject children
+	mainCam->draw(this);
+	camera2->draw(this);
+	dullCam->draw(this);
 }
 
 //events from callbacks
@@ -288,6 +297,7 @@ std::vector<Camera*> SampleScene::getAllCameras() {
 	std::vector<Camera*> allCams;
 	allCams.push_back(mainCam);
 	allCams.push_back(camera2);
+	allCams.push_back(dullCam);
 	return allCams;
 }
 

@@ -19,6 +19,7 @@ class SampleScene : public Scene {
 	float camDist;
 	glm::mat4 camRotationMatrix;
 	Camera* camera2;
+	Camera* dullCam;
 
 	//Lights
 	Light* sceneLights;

@@ -25,11 +25,12 @@ class Camera : public SceneObject{
 
 	//Camera gizmos
 	std::vector<glm::vec3> gizmosPoints;
+	GLuint VAO, VBO;
 	
 public:
 
 	Camera(glm::vec3 camera_position, float camera_field_of_view_Y);
-
+	~Camera();
 	void update();
 	void resize(float camera_width, float camera_height);
 	void applySettings(GLuint currShaderProgram);
@@ -57,5 +58,5 @@ private:
 
 	void updateViewMatrix();
 	void updateProjectionMatrix();
-	void drawGizmos();
+	void drawGizmos(Scene* currScene);
 };
