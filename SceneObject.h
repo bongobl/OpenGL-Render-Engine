@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <vector>
 class Scene;
 class SceneObject {
@@ -10,11 +12,10 @@ protected:
 	glm::mat4 local_rotation;
 	glm::vec3 local_scale;
 
+
 	glm::mat4 toParent;			//local coordinates
 	glm::mat4 parentToWorld;	//parent's toWorld
 	std::vector<SceneObject*> children;
-
-
 
 	glm::mat4 toWorld;			//global coordinates
 
@@ -40,5 +41,4 @@ public:
 private:
 	void updateParentToWorldMatrix(glm::mat4 parent_to_world);
 	void updateAllMatrices();
-	
 };

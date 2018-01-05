@@ -18,7 +18,10 @@ glm::vec3 SceneObject::getPosition(unsigned int coordinate_space) {
 		return local_position;
 	}
 	else if (coordinate_space == SceneObject::WORLD) {
-		return parentToWorld * glm::vec4(local_position,1);
+
+		glm::vec3 translation;
+		glm::decompose(toWorld, glm::vec3(0,0,0), glm::quat(), translation, glm::vec3(0, 0, 0), glm::vec4(0, 0, 0,0));
+		return translation;
 	}
 	else {
 		std::cerr << "invalid coordinate space specifier" << std::endl;
@@ -34,7 +37,10 @@ glm::mat4 SceneObject::getRotation(unsigned int coordinate_space) {
 		return local_rotation;
 	}
 	else if (coordinate_space == SceneObject::WORLD) {
-		return parentToWorld * local_rotation;
+
+		glm::quat rotation;
+		glm::decompose(toWorld, glm::vec3(0, 0, 0), rotation, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0));
+		return glm::toMat4(glm::conjugate(rotation));
 	}
 	else {
 		std::cerr << "invalid coordinate space specifier" << std::endl;
@@ -50,7 +56,10 @@ glm::vec3 SceneObject::getScale(unsigned int coordinate_space) {
 		return local_scale;
 	}
 	else if (coordinate_space == SceneObject::WORLD) {
-		return parentToWorld * glm::vec4(local_scale, 1);
+
+		glm::vec3 scale;
+		glm::decompose(toWorld, scale, glm::quat(), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0));
+		return scale;
 	}
 	else {
 		std::cerr << "invalid coordinate space specifier" << std::endl;

@@ -22,6 +22,11 @@ Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	//update view and projection matrices to reflect camera properties
 	updateViewMatrix();
 	updateProjectionMatrix();
+
+	//init gizmos points
+	for (unsigned int i = 0; i < 5; ++i) {
+		gizmosPoints.push_back(glm::vec3(0, 0, 0));
+	}
 }
 void Camera::update() {
 
@@ -83,6 +88,7 @@ float Camera::getCameraFar() {
 
 void Camera::draw(Scene* currScene) {
 	drawAllChildren(currScene);
+	drawGizmos();
 }
 
 //Private Helpers
@@ -109,4 +115,28 @@ void Camera::updateProjectionMatrix() {
 	{
 		ProjectionMatrix = glm::perspective(fieldOfViewY, (float)width / (float)height, near, far);
 	}
+}
+
+void Camera::drawGizmos() {
+
+	
+	glm::vec3 pointTemplate;
+	pointTemplate.z = 50; //const
+	pointTemplate.y = pointTemplate.z * tan(fieldOfViewY * glm::pi<float>() / 180);
+	pointTemplate.x = pointTemplate.y *  ((float)width / (float)height);
+
+	glm::vec3 centerPoint(0, 0, 0);
+	glm::vec3 upperRight(pointTemplate.x, pointTemplate.y, -pointTemplate.z);
+	glm::vec3 lowerRight(pointTemplate.x, -pointTemplate.y, -pointTemplate.z);
+	glm::vec3 upperLeft(-pointTemplate.x, pointTemplate.y, -pointTemplate.z);
+	glm::vec3 lowerLeft(-pointTemplate.x, -pointTemplate.y, -pointTemplate.z);
+
+
+	centerPoint = toWorld * glm::vec4(centerPoint, 1);
+	upperRight = toWorld * glm::vec4(upperRight,1);
+	lowerRight = toWorld * glm::vec4(lowerRight, 1);
+	upperLeft = toWorld * glm::vec4(upperLeft, 1);
+	lowerLeft = toWorld * glm::vec4(lowerLeft, 1);
+
+
 }

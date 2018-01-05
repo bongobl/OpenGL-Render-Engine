@@ -57,4 +57,5 @@ private:
 
 	void updateViewMatrix();
 	void updateProjectionMatrix();
+	void drawGizmos();
 };
