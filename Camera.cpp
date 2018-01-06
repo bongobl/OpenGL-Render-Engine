@@ -41,6 +41,7 @@ Camera::~Camera() {
 void Camera::update() {
 
 	updateViewMatrix();
+	updateGizmos();
 }
 void Camera::resize(float camera_width, float camera_height) {
 
@@ -127,15 +128,15 @@ void Camera::updateProjectionMatrix() {
 	}
 }
 
-void Camera::drawGizmos(Scene* currScene) {
-
+void Camera::updateGizmos() {
 	//UPDATE GIZMOS POINTS
 	glm::vec3 pointTemplate;
-	
+
 	pointTemplate.z = 50; //const
-	pointTemplate.x = pointTemplate.z *  tan(fieldOfViewY * glm::pi<float>() / 180);
+	pointTemplate.x = pointTemplate.z *  tan(fieldOfViewY);
 	pointTemplate.y = pointTemplate.x *  ((float)height / (float)width);
-	
+
+
 
 	glm::vec3 centerPoint(0, 0, 0);
 	glm::vec3 upperRight(pointTemplate.x, pointTemplate.y, -pointTemplate.z);
@@ -170,12 +171,17 @@ void Camera::drawGizmos(Scene* currScene) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-
-	//DRAW
-	glUseProgram(Material::getShaderProgram());
+}
+void Camera::drawGizmos(Scene* currScene) {
 
 	Camera* activeCamera = currScene->getActiveCamera();
+
+	//don't draw gizmos of current camera
+	if (activeCamera == this) {
+		return;
+	}
+
+	glUseProgram(Material::getShaderProgram());
 
 	//apply object boundingbox properties	
 	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorld[0][0]);

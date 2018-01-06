@@ -189,11 +189,6 @@ void Model::parse(const char *filepath)
 	meshCenterOffset.y = (highestY + lowestY) / 2.0f;
 	meshCenterOffset.z = (highestZ + lowestZ) / 2.0f;
 	centerModelMeshMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-meshCenterOffset.x, -meshCenterOffset.y, -meshCenterOffset.z));
-
-	cout << "num vertices: " << vertices.size() << endl;
-	cout << "num normals: " << normals.size() << endl;
-	cout << "num texCoords: " << UVs.size() << endl;
-	cout << "num indices: " << indices.size() << endl;	
 	
 	//Calc Tangents and Bitangents
 	for (unsigned int i = 0; i< vertices.size(); i += 3) {
@@ -239,7 +234,6 @@ void Model::draw(Scene* currScene) {
 	Camera* activeCamera = currScene->getActiveCamera();
 	Light* activeLight = currScene->getActiveLight();
 
-
 	//apply this object's properties
 	this->applySettings();
 	//apply camera properties
@@ -251,7 +245,6 @@ void Model::draw(Scene* currScene) {
 
 	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 

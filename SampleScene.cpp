@@ -10,11 +10,16 @@ void SampleScene::initObjects() {
 	//init cameras & set currActiveCamera
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
-	mainCam = new Camera(glm::vec3(0, 0, camDist), 45);
-	camera2 = new Camera(glm::vec3(0, 0, -100),45);
+	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
+	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
 	camera2->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	dullCam = new Camera(glm::vec3(0, 0, 0), 45);
+	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
+	dullCam->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
 	currActiveCamera = mainCam;
+
+	allSceneCameras.push_back(mainCam);
+	allSceneCameras.push_back(camera2);
+	allSceneCameras.push_back(dullCam);
 
 	
 	//init lights
@@ -127,7 +132,6 @@ void SampleScene::dispose() {
 
 	//dispose textures theoretically
 
-
 	delete testModel;
 	delete childObject;
 	delete child2;
@@ -150,6 +154,7 @@ void SampleScene::update(float deltaTime) {
 	//Note::update camera last so all objects are up to date
 	mainCam->update();
 	camera2->update();
+	dullCam->update();
 }
 void SampleScene::draw() {
 	
@@ -191,14 +196,17 @@ void SampleScene::key_event(int key, int scancode, int action, int mods) {
 			currEditMode = SampleScene::EDIT_LIGHT;
 		}
 		if (key == GLFW_KEY_SPACE) {
-			if (currActiveCamera != NULL) {
-				if (currActiveCamera == mainCam) {
-					currActiveCamera = camera2;
-				}
-				else if (currActiveCamera == camera2) {
-					currActiveCamera = mainCam;
-				}
+			
+			if (currActiveCamera == mainCam) {
+				currActiveCamera = camera2;
 			}
+			else if (currActiveCamera == camera2) {
+				currActiveCamera = dullCam;
+			}
+			else if (currActiveCamera == dullCam) {
+				currActiveCamera = mainCam;
+			}
+
 		}
 
 	}
@@ -290,15 +298,6 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 
 Camera* SampleScene::getActiveCamera() {
 	return currActiveCamera;
-}
-
-std::vector<Camera*> SampleScene::getAllCameras() {
-
-	std::vector<Camera*> allCams;
-	allCams.push_back(mainCam);
-	allCams.push_back(camera2);
-	allCams.push_back(dullCam);
-	return allCams;
 }
 
 Light* SampleScene::getActiveLight() {

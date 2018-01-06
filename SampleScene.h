@@ -51,7 +51,6 @@ public:
 
 	//override from Scene
 	Camera* getActiveCamera();
-	std::vector<Camera*> getAllCameras();
 	Light* getActiveLight();
 
 

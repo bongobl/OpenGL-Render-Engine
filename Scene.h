@@ -12,6 +12,9 @@ class Scene {
 protected:
 	int window_width;
 	int window_height;
+
+	std::vector<Camera*> allSceneCameras;
+
 public:
 	
 	virtual void initObjects() = 0;
@@ -20,7 +23,6 @@ public:
 	virtual void draw() = 0;
 
 	virtual Camera* getActiveCamera() = 0;
-	virtual std::vector<Camera*> getAllCameras() = 0;
 	virtual Light* getActiveLight() = 0;
 
 	//events from callbacks

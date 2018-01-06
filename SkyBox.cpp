@@ -11,15 +11,14 @@ SkyBox::SkyBox()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 	
-	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
-	// Consider the VAO as a container for all your buffers.
+
 	glBindVertexArray(VAO);
 
 	//Vertex Position
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
+	glVertexAttribPointer(0,
 		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
 		GL_FLOAT, // What type these components are
 		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
@@ -32,7 +31,7 @@ SkyBox::SkyBox()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
 
-
+	//Unbind current VBO and VAO, but not EBO
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	
