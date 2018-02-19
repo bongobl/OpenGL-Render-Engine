@@ -60,7 +60,9 @@ out vec4 outColor;
 const int DIRECTIONAL_LIGHT = 0;
 const int POINT_LIGHT = 1;
 
-
+//current light properties
+vec3 L = vec3(0,0,0);
+float C_l = 0;
 void main()
 {
 
@@ -72,10 +74,9 @@ void main()
 	vec3 world_tangent = normalize(refinedToWorld * objectSpaceTangent);
 	vec3 world_bitangent = normalize(refinedToWorld * objectSpaceBitangent);
 
-
+	
 	//find values L and C_l based on light properties
-	vec3 L;
-	float C_l;
+	
 	if(light.type == DIRECTIONAL_LIGHT){
 		L = -normalize(light.direction);
 		C_l = light.brightness;
@@ -89,6 +90,7 @@ void main()
 	//Starting Color: white, each material property will cut away at it
 	outColor = vec4(1,1,1,1);
 
+	//define vars out here for ambient lighting to use
 	vec4 textureColor = vec4(1,1,1,1);
 	vec4 reflectionTextureColor = vec4(1,1,1,1);
 
@@ -98,6 +100,7 @@ void main()
 		outColor *= textureColor;
 	}
 	if(material.useNormalMap){
+
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvTexCoord ).rgb * 2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset * material.normalMapStrength);
 
@@ -109,21 +112,22 @@ void main()
 		outColor *= reflectionTextureColor;
 	}
 	
+	
 
-
+	vec4 multiplier = vec4(0,0,0,1);
 	//Lighting Modes
 	if(material.useDiffuse)
-		outColor *= vec4(material.diffuse,1) * max( dot(world_normal, L), 0);
+		multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * vec4(light.color * C_l ,1);
+		outColor *= multiplier;
 		
 	if(material.useSpecular){
 		vec3 R = 2 * dot(world_normal, L) * world_normal - L;
 		vec3 e = normalize(camPosition - world_position);
-		outColor += material.specular * pow( max(dot(R, e),0) , 20);
+		outColor += vec4(material.specular,0) * pow( max(dot(R, e),0) , 20) * vec4(light.color * C_l ,1);
 	}		
-	outColor *= vec4(light.color * C_l ,1);
-
+	
 	if(material.useAmbient){
-		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor;
+		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * vec4(light.color * C_l ,1);
 	}
 		
 }

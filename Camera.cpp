@@ -183,7 +183,7 @@ void Camera::drawGizmos(Scene* currScene) {
 
 	glUseProgram(Material::getShaderProgram());
 
-	//apply object boundingbox properties	
+	//apply object properties	
 	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorld[0][0]);
 
 	//apply camera properties
@@ -197,7 +197,7 @@ void Camera::drawGizmos(Scene* currScene) {
 	m.setUseAmbient(true);
 	m.applySettings();
 
-	//Bind VAO for box and draw 
+	//Bind VAO for gizmos and draw 
 	glBindVertexArray(VAO);
 	glLineWidth(2);
 	glDrawArrays(GL_LINES, 0, gizmosPoints.size());

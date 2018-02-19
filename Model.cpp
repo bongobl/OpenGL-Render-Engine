@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <cmath>
 #include "Model.h"
@@ -88,7 +90,7 @@ Model::Model(const char *filepath, Material m)
 		GL_FALSE,
 		3 * sizeof(GLfloat),
 		(GLvoid*)0);
-
+	
 
 	// We've sent the vertex data over to OpenGL, but there's still something missing.
 	// In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
@@ -184,7 +186,7 @@ void Model::parse(const char *filepath)
 		
 	}//END FOR
 	
-	 //define object center
+	//define object center
 	meshCenterOffset.x = (highestX + lowestX) / 2.0f;
 	meshCenterOffset.y = (highestY + lowestY) / 2.0f;
 	meshCenterOffset.z = (highestZ + lowestZ) / 2.0f;

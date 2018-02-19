@@ -89,7 +89,7 @@ void SampleScene::initObjects() {
 	///normal map
 	asteroidMaterial.loadNormalMap(normalMapTexture);
 	asteroidMaterial.setNormalMapStrength(0.4f);
-	//asteroidMaterial.setUseNormalMap(true);
+	asteroidMaterial.setUseNormalMap(true);
 
 	///reflection texture
 	asteroidMaterial.loadReflectionTexture(oceanViewCubeMap);

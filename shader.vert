@@ -9,8 +9,8 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
-layout (location = 2) in vec3 tangent;
-layout (location = 2) in vec3 bitangent;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec3 bitangent;
 
 // Uniform variables can be updated by fetching their location and passing values to that location
 
@@ -36,7 +36,7 @@ void main()
 {
     // OpenGL maintains the D matrix so you only need to multiply by P, V and M
     gl_Position = projection * view * toWorld * vec4(position, 1.0);
-
+	
 	objectSpacePosition = position;
 	objectSpaceNormal = normal;
 	uvTexCoord = uv;
