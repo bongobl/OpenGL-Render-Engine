@@ -6,6 +6,11 @@
 #include "BoundingBox.h"
 class SampleScene : public Scene {
 
+	//Textures
+	Texture oceanViewCubeMap;
+	Texture asteroidTexture;
+	Texture normalMapTexture;
+
 	//Scene Objects
 	SkyBox oceanView;
 	Model* testModel;
@@ -40,14 +45,22 @@ class SampleScene : public Scene {
 	unsigned int currEditMode;
 	unsigned int currActiveLight;
 
+
+	//frame buffer objs
+	GLuint blurShaderID;
+	GLuint frameTextureID;
+	GLuint RBO;
+	GLuint FBO;
+
+
 public: 
 
 
 	//basic, overloaded
-	void initObjects();
-	void dispose();
+	void initThisSceneObjects();
+	void disposeThisSceneObjects();
 	void update(float deltaTime);
-	void draw();
+	void drawSceneToBuffer();
 
 	//override from Scene
 	Camera* getActiveCamera();

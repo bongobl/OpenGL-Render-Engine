@@ -7,8 +7,6 @@
 class Scene;
 class SceneManager {
 
-	
-
 	//Window Variables
 	static int windowWidth;
 	static int windowHeight;
@@ -19,6 +17,21 @@ class SceneManager {
 
 	//Scene
 	static Scene* currScene;
+
+	
+	//FBOs
+	static GLuint blurShader;
+	static GLuint FramebufferName;
+	static GLuint renderedTexture;
+	static GLuint depthrenderbuffer;
+	static GLenum DrawBuffers[1];
+	static GLuint quad_VertexArrayID;
+	static GLuint quad_vertexbuffer;
+	static GLfloat g_quad_vertex_buffer_data[];
+	static GLuint quadEBO;
+	static GLuint indices[];
+	
+	static float testFloat[1];
 
 public:
 	
@@ -39,5 +52,7 @@ public:
 	static void mouse_wheel_callback(GLFWwindow* window, double xoffset, double yoffset);
 	
 	static bool isWindowOpen();
+
+	static GLuint getBlurShader();
 
 };

@@ -15,12 +15,15 @@ protected:
 
 	std::vector<Camera*> allSceneCameras;
 
+
 public:
 	
-	virtual void initObjects() = 0;
-	virtual void dispose() = 0;
+	void initObjects();
+	
+	void dispose();
 	virtual void update(float deltaTime) = 0;
-	virtual void draw() = 0;
+	void draw();
+	
 
 	virtual Camera* getActiveCamera() = 0;
 	virtual Light* getActiveLight() = 0;
@@ -32,4 +35,11 @@ public:
 	virtual void mouse_wheel_event(double xoffset, double yoffset) = 0;
 
 	void resize_event(int width, int height);
+
+	
+
+private: 
+	virtual void drawSceneToBuffer() = 0;
+	virtual void initThisSceneObjects() = 0;
+	virtual void disposeThisSceneObjects() = 0;
 };

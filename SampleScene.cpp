@@ -1,6 +1,6 @@
 #include "SampleScene.h"
 
-void SampleScene::initObjects() {
+void SampleScene::initThisSceneObjects() {
 
 
 	//init trackball controls
@@ -54,7 +54,6 @@ void SampleScene::initObjects() {
 	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
 	
-	Texture oceanViewCubeMap;
 	oceanViewCubeMap.loadCubeMap(faceNames);
 
 	//init cubemap
@@ -62,9 +61,7 @@ void SampleScene::initObjects() {
 
 	//TEST OBJECT
 	//Load Asteroid Textures
-	Texture asteroidTexture;
 	asteroidTexture.loadStandardTexture("Textures/AsteroidTexture.ppm");
-	Texture normalMapTexture;
 	normalMapTexture.loadStandardTexture("Textures/AsteroidNormalMap.ppm");
 
 	//Create Asteroid Material
@@ -127,11 +124,14 @@ void SampleScene::initObjects() {
 	childObject->addChild(mainCam);
 	camera2->setTargetObject(childObject);
 	camera2->setTargetMode(true);
+
+
+
 }
-void SampleScene::dispose() {
+void SampleScene::disposeThisSceneObjects() {
 
-	//dispose textures theoretically
 
+	//delete models & cam gizmos
 	delete testModel;
 	delete childObject;
 	delete child2;
@@ -139,6 +139,13 @@ void SampleScene::dispose() {
 	delete dullCam;
 	delete mainCam;
 	delete[] sceneLights;
+
+
+	//dispose textures
+	oceanViewCubeMap.disposeCurrentTexture();
+	asteroidTexture.disposeCurrentTexture();
+	normalMapTexture.disposeCurrentTexture();
+
 }
 
 void SampleScene::update(float deltaTime) {
@@ -156,8 +163,9 @@ void SampleScene::update(float deltaTime) {
 	camera2->update();
 	dullCam->update();
 }
-void SampleScene::draw() {
+void SampleScene::drawSceneToBuffer() {
 	
+
 	testModel->draw(this);	
 	sceneLights[currActiveLight].draw(this);
 	boundingBox->draw(this);
@@ -167,6 +175,10 @@ void SampleScene::draw() {
 	mainCam->draw(this);
 	camera2->draw(this);
 	dullCam->draw(this);
+
+
+
+	
 }
 
 //events from callbacks

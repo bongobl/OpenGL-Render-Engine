@@ -2,11 +2,11 @@
 // This is the material fragment shader.
 
 struct Light{
-	int type;
-	vec3 color;
-	float brightness;
-	vec3 position;
-	vec3 direction;
+	int type; 			// vec3 typePadding;
+	vec3 color;			// float colorPadding;
+	float brightness;	// vec3 brightnessPadding;
+	vec3 position;		// float positionPadding;
+	vec3 direction;		// float directionPadding;
 	
 };
 
@@ -53,7 +53,7 @@ in vec3 objectSpaceBitangent;
 
 in mat4 toWorldMatrix;
 
-out vec4 outColor;
+layout (location = 0) out vec4 outColor;
 
 
 //constants
@@ -129,6 +129,8 @@ void main()
 	if(material.useAmbient){
 		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * vec4(light.color * C_l ,1);
 	}
+
+	outColor.a = 1;
 		
 }
 

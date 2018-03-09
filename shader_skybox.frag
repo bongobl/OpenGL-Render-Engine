@@ -5,7 +5,7 @@
 
 in vec3 objectSpacePosition;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 uniform samplerCube skybox;
 uniform vec3 camPosition;
@@ -13,5 +13,5 @@ uniform vec3 camPosition;
 void main()
 {
 	color = texture(skybox, objectSpacePosition);		//for skybox
-	
+	color.a = 1;
 }

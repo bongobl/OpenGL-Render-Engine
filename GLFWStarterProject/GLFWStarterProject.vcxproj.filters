@@ -104,5 +104,11 @@
     <None Include="..\shader_skybox.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\..\..\Alex%27s Laptop\Desktop\OpenGLPrac\shader_blur.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shader_blur.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

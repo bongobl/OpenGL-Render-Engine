@@ -48,6 +48,8 @@
     <ClCompile Include="..\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\shader_blur.vert" />
+    <None Include="..\..\..\..\Alex%27s Laptop\Desktop\OpenGLPrac\shader_blur.frag" />
     <None Include="..\shader_material.frag" />
     <None Include="..\shader_skybox.frag" />
     <None Include="..\shader.vert" />
