@@ -12,16 +12,18 @@ void SampleScene::initThisSceneObjects() {
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
 	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
-	camera2->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	camera2->setBlurValue(0.004f);
+	camera2->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
-	dullCam->setLocalRotation( glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
+	dullCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
+
 	currActiveCamera = mainCam;
 
 	allSceneCameras.push_back(mainCam);
 	allSceneCameras.push_back(camera2);
 	allSceneCameras.push_back(dullCam);
 
-	
+
 	//init lights
 	pointLightDist = 20;
 	sceneLights = new Light[2]{
@@ -29,10 +31,10 @@ void SampleScene::initThisSceneObjects() {
 		Light(Light::POINT,glm::vec3(1,1,1), 30, glm::vec3(pointLightDist,0,0), glm::vec3(0,0,0))
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
-	
+
 
 	Material graphicMaterial;
-	graphicMaterial.setDiffuseColor(glm::vec3(0,0,0));
+	graphicMaterial.setDiffuseColor(glm::vec3(0, 0, 0));
 	graphicMaterial.setUseDiffuse(true);
 	graphicMaterial.setAmbientColor(glm::vec3(1, 1, 0));
 	graphicMaterial.setUseAmbient(true);
@@ -53,7 +55,7 @@ void SampleScene::initThisSceneObjects() {
 	faceNames.push_back("skybox/bottom.ppm");
 	faceNames.push_back("skybox/back.ppm");
 	faceNames.push_back("skybox/front.ppm");
-	
+
 	oceanViewCubeMap.loadCubeMap(faceNames);
 
 	//init cubemap
@@ -104,7 +106,7 @@ void SampleScene::initThisSceneObjects() {
 
 	child2 = new Model("Models/Sphere.obj", Material::basic());
 	child2->setLocalPosition(glm::vec3(-7, 2, 0));
-	child2->setLocalScale(glm::vec3(0.7f,0.7f,0.7f));
+	child2->setLocalScale(glm::vec3(0.7f, 0.7f, 0.7f));
 	child2->getMaterial().setDiffuseColor(glm::vec3(1, 1, 0));
 	child2->getMaterial().setUseDiffuse(true);
 	child2->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
@@ -114,7 +116,7 @@ void SampleScene::initThisSceneObjects() {
 	child2->getMaterial().loadReflectionTexture(oceanViewCubeMap);
 	child2->getMaterial().setUseReflectionTexture(true);
 	childObject->addChild(child2);
-	
+
 
 	boundingBox = new BoundingBox(testModel->getVertices());
 
@@ -149,24 +151,24 @@ void SampleScene::disposeThisSceneObjects() {
 }
 
 void SampleScene::update(float deltaTime) {
-	
-	
+
+
 	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
 	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
 	oceanView.setLocalPosition(getActiveCamera()->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
-	
+
 	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
-	
+
 	//Note::update camera last so all objects are up to date
 	mainCam->update();
 	camera2->update();
 	dullCam->update();
 }
 void SampleScene::drawSceneToBuffer() {
-	
 
-	testModel->draw(this);	
+
+	testModel->draw(this);
 	sceneLights[currActiveLight].draw(this);
 	boundingBox->draw(this);
 	oceanView.draw(this);
@@ -178,7 +180,7 @@ void SampleScene::drawSceneToBuffer() {
 
 
 
-	
+
 }
 
 //events from callbacks
@@ -208,7 +210,7 @@ void SampleScene::key_event(int key, int scancode, int action, int mods) {
 			currEditMode = SampleScene::EDIT_LIGHT;
 		}
 		if (key == GLFW_KEY_SPACE) {
-			
+
 			if (currActiveCamera == mainCam) {
 				currActiveCamera = camera2;
 			}
@@ -247,7 +249,7 @@ void SampleScene::mouse_button_event(int button, int action, int mods) {
 	}
 }
 void SampleScene::cursor_position_event(double xpos, double ypos) {
-	
+
 	//define mousePosition for other functions to use
 	mousePosition.x = (float)xpos;
 	mousePosition.y = (float)ypos;
@@ -269,8 +271,8 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 
 				if (isRightMouseButtonDown) {
 					camRotationMatrix = deltaTrackBall * camRotationMatrix;
-					
-					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));	
+
+					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
 				}
 				else if (isLeftMouseButtonDown) {
 
@@ -278,7 +280,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 
 					}
 					else if (currEditMode == SampleScene::EDIT_LIGHT) {
-						if(currActiveLight == 0)
+						if (currActiveLight == 0)
 							sceneLights[currActiveLight].setLocalRotation(deltaTrackBall * sceneLights[currActiveLight].getRotation(SceneObject::OBJECT));
 						else if (currActiveLight == 1) {
 							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
@@ -294,7 +296,7 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 	lastPoint = currPoint;
 }
 void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
-	
+
 	if (currEditMode == SampleScene::EDIT_MODEL) {
 		camDist += -5 * (float)yoffset;
 		mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
@@ -302,10 +304,10 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	else if (currEditMode == SampleScene::EDIT_LIGHT) {
 		if (currActiveLight == SampleScene::POINT_LIGHT) {
 			pointLightDist += 3 * (float)yoffset;
-			sceneLights[currActiveLight].setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0,1));
+			sceneLights[currActiveLight].setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0, 1));
 		}
 	}
-	
+
 }
 
 Camera* SampleScene::getActiveCamera() {
@@ -317,7 +319,7 @@ Light* SampleScene::getActiveLight() {
 }
 //Private Subroutines
 glm::vec3 SampleScene::trackBallMap(glm::vec2 point) {
-	
+
 	glm::vec3 v;
 	GLfloat d;
 	v.x = (2.0f * point.x - window_width) / window_width;
@@ -326,7 +328,7 @@ glm::vec3 SampleScene::trackBallMap(glm::vec2 point) {
 	d = glm::length(v);
 	if (d > 1.0f)
 		d = 1.0f;
-	v.z = sqrt(1.001f - d*d);
+	v.z = sqrt(1.001f - d * d);
 	v = glm::normalize(v);
 	return v;
 

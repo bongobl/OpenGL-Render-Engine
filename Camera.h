@@ -3,8 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Material.h"
 #include "SceneObject.h"
-class Camera : public SceneObject{
-	
+class Camera : public SceneObject {
+
 	//Define Camera Mode
 	bool targetMode;
 
@@ -19,6 +19,9 @@ class Camera : public SceneObject{
 	float near;
 	float far;
 
+	//blur
+	float blurValue;
+
 	//Camera Matrices
 	glm::mat4 ViewMatrix;
 	glm::mat4 ProjectionMatrix;
@@ -26,7 +29,7 @@ class Camera : public SceneObject{
 	//Camera gizmos
 	std::vector<glm::vec3> gizmosPoints;
 	GLuint VAO, VBO;
-	
+
 public:
 
 	Camera(glm::vec3 camera_position, float camera_field_of_view_Y);
@@ -34,8 +37,8 @@ public:
 	void update();
 	void resize(float camera_width, float camera_height);
 	void applySettings(GLuint currShaderProgram);
-	
-	
+
+
 	void setTargetMode(bool targetMode);
 
 	//Target Mode
@@ -50,6 +53,9 @@ public:
 	void setFar(float camera_far);
 	float getCameraFar();
 
+	//blur settings
+	void setBlurValue(float camera_blur_value);
+	float getBlurValue();
 
 	//override
 	void draw(Scene* currScene);

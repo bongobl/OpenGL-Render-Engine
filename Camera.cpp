@@ -1,16 +1,16 @@
 #include "Camera.h"
 #include "Scene.h"
 Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
-	
+
 	//SceneObject Position
 	setLocalPosition(camera_position);
 
 	//Camera Mode
 	targetMode = false;
-	
+
 	//Target Mode
-	targetObject = NULL;	
-	up = glm::vec3(0,1,0);
+	targetObject = NULL;
+	up = glm::vec3(0, 1, 0);
 
 	//To define Projection Matrix
 	fieldOfViewY = camera_field_of_view_Y;
@@ -18,6 +18,9 @@ Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	height = 1;
 	near = 0.1f;
 	far = 100000.0f;
+
+	//Define default blur value
+	blurValue = 0;
 
 	//update view and projection matrices to reflect camera properties
 	updateViewMatrix();
@@ -53,13 +56,19 @@ void Camera::resize(float camera_width, float camera_height) {
 
 void Camera::applySettings(GLuint currShaderProgram) {
 
+	//send camera blur settings to blur shader program
+	glUseProgram(SceneManager::getBlurShader());
+	glUniform1f(glGetUniformLocation(SceneManager::getBlurShader(), "blurRadius"), blurValue);
+
 	glm::vec3 worldPosition = getPosition(SceneObject::WORLD);
 
+	//send camera properties to current shader program
+	glUseProgram(currShaderProgram);
 	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "projection"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(currShaderProgram, "view"), 1, GL_FALSE, &ViewMatrix[0][0]);
 	glUniform3f(glGetUniformLocation(currShaderProgram, "camPosition"), worldPosition.x, worldPosition.y, worldPosition.z);
 
-	
+
 }
 
 void Camera::setTargetMode(bool target_mode) {
@@ -97,6 +106,13 @@ void Camera::setFar(float camera_far) {
 }
 float Camera::getCameraFar() {
 	return far;
+}
+
+void Camera::setBlurValue(float camera_blur_value) {
+	blurValue = camera_blur_value;
+}
+float Camera::getBlurValue() {
+	return blurValue;
 }
 
 void Camera::draw(Scene* currScene) {
