@@ -1,9 +1,9 @@
+#include <iostream>
 #include "SceneManager.h"
 #include "Scene.h"
 #include "SampleScene.h"
 
-float SceneManager::testFloat[1];
-//Static members
+//Basic Data
 GLFWwindow* SceneManager::window;
 int SceneManager::windowWidth;
 int SceneManager::windowHeight;
@@ -12,16 +12,15 @@ float SceneManager::prevTime;
 Scene* SceneManager::currScene = NULL;
 
 
-//FBOs
-GLuint SceneManager::blurShader;
-GLuint SceneManager::FramebufferName;
-GLuint SceneManager::renderedTexture;
-GLuint SceneManager::depthrenderbuffer;
-GLenum SceneManager::DrawBuffers[1];
-GLuint SceneManager::quad_VertexArrayID;
-GLuint SceneManager::quad_vertexbuffer;
-
-GLfloat SceneManager::g_quad_vertex_buffer_data[] = {
+//Gaussian Blur Data
+GLuint SceneManager::blurShaderProgram;
+GLuint SceneManager::frameBufferID;
+Texture SceneManager::frameTexture;
+GLuint SceneManager::renderBufferID;
+GLenum SceneManager::drawBuffers[1];
+GLuint SceneManager::VAO_ScreenQuad;
+GLuint SceneManager::VBO_SceenQuadPositions;
+GLfloat SceneManager::screenQuadVertexPositions[] = {
 	-1.0f, -1.0f, 0.0f,
 	1.0f, -1.0f, 0.0f,
 	-1.0f,  1.0f, 0.0f,
@@ -29,15 +28,15 @@ GLfloat SceneManager::g_quad_vertex_buffer_data[] = {
 	1.0f, -1.0f, 0.0f,
 	1.0f,  1.0f, 0.0f,
 };
-GLuint SceneManager::quadEBO;
-GLuint SceneManager::indices[6] = {0,1,2,3,4,5};
+GLuint SceneManager::EB0_ScreenQuad;
+GLuint SceneManager::meshIndices[6] = {0,1,2,3,4,5};
 
 
-
+//don't call any gl functions here, only glfw
 int SceneManager::createWindow(const char* title, int window_width, int window_height) {
 
 	// 4x antialiasing
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	windowWidth = window_width;
 	windowHeight = window_height;
@@ -85,72 +84,25 @@ void SceneManager::initObjects() {
 	currScene = new SampleScene();
 	currScene->initObjects();
 
+	//Init Gaussian Blur buffers and shader
+	initFrameBufferObjects();
+
 	// Call the resize callback to make sure things get drawn immediately
 	resize_callback(window, windowWidth, windowHeight);
 
-	
-	//FBOS
-	//fbo
-	FramebufferName = 0;
-	glGenFramebuffers(1, &FramebufferName);
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 
-	//texture
-	glGenTextures(1, &renderedTexture);
-	glBindTexture(GL_TEXTURE_2D, renderedTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	
-	// The depth buffer
-	glGenRenderbuffers(1, &depthrenderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
-
-	//fbo config
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
-	DrawBuffers[0] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers);
-
-	//check
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		exit(1);
-
-	//set current frame buffer to standard one
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	
-	//Screen QUAD
-
-	//vao
-	glGenVertexArrays(1, &quad_VertexArrayID);
-	glBindVertexArray(quad_VertexArrayID);
-
-	//vbo
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	
-	//ebo
-	glGenBuffers(1, &quadEBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLint), indices, GL_STATIC_DRAW);
-	
-	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	//blur shader
-	blurShader = LoadShaders("../shader_blur.vert", "../shader_blur.frag");
-
-	
 }
 void SceneManager::dispose() {
 
 	currScene->dispose();
+	frameTexture.disposeCurrentTexture();
+	glDeleteBuffers(1, &renderBufferID);
+	glDeleteBuffers(1, &frameBufferID);
+	glDeleteBuffers(1, &VBO_SceenQuadPositions);
+	glDeleteBuffers(1, &EB0_ScreenQuad);
+	glDeleteVertexArrays(1, &VAO_ScreenQuad);
+	glDeleteProgram(blurShaderProgram);
+
 	Material::cleanUpStatics();
 
 	glfwDestroyWindow(window);
@@ -167,32 +119,35 @@ void SceneManager::update() {
 void SceneManager::draw() {
 
 
-	//draw scene to frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-	// Clear the color and depth buffers
+	//draw scene to frame buffer's screen texture
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	currScene->draw();
-	
-	
-	//draw frame buffer to window
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	
+	//Draw frame buffer's frame texture to window
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	
-	glUseProgram(blurShader);	
-	glUniform1i(glGetUniformLocation(blurShader, "texture"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, renderedTexture);
-	
+	//use the blur shader program
+	glUseProgram(blurShaderProgram);	
 
-	glBindVertexArray(quad_VertexArrayID);
+	//send frame buffer's frame texture to blur shader
+	glUniform1i(glGetUniformLocation(blurShaderProgram, "texture"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, frameTexture.getID());
+	
+	//send current camera's blur radius value to blur shader
+	glUniform1f(glGetUniformLocation(blurShaderProgram, "blurRadius"), currScene->getActiveCamera()->getBlurValue());
+
+	//bind and draw screen quad
+	glBindVertexArray(VAO_ScreenQuad);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+	//unbind screen quad
 	glBindVertexArray(0);
-
+	
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -221,10 +176,11 @@ void SceneManager::resize_callback(GLFWwindow* window, int width, int height) {
 	SceneManager::windowWidth = width;
 	SceneManager::windowHeight = height;
 
+
 	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
 	glViewport(0, 0, width, height);
 	
-	
+	resizeFrameBufferObjects();
 
 	currScene->resize_event(width, height);
 
@@ -244,5 +200,85 @@ bool SceneManager::isWindowOpen() {
 }
 
 GLuint SceneManager::getBlurShader() {
-	return blurShader;
+	return blurShaderProgram;
+}
+
+
+//PRIVATE HELPERS
+
+void SceneManager::initFrameBufferObjects() {
+
+	//generate since they will be deleted during resize
+	glGenFramebuffers(1, &frameBufferID);
+	frameTexture.generatePlainTexture();
+	glGenRenderbuffers(1, &renderBufferID);
+
+
+	//Validate FBO
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		exit(1);
+	}
+
+	//Done setting up FBO and Frame Texture. Set current frame buffer to standard window
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//VAO
+	glGenVertexArrays(1, &VAO_ScreenQuad);
+	glBindVertexArray(VAO_ScreenQuad);
+
+	//VBO
+	glGenBuffers(1, &VBO_SceenQuadPositions);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_SceenQuadPositions);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(screenQuadVertexPositions), screenQuadVertexPositions, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+	//EBO
+	glGenBuffers(1, &EB0_ScreenQuad);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EB0_ScreenQuad);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLint), meshIndices, GL_STATIC_DRAW);
+
+	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	//set up blur shader
+	blurShaderProgram = LoadShaders("../shader_blur.vert", "../shader_blur.frag");
+
+}
+
+
+void SceneManager::resizeFrameBufferObjects() {
+	
+	//delete buffers
+	frameTexture.disposeCurrentTexture();
+	glDeleteBuffers(1, &renderBufferID);
+	glDeleteBuffers(1, &frameBufferID);
+
+	//FBO
+	glGenFramebuffers(1, &frameBufferID);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+
+	//Frame texture
+	frameTexture.generatePlainTexture();
+	glBindTexture(GL_TEXTURE_2D, frameTexture.getID());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	//Depth buffer
+	glGenRenderbuffers(1, &renderBufferID);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferID);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferID);
+
+	//FBO config
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.getID(), 0);
+	drawBuffers[0] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBuffers);
+
+	//Validate FBO
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		exit(1);
+	}
 }

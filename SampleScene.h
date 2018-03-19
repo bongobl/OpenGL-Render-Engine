@@ -30,7 +30,6 @@ class SampleScene : public Scene {
 	Light* sceneLights;
 	float pointLightDist;
 	glm::mat4 pointLightRotationMatrix;
-	Model* pointLightGraphic;
 
 	//Trackball controls
 	bool isRightMouseButtonDown;
@@ -52,26 +51,25 @@ class SampleScene : public Scene {
 	GLuint RBO;
 	GLuint FBO;
 
-
+	
 public: 
 
+	
+	//OVERLOADED FROM SCENE CLASS
 
-	//basic, overloaded
-	void initThisSceneObjects();
-	void disposeThisSceneObjects();
-	void update(float deltaTime);
-	void drawSceneToBuffer();
-
-	//override from Scene
-	Camera* getActiveCamera();
+	Camera * getActiveCamera();
 	Light* getActiveLight();
 
-
-	//events from callbacks, override from Scene
 	void key_event(int key, int scancode, int action, int mods);
 	void mouse_button_event(int button, int action, int mods);
 	void cursor_position_event(double xpos, double ypos);
 	void mouse_wheel_event(double xoffset, double yoffset);
+
+	void initThisScenesObjects();
+	void disposeThisScenesObjects();
+	void updateThisScenesObjects(float deltaTime);
+	void drawThisScenesObjects();
+
 
 private:
 	glm::vec3 trackBallMap(glm::vec2 point);

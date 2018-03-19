@@ -1,4 +1,6 @@
 #version 330 core
+#define PI 3.1415926535897932384626433832795
+
 //this is the fragment shader to blur the current camera
 
 uniform sampler2D texture;
@@ -8,22 +10,22 @@ in vec3 pos;
 out vec4 finalColor;
 void main()
 {
-	//float blurRadius = 0.005;
-    vec2 offx = vec2(blurRadius, 0.0);
-    vec2 offy = vec2(0.0, blurRadius);
 	vec2 pixelPosition = vec2( (pos.x / 2.0) + 0.5 , (pos.y /2.0) + 0.5);
+	vec4 sumOfColors =	texture2D(texture, pixelPosition)  * 8;
 
-    vec4 pixel = texture2D(texture, pixelPosition)               * 4.0 +
-                 texture2D(texture, pixelPosition - offx)        * 2.0 +
-                 texture2D(texture, pixelPosition + offx)        * 2.0 +
-                 texture2D(texture, pixelPosition - offy)        * 2.0 +
-                 texture2D(texture, pixelPosition + offy)        * 2.0 +
-                 texture2D(texture, pixelPosition - offx - offy) * 1.0 +
-                 texture2D(texture, pixelPosition - offx + offy) * 1.0 +
-                 texture2D(texture, pixelPosition + offx - offy) * 1.0 +
-                 texture2D(texture, pixelPosition + offx + offy) * 1.0;
+	
+	
+	for(int iter = 0; iter < 16; ++iter){
+		sumOfColors += texture2D(texture, pixelPosition + (blurRadius / 100.0) * vec2(cos(iter * (2 * PI) / 16), sin(iter * (2 * PI) / 16))) * 4;
+	}
+	for(int iter = 0; iter < 16; ++iter){
+		sumOfColors += texture2D(texture, pixelPosition + 2 * (blurRadius / 100.0) * vec2(cos(iter * (2 * PI) / 16), sin(iter * (2 * PI) / 16))) * 2;
+	}
+	for(int iter = 0; iter < 16; ++iter){
+		sumOfColors += texture2D(texture, pixelPosition + 3 * (blurRadius / 100.0) * vec2(cos(iter * (2 * PI) / 16), sin(iter * (2 * PI) / 16))) * 1;
+	}
 
-    finalColor =  pixel / 16.0;
-
+    finalColor =  sumOfColors / 120;
+	
 
 }

@@ -25,7 +25,7 @@ public:
 	BoundingBox(std::vector<glm::vec3> verts);
 	~BoundingBox();
 
-	bool isCollidingWith(BoundingBox* other);
+	bool isCollidingWith(const BoundingBox* other);
 	void updateToWorld(glm::mat4 toWorld);
 	void draw(Scene* currScene);
 };

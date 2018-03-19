@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include "Texture.h"
 class Scene;
 class SceneManager {
 
@@ -19,17 +19,17 @@ class SceneManager {
 	static Scene* currScene;
 
 	
-	//FBOs
-	static GLuint blurShader;
-	static GLuint FramebufferName;
-	static GLuint renderedTexture;
-	static GLuint depthrenderbuffer;
-	static GLenum DrawBuffers[1];
-	static GLuint quad_VertexArrayID;
-	static GLuint quad_vertexbuffer;
-	static GLfloat g_quad_vertex_buffer_data[];
-	static GLuint quadEBO;
-	static GLuint indices[];
+	//Gaussian Blur Data
+	static GLuint blurShaderProgram;
+	static GLuint frameBufferID;
+	static Texture frameTexture;
+	static GLuint renderBufferID;
+	static GLenum drawBuffers[1];
+	static GLuint VAO_ScreenQuad;
+	static GLuint VBO_SceenQuadPositions;
+	static GLfloat screenQuadVertexPositions[];
+	static GLuint EB0_ScreenQuad;
+	static GLuint meshIndices[];
 	
 	static float testFloat[1];
 
@@ -55,4 +55,8 @@ public:
 
 	static GLuint getBlurShader();
 
+private:
+
+	static void initFrameBufferObjects();
+	static void resizeFrameBufferObjects();
 };

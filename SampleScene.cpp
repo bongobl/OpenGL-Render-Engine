@@ -1,7 +1,6 @@
 #include "SampleScene.h"
 
-void SampleScene::initThisSceneObjects() {
-
+void SampleScene::initThisScenesObjects() {
 
 	//init trackball controls
 	isLeftMouseButtonDown = false;
@@ -11,12 +10,12 @@ void SampleScene::initThisSceneObjects() {
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
+	mainCam->setBlurValue(0.3f);
 	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
-	camera2->setBlurValue(0.004f);
 	camera2->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
 	dullCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
-
+	
 	currActiveCamera = mainCam;
 
 	allSceneCameras.push_back(mainCam);
@@ -27,19 +26,11 @@ void SampleScene::initThisSceneObjects() {
 	//init lights
 	pointLightDist = 20;
 	sceneLights = new Light[2]{
-		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(0,0,0),glm::vec3(-1,0,0)),
+		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(20,70,0),glm::vec3(-1,0,0)),
 		Light(Light::POINT,glm::vec3(1,1,1), 30, glm::vec3(pointLightDist,0,0), glm::vec3(0,0,0))
 	};
 	pointLightRotationMatrix = glm::mat4(1.0f);
 
-
-	Material graphicMaterial;
-	graphicMaterial.setDiffuseColor(glm::vec3(0, 0, 0));
-	graphicMaterial.setUseDiffuse(true);
-	graphicMaterial.setAmbientColor(glm::vec3(1, 1, 0));
-	graphicMaterial.setUseAmbient(true);
-	pointLightGraphic = new Model("Models/Sphere.obj", graphicMaterial);
-	sceneLights[1].addChild(pointLightGraphic);
 
 	//init modes
 	currEditMode = SampleScene::EDIT_MODEL;
@@ -68,6 +59,7 @@ void SampleScene::initThisSceneObjects() {
 
 	//Create Asteroid Material
 	Material asteroidMaterial;
+
 	///diffuse
 	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
 	asteroidMaterial.setUseDiffuse(true);
@@ -80,6 +72,10 @@ void SampleScene::initThisSceneObjects() {
 	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
 	asteroidMaterial.setUseAmbient(true);
 
+	///surface color
+	asteroidMaterial.setSurfaceColor(glm::vec3(0, 1, 0));
+	asteroidMaterial.setUseSurfaceColor(true);
+
 	///surface texture
 	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
 	asteroidMaterial.setSurfaceTextureStrength(1.0f);
@@ -87,7 +83,7 @@ void SampleScene::initThisSceneObjects() {
 
 	///normal map
 	asteroidMaterial.loadNormalMap(normalMapTexture);
-	asteroidMaterial.setNormalMapStrength(0.4f);
+	asteroidMaterial.setNormalMapStrength(0.13f);
 	asteroidMaterial.setUseNormalMap(true);
 
 	///reflection texture
@@ -104,9 +100,9 @@ void SampleScene::initThisSceneObjects() {
 	childObject->setLocalPosition(glm::vec3(7, 7, 0));
 
 
-	child2 = new Model("Models/Sphere.obj", Material::basic());
+	child2 = new Model("Models/Icosahedron.obj", Material::basic());
 	child2->setLocalPosition(glm::vec3(-7, 2, 0));
-	child2->setLocalScale(glm::vec3(0.7f, 0.7f, 0.7f));
+	child2->setLocalScale(glm::vec3(0.007f, 0.007f, 0.007f));
 	child2->getMaterial().setDiffuseColor(glm::vec3(1, 1, 0));
 	child2->getMaterial().setUseDiffuse(true);
 	child2->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
@@ -130,7 +126,7 @@ void SampleScene::initThisSceneObjects() {
 
 
 }
-void SampleScene::disposeThisSceneObjects() {
+void SampleScene::disposeThisScenesObjects() {
 
 
 	//delete models & cam gizmos
@@ -150,22 +146,16 @@ void SampleScene::disposeThisSceneObjects() {
 
 }
 
-void SampleScene::update(float deltaTime) {
+void SampleScene::updateThisScenesObjects(float deltaTime) {
 
-
-	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
-	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 3, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
+	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 2, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
+	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
 	oceanView.setLocalPosition(getActiveCamera()->getPosition(SceneObject::WORLD));
 	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 
 	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
-
-	//Note::update camera last so all objects are up to date
-	mainCam->update();
-	camera2->update();
-	dullCam->update();
 }
-void SampleScene::drawSceneToBuffer() {
+void SampleScene::drawThisScenesObjects() {
 
 
 	testModel->draw(this);
@@ -173,13 +163,13 @@ void SampleScene::drawSceneToBuffer() {
 	boundingBox->draw(this);
 	oceanView.draw(this);
 
-	//Note::You need to draw cameras if they have SceneObject children
+	
 	mainCam->draw(this);
 	camera2->draw(this);
 	dullCam->draw(this);
 
-
-
+	sceneLights[1].draw(this);
+	sceneLights[0].draw(this);
 
 }
 

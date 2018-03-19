@@ -15,29 +15,33 @@ class Material {
 	static GLuint shaderProgram;
 
 	//diffuse
-	bool useDiffuse;
+	int useDiffuse;
 	glm::vec3 diffuse;
 
 	//specular
-	bool useSpecular;
+	int useSpecular;
 	glm::vec3 specular;
 
 	//ambient
-	bool useAmbient;
+	int useAmbient;
 	glm::vec3 ambient;
 
+	//surface color
+	int useSurfaceColor;
+	glm::vec3 surfaceColor;
+
 	//surface texture
-	bool useSurfaceTexture;
+	int useSurfaceTexture;
 	Texture surfaceTexture;
 	float surfaceTextureStrength;
 	
 	//normal map
-	bool useNormalMap;
+	int useNormalMap;
 	float normalMapStrength;
 	Texture normalMap;
 
 	//relection texture
-	bool useReflectionTexture;
+	int useReflectionTexture;
 	Texture reflectionTexture;
 	float reflectiveness;
 	
@@ -53,36 +57,41 @@ public:
 	~Material();
 
 	//diffuse
-	void setUseDiffuse(bool opt);
+	void setUseDiffuse(int opt);
 	void setDiffuseColor(glm::vec3 c);
 	glm::vec3 getDiffuseColor();
 
 	//specular
-	void setUseSpecular(bool opt);
+	void setUseSpecular(int opt);
 	void setSpecularColor(glm::vec3 c);
 	glm::vec3 getSpecularColor();
 
 	//ambient
-	void setUseAmbient(bool opt);
+	void setUseAmbient(int opt);
 	void setAmbientColor(glm::vec3 c);
 	glm::vec3 getAmbientColor();
 
+	//surface color
+	void setUseSurfaceColor(int opt);
+	void setSurfaceColor(glm::vec3 surface_color);
+	glm::vec3 getSurfaceColor();
+
 	//surface texture
-	void setUseSurfaceTexture(bool opt);
+	void setUseSurfaceTexture(int opt);
 	void loadSurfaceTexture(Texture surface_texture);
 	Texture& getSurfaceTexture();
 	void setSurfaceTextureStrength(float f);
 	float getSurfaceTextureStrength();
 
 	//normal map
-	void setUseNormalMap(bool opt);
+	void setUseNormalMap(int opt);
 	void loadNormalMap(Texture normal_map);
 	Texture& getNormalMap();
 	void setNormalMapStrength(float f);
 	float getNormalMapStrength();
 
 	//reflection texture
-	void setUseReflectionTexture(bool opt);
+	void setUseReflectionTexture(int opt);
 	void loadReflectionTexture(Texture reflection_texture);
 	Texture& getReflectionTexture();
 	void setReflectiveness(float r);

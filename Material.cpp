@@ -29,6 +29,10 @@ Material::Material() {
 	useAmbient = false;
 	ambient = glm::vec3(0, 0, 0);
 
+	//surface color
+	useSurfaceColor = false;
+	surfaceColor = glm::vec3(1, 1, 1);
+
 	//surface texture
 	useSurfaceTexture = false;
 	surfaceTextureStrength = 1.0f;
@@ -47,7 +51,7 @@ Material::~Material() {
 }
 
 //diffuse
-void Material::setUseDiffuse(bool opt) {
+void Material::setUseDiffuse(int opt) {
 	useDiffuse = opt;
 }
 void Material::setDiffuseColor(glm::vec3 c) {
@@ -58,7 +62,7 @@ glm::vec3 Material::getDiffuseColor() {
 }
 
 //specular
-void Material::setUseSpecular(bool opt) {
+void Material::setUseSpecular(int opt) {
 	useSpecular = opt;
 }
 void Material::setSpecularColor(glm::vec3 c) {
@@ -69,7 +73,7 @@ glm::vec3 Material::getSpecularColor() {
 }
 
 //ambient
-void Material::setUseAmbient(bool opt) {
+void Material::setUseAmbient(int opt) {
 	useAmbient = opt;
 }
 void Material::setAmbientColor(glm::vec3 c) {
@@ -79,9 +83,20 @@ glm::vec3 Material::getAmbientColor() {
 	return ambient;
 }
 
+//surface color
+void Material::setUseSurfaceColor(int opt) {
+	useSurfaceColor = opt;
+}
+void Material::setSurfaceColor(glm::vec3 surface_color) {
+	surfaceColor = surface_color;
+}
+glm::vec3 Material::getSurfaceColor() {
+	return surfaceColor;
+}
+
 //surface texture
-void Material::setUseSurfaceTexture(bool opt) {
-	if (opt == true && surfaceTexture.getType() != Texture::STANDARD) {
+void Material::setUseSurfaceTexture(int opt) {
+	if (opt && surfaceTexture.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: No texture map loaded" << std::endl;
 		return;
 	}
@@ -106,8 +121,8 @@ float Material::getSurfaceTextureStrength() {
 }
 
 //normal map
-void Material::setUseNormalMap(bool opt) {
-	if (opt == true && normalMap.getType() != Texture::STANDARD) {
+void Material::setUseNormalMap(int opt) {
+	if (opt && normalMap.getType() != Texture::STANDARD) {
 		std::cerr << "ERROR: No normal map loaded" << std::endl;
 		return;
 	}
@@ -132,8 +147,8 @@ float Material::getNormalMapStrength() {
 }
 
 //reflection texture
-void Material::setUseReflectionTexture(bool opt) {
-	if (opt == true && reflectionTexture.getType() != Texture::CUBE_MAP) {
+void Material::setUseReflectionTexture(int opt) {
+	if (opt && reflectionTexture.getType() != Texture::CUBE_MAP) {
 		std::cerr << "ERROR: No Reflection texture loaded" << std::endl;
 		return;
 	}
@@ -165,10 +180,12 @@ GLuint Material::getShaderProgram() {
 
 void Material::applySettings() {
 
+	glUseProgram(shaderProgram);
 	//material properties	
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useDiffuse"), useDiffuse);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSpecular"), useSpecular);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useAmbient"), useAmbient);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSurfaceColor"), useSurfaceColor);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSurfaceTexture"), useSurfaceTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useNormalMap"), useNormalMap);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useReflectionTexture"), useReflectionTexture);
@@ -180,6 +197,9 @@ void Material::applySettings() {
 	}
 	if (useAmbient) {
 		glUniform3f(glGetUniformLocation(shaderProgram, "material.ambient"), ambient.r, ambient.g, ambient.b);
+	}
+	if (useSurfaceColor) {
+		glUniform3f(glGetUniformLocation(shaderProgram, "material.surfaceColor"), surfaceColor.r, surfaceColor.g, surfaceColor.b);
 	}
 	if (useSurfaceTexture) {
 		glUniform1i(glGetUniformLocation(shaderProgram, "material.surfaceTexture"), 0);

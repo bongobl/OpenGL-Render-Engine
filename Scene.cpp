@@ -4,12 +4,12 @@
 
 void Scene::initObjects() {
 
-	initThisSceneObjects();
+	initThisScenesObjects();
 
 }
 
 void Scene::dispose() {
-	disposeThisSceneObjects();
+	disposeThisScenesObjects();
 }
 
 void Scene::resize_event(int width, int height) {
@@ -24,11 +24,17 @@ void Scene::resize_event(int width, int height) {
 	}
 }
 
+void Scene::update(float deltaTime) {
+	updateThisScenesObjects(deltaTime);
+
+	for (unsigned int i = 0; i < allSceneCameras.size(); ++i) {
+
+		allSceneCameras.at(i)->updateViewMatrix();
+	}
+}
 void Scene::draw() {
 
-
-	drawSceneToBuffer();
-
+	drawThisScenesObjects();
 
 }
 

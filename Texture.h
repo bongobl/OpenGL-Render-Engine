@@ -11,14 +11,14 @@ class Texture {
 
 public:
 	Texture();
+	void generatePlainTexture();
 	void loadStandardTexture(const char* filename);
 	void loadCubeMap(std::vector<std::string> faces);
 	void disposeCurrentTexture();
-
 	unsigned int getType();
 	GLint getID();
 
-	enum Types { NONE, STANDARD, CUBE_MAP };
+	enum Types { EMPTY, STANDARD, CUBE_MAP, PLAIN};
 private:
 
 	//Helpers

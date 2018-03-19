@@ -71,7 +71,7 @@ int main(void)
 	}
 
 	//create window
-	if (!SceneManager::createWindow("Alex Lui", 1920, 1080)) {
+	if (!SceneManager::createWindow("Render Engine", 2560,1440)) {
 		exit(-1);
 	}
 

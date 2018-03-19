@@ -12,6 +12,7 @@
 #include "shader.h"
 #include "Texture.h"
 #include "SceneObject.h"
+
 class Scene;
 class SkyBox : public SceneObject
 {

@@ -34,31 +34,32 @@ Camera::Camera(glm::vec3 camera_position, float camera_field_of_view_Y) {
 	//prepare buffers
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, gizmosPoints.size() * sizeof(glm::vec3), gizmosPoints.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 Camera::~Camera() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 }
-void Camera::update() {
+	
 
-	updateViewMatrix();
-	updateGizmos();
-}
 void Camera::resize(float camera_width, float camera_height) {
 
 	width = camera_width;
 	height = camera_height;
 
 	updateProjectionMatrix();
+	updateGizmos();
 }
 
 void Camera::applySettings(GLuint currShaderProgram) {
 
-	//send camera blur settings to blur shader program
-	glUseProgram(SceneManager::getBlurShader());
-	glUniform1f(glGetUniformLocation(SceneManager::getBlurShader(), "blurRadius"), blurValue);
 
 	glm::vec3 worldPosition = getPosition(SceneObject::WORLD);
 
@@ -181,7 +182,7 @@ void Camera::updateGizmos() {
 	gizmosPoints[14] = lowerRight;
 	gizmosPoints[15] = upperRight;
 
-	//update VBO for new box vertices positions
+	//update VBO for new gizmos vertices positions
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, gizmosPoints.size() * sizeof(glm::vec3), gizmosPoints.data(), GL_STATIC_DRAW);
@@ -209,10 +210,8 @@ void Camera::drawGizmos(Scene* currScene) {
 
 	//apply material properties
 	Material m;
-	m.setDiffuseColor(glm::vec3(0, 0, 0));
-	m.setUseDiffuse(true);
-	m.setAmbientColor(glm::vec3(0.5, 1, 0.5));
-	m.setUseAmbient(true);
+	m.setSurfaceColor(glm::vec3(0.5, 1, 0.5));
+	m.setUseSurfaceColor(true);
 	m.applySettings();
 
 	//Bind VAO for gizmos and draw 

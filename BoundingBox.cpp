@@ -9,10 +9,9 @@ BoundingBox::BoundingBox(std::vector<glm::vec3> verts) {
 	}
 
 	//init material
-	material.setUseDiffuse(true);
-	material.setDiffuseColor(glm::vec3(0, 0, 0));
-	material.setUseAmbient(true);
-	material.setAmbientColor(glm::vec3(0, 0, 1));
+	material.setSurfaceColor(glm::vec3(0, 0, 1));
+	material.setUseSurfaceColor(true);
+	
 
 	//prepare buffers
 	glGenVertexArrays(1, &VAO);
@@ -112,7 +111,7 @@ void BoundingBox::draw(Scene* currScene) {
 
 }
 
-bool BoundingBox::isCollidingWith(BoundingBox* other) {
+bool BoundingBox::isCollidingWith(const BoundingBox* other) {
 
 	if(this->highest.x < other->lowest.x)
 		return false;

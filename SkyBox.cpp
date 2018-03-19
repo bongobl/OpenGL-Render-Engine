@@ -11,7 +11,7 @@ SkyBox::SkyBox()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 	
-
+	//set VAO to current one
 	glBindVertexArray(VAO);
 
 	//Vertex Position
