@@ -10,7 +10,7 @@ void SampleScene::initThisScenesObjects() {
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
-	mainCam->setBlurValue(0.3f);
+	//mainCam->setBlurValue(0.3f);
 	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
 	camera2->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
@@ -27,9 +27,9 @@ void SampleScene::initThisScenesObjects() {
 	pointLightDist = 20;
 	
 
-	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 1, 1), 1, glm::vec3(20, 70, 0), glm::vec3(-1, 0, 0)));
-	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(1, 1, 1), 30, glm::vec3(pointLightDist, 0, 0), glm::vec3(0, 0, 0)));
-
+	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 0, 0), 1, glm::vec3(20, 70, 0), glm::vec3(-1, 0, 0)));
+	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 1, 0), 30, glm::vec3(pointLightDist, 0, 0), glm::vec3(0, 0, 0)));
+	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 0, 1), 10, glm::vec3(0, 0, -20), glm::vec3(0, 0, 0)));
 	pointLightRotationMatrix = glm::mat4(1.0f);
 
 
@@ -171,8 +171,9 @@ void SampleScene::drawThisScenesObjects() {
 	camera2->draw(this);
 	dullCam->draw(this);
 
-	allSceneLights[1]->draw(this);
-	allSceneLights[0]->draw(this);
+	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
+		allSceneLights[i]->draw(this);
+	}
 
 }
 

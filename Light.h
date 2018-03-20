@@ -16,6 +16,8 @@ struct LightStruct {
 	float padding;
 	float padding2;
 
+	LightStruct() { ; }
+
 };
 
 class Light : public SceneObject{

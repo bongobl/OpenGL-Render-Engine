@@ -10,7 +10,7 @@ void Scene::initObjects() {
 	//set up UBO info for all scene lights
 	for (unsigned int i = 0; i < 30; ++i) {
 
-			allSceneLightStructs.push_back(allSceneLights[0]->getLightStruct());
+			allSceneLightStructs.push_back(LightStruct());
 	}
 
 	glUseProgram(Material::getShaderProgram());
@@ -51,10 +51,12 @@ void Scene::applyAllLights() {
 	glUseProgram(Material::getShaderProgram());
 	
 
+	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "numLights"), allSceneLights.size());
 	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
 		allSceneLightStructs[i] = allSceneLights[i]->getLightStruct();
 	}
 
+	
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO_Lights);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, 30 * sizeof(LightStruct), allSceneLightStructs.data());
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);

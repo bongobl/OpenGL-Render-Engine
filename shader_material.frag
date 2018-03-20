@@ -8,9 +8,9 @@ struct Light{
 	vec4 color;					
 	vec4 position;		 
 	vec4 direction;	
-
 	int type; 
 	float brightness;
+
 	float padding;
 	float padding2;
 };
@@ -57,13 +57,14 @@ struct Material{
 
 uniform Material material;
 uniform vec3 camPosition;
+uniform int numLights;
 
+//from vertex shader
 in vec3 objectSpacePosition;
 in vec3 objectSpaceNormal;
 in vec2 uvTexCoord;
 in vec3 objectSpaceTangent;
 in vec3 objectSpaceBitangent;
-
 in mat4 toWorldMatrix;
 
 layout (location = 0) out vec4 outColor;
@@ -85,8 +86,7 @@ void calc_LandC_L(int i);
 
 void main()
 {
-	int testNumber = 1;
-	Light light = allLights[testNumber];
+	
 
 	//FIND POSITION, NORMAL AND TANGENTS IN WORLD COORDINATES
 	world_position = vec3(toWorldMatrix * vec4(objectSpacePosition,1));
@@ -95,11 +95,7 @@ void main()
 	world_normal = normalize(refinedToWorld * objectSpaceNormal);				
 	world_tangent = normalize(refinedToWorld * objectSpaceTangent);
 	world_bitangent = normalize(refinedToWorld * objectSpaceBitangent);
-
 	
-	//find values L and C_l based on light properties
-	
-	calc_LandC_L(testNumber);
 
 	//Starting Color: white, each material property will cut away at it
 	outColor = vec4(1,1,1,1);
@@ -135,21 +131,30 @@ void main()
 
 	//Lighting Modes
 	if(material.useDiffuse == 1){
-		multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * light.color * C_l;
+		for(int i = 0; i < numLights; ++i){
+			calc_LandC_L(i);
+			multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * allLights[i].color * C_l;
+		}
 		outColor *= multiplier;
 	}
 	if(material.useSpecular == 1){
-		vec3 R = 2 * dot(world_normal, L) * world_normal - L;	//reflect(-L, world_normal);
-		vec3 e = normalize(camPosition - world_position);
-		outColor += vec4(material.specular,0) * pow( max(dot(R, e),0) , 20) * light.color * C_l;
+		for(int i = 0; i < numLights; ++i){
+			calc_LandC_L(i);
+			vec3 R = 2 * dot(world_normal, L) * world_normal - L;	//reflect(-L, world_normal);
+			vec3 e = normalize(camPosition - world_position);
+			outColor += vec4(material.specular,0) * pow( max(dot(R, e),0) , 20) * allLights[i].color * C_l;
+		}
 	}		
 	
 	if(material.useAmbient == 1){
-		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * light.color * C_l;
+		for(int i = 0; i < numLights; ++i){
+			calc_LandC_L(i);
+			outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * allLights[i].color * C_l;
+		}
 	}
 
 	
-}
+}//END MAIN
 
 
 void calc_LandC_L(int i){
