@@ -1,13 +1,23 @@
 #version 330 core
+#define DIRECTIONAL_LIGHT	0
+#define POINT_LIGHT			1
 // This is the material fragment shader.
 
 struct Light{
-	int type; 			 vec3 typePadding;
-	vec3 color;			 float colorPadding;
-	float brightness;	 vec3 brightnessPadding;
-	vec3 position;		 float positionPadding;
-	vec3 direction;		 float directionPadding;
-	
+		 
+	vec4 color;					
+	vec4 position;		 
+	vec4 direction;	
+
+	int type; 
+	float brightness;
+	float padding;
+	float padding2;
+};
+
+
+layout (std140) uniform SceneLights {
+	Light allLights[30];
 };
 
 struct Material{
@@ -46,7 +56,6 @@ struct Material{
 };
 
 uniform Material material;
-uniform Light light;
 uniform vec3 camPosition;
 
 in vec3 objectSpacePosition;
@@ -60,36 +69,37 @@ in mat4 toWorldMatrix;
 layout (location = 0) out vec4 outColor;
 
 
-//constants
-const int DIRECTIONAL_LIGHT = 0;
-const int POINT_LIGHT = 1;
-
 //current light properties
 vec3 L = vec3(0,0,0);
 float C_l = 0;
+
+//model properties
+vec3 world_position;
+mat3 refinedToWorld;
+vec3 world_normal;			
+vec3 world_tangent;
+vec3 world_bitangent;
+
+//prototype
+void calc_LandC_L(int i);
+
 void main()
 {
+	int testNumber = 1;
+	Light light = allLights[testNumber];
 
 	//FIND POSITION, NORMAL AND TANGENTS IN WORLD COORDINATES
-	vec3 world_position = vec3(toWorldMatrix * vec4(objectSpacePosition,1));
+	world_position = vec3(toWorldMatrix * vec4(objectSpacePosition,1));
 
-	mat3 refinedToWorld = mat3(transpose(inverse(toWorldMatrix)));	
-	vec3 world_normal = normalize(refinedToWorld * objectSpaceNormal);				
-	vec3 world_tangent = normalize(refinedToWorld * objectSpaceTangent);
-	vec3 world_bitangent = normalize(refinedToWorld * objectSpaceBitangent);
+	refinedToWorld = mat3(transpose(inverse(toWorldMatrix)));	
+	world_normal = normalize(refinedToWorld * objectSpaceNormal);				
+	world_tangent = normalize(refinedToWorld * objectSpaceTangent);
+	world_bitangent = normalize(refinedToWorld * objectSpaceBitangent);
 
 	
 	//find values L and C_l based on light properties
 	
-	if(light.type == DIRECTIONAL_LIGHT){
-		L = -normalize(light.direction);
-		C_l = light.brightness;
-	}else if(light.type == POINT_LIGHT){
-		
-		L = normalize(light.position - world_position);
-		C_l = light.brightness / length(light.position - world_position);
-
-	}
+	calc_LandC_L(testNumber);
 
 	//Starting Color: white, each material property will cut away at it
 	outColor = vec4(1,1,1,1);
@@ -125,19 +135,32 @@ void main()
 
 	//Lighting Modes
 	if(material.useDiffuse == 1){
-		multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * vec4(light.color * C_l ,1);
+		multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * light.color * C_l;
 		outColor *= multiplier;
 	}
 	if(material.useSpecular == 1){
 		vec3 R = 2 * dot(world_normal, L) * world_normal - L;	//reflect(-L, world_normal);
 		vec3 e = normalize(camPosition - world_position);
-		outColor += vec4(material.specular,0) * pow( max(dot(R, e),0) , 20) * vec4(light.color * C_l ,1);
+		outColor += vec4(material.specular,0) * pow( max(dot(R, e),0) , 20) * light.color * C_l;
 	}		
 	
 	if(material.useAmbient == 1){
-		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * vec4(light.color * C_l ,1);
+		outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * light.color * C_l;
 	}
 
 	
 }
 
+
+void calc_LandC_L(int i){
+
+	if(allLights[i].type == DIRECTIONAL_LIGHT){
+		L = -normalize(vec3(allLights[i].direction.x, allLights[i].direction.y, allLights[i].direction.z ));
+		C_l = allLights[i].brightness;
+	}else if(allLights[i].type == POINT_LIGHT){
+		
+		L = normalize(vec3(allLights[i].position.x, allLights[i].position.y, allLights[i].position.z ) - world_position);
+		C_l = allLights[i].brightness / length(vec3(allLights[i].position.x, allLights[i].position.y, allLights[i].position.z ) - world_position);
+
+	}
+}

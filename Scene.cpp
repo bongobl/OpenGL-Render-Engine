@@ -6,10 +6,31 @@ void Scene::initObjects() {
 
 	initThisScenesObjects();
 
+	
+	//set up UBO info for all scene lights
+	for (unsigned int i = 0; i < 30; ++i) {
+
+			allSceneLightStructs.push_back(allSceneLights[0]->getLightStruct());
+	}
+
+	glUseProgram(Material::getShaderProgram());
+	GLuint SceneLightsLocation = glGetUniformBlockIndex(Material::getShaderProgram(), "SceneLights");
+	glUniformBlockBinding(Material::getShaderProgram(), SceneLightsLocation, 0);
+	
+	glGenBuffers(1, &UBO_Lights);
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO_Lights);
+	glBufferData(GL_UNIFORM_BUFFER, 30 * sizeof(LightStruct), NULL, GL_DYNAMIC_DRAW);
+	
+	glBindBufferBase(GL_UNIFORM_BUFFER, SceneLightsLocation, UBO_Lights);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
+	
 }
 
 void Scene::dispose() {
 	disposeThisScenesObjects();
+
+	glDeleteBuffers(1, &UBO_Lights);
 }
 
 void Scene::resize_event(int width, int height) {
@@ -24,6 +45,21 @@ void Scene::resize_event(int width, int height) {
 	}
 }
 
+void Scene::applyAllLights() {
+
+	//Material shader program is the only one that uses light calculations
+	glUseProgram(Material::getShaderProgram());
+	
+
+	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
+		allSceneLightStructs[i] = allSceneLights[i]->getLightStruct();
+	}
+
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO_Lights);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 30 * sizeof(LightStruct), allSceneLightStructs.data());
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
+}
 void Scene::update(float deltaTime) {
 	updateThisScenesObjects(deltaTime);
 
@@ -33,8 +69,10 @@ void Scene::update(float deltaTime) {
 	}
 }
 void Scene::draw() {
-
+	
+	applyAllLights();
 	drawThisScenesObjects();
+	
 
 }
 

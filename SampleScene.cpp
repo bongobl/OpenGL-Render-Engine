@@ -25,10 +25,11 @@ void SampleScene::initThisScenesObjects() {
 
 	//init lights
 	pointLightDist = 20;
-	sceneLights = new Light[2]{
-		Light(Light::DIRECTIONAL,glm::vec3(1,1,1), 1, glm::vec3(20,70,0),glm::vec3(-1,0,0)),
-		Light(Light::POINT,glm::vec3(1,1,1), 30, glm::vec3(pointLightDist,0,0), glm::vec3(0,0,0))
-	};
+	
+
+	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 1, 1), 1, glm::vec3(20, 70, 0), glm::vec3(-1, 0, 0)));
+	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(1, 1, 1), 30, glm::vec3(pointLightDist, 0, 0), glm::vec3(0, 0, 0)));
+
 	pointLightRotationMatrix = glm::mat4(1.0f);
 
 
@@ -73,7 +74,7 @@ void SampleScene::initThisScenesObjects() {
 	asteroidMaterial.setUseAmbient(true);
 
 	///surface color
-	asteroidMaterial.setSurfaceColor(glm::vec3(0, 1, 0));
+	asteroidMaterial.setSurfaceColor(glm::vec3(1, 1, 1));
 	asteroidMaterial.setUseSurfaceColor(true);
 
 	///surface texture
@@ -84,7 +85,7 @@ void SampleScene::initThisScenesObjects() {
 	///normal map
 	asteroidMaterial.loadNormalMap(normalMapTexture);
 	asteroidMaterial.setNormalMapStrength(0.13f);
-	asteroidMaterial.setUseNormalMap(true);
+	//asteroidMaterial.setUseNormalMap(true);
 
 	///reflection texture
 	asteroidMaterial.loadReflectionTexture(oceanViewCubeMap);
@@ -136,7 +137,9 @@ void SampleScene::disposeThisScenesObjects() {
 	delete camera2;
 	delete dullCam;
 	delete mainCam;
-	delete[] sceneLights;
+	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
+		delete allSceneLights[i];
+	}
 
 
 	//dispose textures
@@ -159,7 +162,7 @@ void SampleScene::drawThisScenesObjects() {
 
 
 	testModel->draw(this);
-	sceneLights[currActiveLight].draw(this);
+	allSceneLights[currActiveLight]->draw(this);
 	boundingBox->draw(this);
 	oceanView.draw(this);
 
@@ -168,8 +171,8 @@ void SampleScene::drawThisScenesObjects() {
 	camera2->draw(this);
 	dullCam->draw(this);
 
-	sceneLights[1].draw(this);
-	sceneLights[0].draw(this);
+	allSceneLights[1]->draw(this);
+	allSceneLights[0]->draw(this);
 
 }
 
@@ -271,10 +274,10 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 					}
 					else if (currEditMode == SampleScene::EDIT_LIGHT) {
 						if (currActiveLight == 0)
-							sceneLights[currActiveLight].setLocalRotation(deltaTrackBall * sceneLights[currActiveLight].getRotation(SceneObject::OBJECT));
+							allSceneLights[currActiveLight]->setLocalRotation(deltaTrackBall * allSceneLights[currActiveLight]->getRotation(SceneObject::OBJECT));
 						else if (currActiveLight == 1) {
 							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
-							sceneLights[currActiveLight].setLocalPosition(deltaTrackBall * glm::vec4(sceneLights[currActiveLight].getPosition(SceneObject::OBJECT), 1));
+							allSceneLights[currActiveLight]->setLocalPosition(deltaTrackBall * glm::vec4(allSceneLights[currActiveLight]->getPosition(SceneObject::OBJECT), 1));
 						}
 					}
 				}
@@ -294,7 +297,7 @@ void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 	else if (currEditMode == SampleScene::EDIT_LIGHT) {
 		if (currActiveLight == SampleScene::POINT_LIGHT) {
 			pointLightDist += 3 * (float)yoffset;
-			sceneLights[currActiveLight].setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0, 1));
+			allSceneLights[currActiveLight]->setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0, 1));
 		}
 	}
 
@@ -305,7 +308,7 @@ Camera* SampleScene::getActiveCamera() {
 }
 
 Light* SampleScene::getActiveLight() {
-	return &sceneLights[currActiveLight];
+	return allSceneLights[currActiveLight];
 }
 //Private Subroutines
 glm::vec3 SampleScene::trackBallMap(glm::vec2 point) {

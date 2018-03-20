@@ -27,7 +27,6 @@ class SampleScene : public Scene {
 	Camera* dullCam;
 
 	//Lights
-	Light* sceneLights;
 	float pointLightDist;
 	glm::mat4 pointLightRotationMatrix;
 

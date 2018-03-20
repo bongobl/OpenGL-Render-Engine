@@ -234,14 +234,12 @@ void Model::draw(Scene* currScene) {
 	glUseProgram(Material::getShaderProgram());
 
 	Camera* activeCamera = currScene->getActiveCamera();
-	Light* activeLight = currScene->getActiveLight();
 
 	//apply this object's properties
 	this->applySettings();
 	//apply camera properties
 	activeCamera->applySettings(Material::getShaderProgram());
-	//apply light properties
-	activeLight->applySettings();
+
 	//apply material properties
 	material.applySettings();
 

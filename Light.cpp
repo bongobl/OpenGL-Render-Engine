@@ -9,29 +9,27 @@ Light::Light(int light_type, glm::vec3 light_color, float light_brightness, glm:
 	setLocalPosition(light_position);
 	direction = light_direction;
 
+	//for gizmos points math
 	float gizmosSize = 3;
 	float dist = sqrt(gizmosSize * gizmosSize / 3);
 
+	//light gizmos points
 	gizmosPoints.push_back(glm::vec3(gizmosSize, 0, 0));
 	gizmosPoints.push_back(glm::vec3(-gizmosSize, 0, 0));
 	gizmosPoints.push_back(glm::vec3(0, gizmosSize, 0));
 	gizmosPoints.push_back(glm::vec3(0, -gizmosSize, 0));
 	gizmosPoints.push_back(glm::vec3(0, 0, gizmosSize));
 	gizmosPoints.push_back(glm::vec3(0, 0, -gizmosSize));
-
 	gizmosPoints.push_back(glm::vec3(dist, dist, dist));
 	gizmosPoints.push_back(glm::vec3(-dist, -dist, -dist));
-
 	gizmosPoints.push_back(glm::vec3(-dist, dist, dist));
 	gizmosPoints.push_back(glm::vec3(dist, -dist, -dist));
-
 	gizmosPoints.push_back(glm::vec3(dist, -dist, dist));
 	gizmosPoints.push_back(glm::vec3(-dist, dist, -dist));
-
 	gizmosPoints.push_back(glm::vec3(dist, dist, -dist));
 	gizmosPoints.push_back(glm::vec3(-dist, -dist, dist));
 
-	//prepare buffers
+	//prepare gizmos buffers
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
@@ -58,12 +56,23 @@ void Light::applySettings() {
 	glm::vec3 worldDirection = parentToWorld * local_rotation * glm::vec4(direction, 1);
 
 	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "light.type"), type);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), color.r, color.g, color.b);
+	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), color.r, color.g, color.b, 1);
 	glUniform1f(glGetUniformLocation(Material::getShaderProgram(), "light.brightness"), brightness);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.position"), worldPosition.x, worldPosition.y, worldPosition.z);
-	glUniform3f(glGetUniformLocation(Material::getShaderProgram(), "light.direction"), worldDirection.x, worldDirection.y, worldDirection.z);
+	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.position"), worldPosition.x, worldPosition.y, worldPosition.z, 1);
+	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.direction"), worldDirection.x, worldDirection.y, worldDirection.z, 1);
 }
 
+LightStruct Light::getLightStruct() {
+
+	LightStruct working;
+	working.type = this->type;
+	working.color = glm::vec4(this->color, 1);
+	working.brightness = this->brightness;
+	working.position = parentToWorld * glm::vec4(local_position, 1);
+	working.direction = parentToWorld * local_rotation * glm::vec4(direction, 1);
+
+	return working;
+}
 void Light::draw(Scene* currScene) {
 	drawAllChildren(currScene);
 	drawGizmos(currScene);

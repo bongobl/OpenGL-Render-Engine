@@ -16,7 +16,11 @@ protected:
 	std::vector<Camera*> allSceneCameras;
 
 	//not used yet
-	std::vector<Light*> allLights;
+	std::vector<Light*> allSceneLights;
+	std::vector<LightStruct> allSceneLightStructs;
+	GLuint UBO_Lights;
+
+
 
 public:
 	
@@ -27,7 +31,7 @@ public:
 	
 	void resize_event(int width, int height);
 
-
+	void applyAllLights();
 	
 	virtual Camera* getActiveCamera() = 0;
 	virtual Light* getActiveLight() = 0;	//this should disappear soon
