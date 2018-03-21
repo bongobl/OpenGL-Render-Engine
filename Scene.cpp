@@ -4,9 +4,6 @@
 
 void Scene::initObjects() {
 
-	initThisScenesObjects();
-
-	
 	//set up UBO info for all scene lights
 	for (unsigned int i = 0; i < 30; ++i) {
 
@@ -23,14 +20,55 @@ void Scene::initObjects() {
 	
 	glBindBufferBase(GL_UNIFORM_BUFFER, SceneLightsLocation, UBO_Lights);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+	//Set up Shadow Map (Not used yet)
+	glGenFramebuffers(1, & shadowFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameBuffer);
+
+	shadowDepthTexture.generatePlainTexture();
+	glBindTexture(GL_TEXTURE_2D, shadowDepthTexture.getID());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	
-	
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowDepthTexture.getID(), 0);
+
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+
+	// Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		exit(1);
+	}
+
+	initThisScenesObjects();
 }
 
 void Scene::dispose() {
+
 	disposeThisScenesObjects();
 
+	shadowDepthTexture.disposeCurrentTexture();
+	glDeleteBuffers(1, &shadowFrameBuffer);
 	glDeleteBuffers(1, &UBO_Lights);
+}
+
+void Scene::update(float deltaTime) {
+	updateThisScenesObjects(deltaTime);
+
+	for (unsigned int i = 0; i < allSceneCameras.size(); ++i) {
+
+		allSceneCameras.at(i)->updateViewMatrix();
+	}
+}
+
+void Scene::draw() {
+
+	applyAllLights();
+	drawThisScenesObjects();
+
 }
 
 void Scene::resize_event(int width, int height) {
@@ -44,6 +82,8 @@ void Scene::resize_event(int width, int height) {
 			allSceneCameras.at(i)->resize((float)window_width, (float)window_height);
 	}
 }
+
+//PRIVATE HELPERS
 
 void Scene::applyAllLights() {
 
@@ -62,19 +102,5 @@ void Scene::applyAllLights() {
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
 }
-void Scene::update(float deltaTime) {
-	updateThisScenesObjects(deltaTime);
 
-	for (unsigned int i = 0; i < allSceneCameras.size(); ++i) {
-
-		allSceneCameras.at(i)->updateViewMatrix();
-	}
-}
-void Scene::draw() {
-	
-	applyAllLights();
-	drawThisScenesObjects();
-	
-
-}
 

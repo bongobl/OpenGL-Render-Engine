@@ -130,7 +130,7 @@ void Camera::updateViewMatrix() {
 		glm::vec3 targetWorldPosition = targetObject->getPosition(SceneObject::WORLD);
 
 		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), targetWorldPosition, up);
-		toWorld = glm::inverse(ViewMatrix);
+		toWorld = glm::inverse(ViewMatrix) * glm::scale(glm::mat4(1.0f), local_scale);
 	}
 
 	//non target mode

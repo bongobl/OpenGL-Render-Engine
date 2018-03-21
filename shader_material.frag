@@ -160,12 +160,13 @@ void main()
 void calc_LandC_L(int i){
 
 	if(allLights[i].type == DIRECTIONAL_LIGHT){
-		L = -normalize(vec3(allLights[i].direction.x, allLights[i].direction.y, allLights[i].direction.z ));
+
+		L = -normalize(allLights[i].direction.xyz);
 		C_l = allLights[i].brightness;
 	}else if(allLights[i].type == POINT_LIGHT){
-		
-		L = normalize(vec3(allLights[i].position.x, allLights[i].position.y, allLights[i].position.z ) - world_position);
-		C_l = allLights[i].brightness / length(vec3(allLights[i].position.x, allLights[i].position.y, allLights[i].position.z ) - world_position);
+
+		L = normalize(allLights[i].position.xyz - world_position);
+		C_l = allLights[i].brightness / length(allLights[i].position.xyz - world_position);
 
 	}
 }

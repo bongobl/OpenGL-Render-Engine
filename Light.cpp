@@ -49,18 +49,7 @@ Light::~Light() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 }
-void Light::applySettings() {
 
-	//find light world position and direction
-	glm::vec3 worldPosition = parentToWorld * glm::vec4(local_position,1);
-	glm::vec3 worldDirection = parentToWorld * local_rotation * glm::vec4(direction, 1);
-
-	glUniform1i(glGetUniformLocation(Material::getShaderProgram(), "light.type"), type);
-	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.color"), color.r, color.g, color.b, 1);
-	glUniform1f(glGetUniformLocation(Material::getShaderProgram(), "light.brightness"), brightness);
-	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.position"), worldPosition.x, worldPosition.y, worldPosition.z, 1);
-	glUniform4f(glGetUniformLocation(Material::getShaderProgram(), "light.direction"), worldDirection.x, worldDirection.y, worldDirection.z, 1);
-}
 
 LightStruct Light::getLightStruct() {
 

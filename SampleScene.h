@@ -57,7 +57,6 @@ public:
 	//OVERLOADED FROM SCENE CLASS
 
 	Camera * getActiveCamera();
-	Light* getActiveLight();
 
 	void key_event(int key, int scancode, int action, int mods);
 	void mouse_button_event(int button, int action, int mods);

@@ -10,13 +10,13 @@ void SampleScene::initThisScenesObjects() {
 	camDist = 160.0f;
 	camRotationMatrix = glm::mat4(1.0f);
 	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
-	//mainCam->setBlurValue(0.3f);
 	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
 	camera2->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
 	dullCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
-	
+	dullCam->setBlurValue(0.2f);
 	currActiveCamera = mainCam;
+
 
 	allSceneCameras.push_back(mainCam);
 	allSceneCameras.push_back(camera2);
@@ -308,9 +308,6 @@ Camera* SampleScene::getActiveCamera() {
 	return currActiveCamera;
 }
 
-Light* SampleScene::getActiveLight() {
-	return allSceneLights[currActiveLight];
-}
 //Private Subroutines
 glm::vec3 SampleScene::trackBallMap(glm::vec2 point) {
 

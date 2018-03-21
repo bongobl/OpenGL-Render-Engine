@@ -37,7 +37,7 @@ public:
 
 	Light(int light_type, glm::vec3 light_color, float light_brightness, glm::vec3 light_position, glm::vec3 light_direction);
 	~Light();
-	void applySettings();
+	
 
 	LightStruct getLightStruct();
 

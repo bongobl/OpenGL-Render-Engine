@@ -15,10 +15,14 @@ protected:
 
 	std::vector<Camera*> allSceneCameras;
 
-	//not used yet
+	//Scene Lights
 	std::vector<Light*> allSceneLights;
 	std::vector<LightStruct> allSceneLightStructs;
 	GLuint UBO_Lights;
+
+	//Shadows (Not used yet)
+	GLuint shadowFrameBuffer;
+	Texture shadowDepthTexture;
 
 
 
@@ -31,10 +35,9 @@ public:
 	
 	void resize_event(int width, int height);
 
-	void applyAllLights();
+	
 	
 	virtual Camera* getActiveCamera() = 0;
-	virtual Light* getActiveLight() = 0;	//this should disappear soon
 
 											//events from callbacks
 	virtual void key_event(int key, int scancode, int action, int mods) = 0;
@@ -48,5 +51,5 @@ protected:
 	virtual void updateThisScenesObjects(float deltaTime) = 0;
 	virtual void drawThisScenesObjects() = 0;
 
-	
+	void applyAllLights();
 };

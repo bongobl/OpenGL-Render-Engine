@@ -80,12 +80,13 @@ void SceneManager::initObjects() {
 	
 	prevTime = (float)glfwGetTime();
 	
+	//Init Gaussian Blur buffers and shader
+	initFrameBufferObjects();
+
 	//create scene
 	currScene = new SampleScene();
 	currScene->initObjects();
 
-	//Init Gaussian Blur buffers and shader
-	initFrameBufferObjects();
 
 	// Call the resize callback to make sure things get drawn immediately
 	resize_callback(window, windowWidth, windowHeight);
@@ -95,6 +96,7 @@ void SceneManager::initObjects() {
 void SceneManager::dispose() {
 
 	currScene->dispose();
+
 	frameTexture.disposeCurrentTexture();
 	glDeleteBuffers(1, &renderBufferID);
 	glDeleteBuffers(1, &frameBufferID);
