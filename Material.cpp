@@ -12,9 +12,7 @@ void Material::cleanUpStatics() {
 	glDeleteProgram(shaderProgram);
 }
 
-Material Material::basic() {
-	return Material();
-}
+
 Material::Material() {
 
 	//diffuse
@@ -42,7 +40,7 @@ Material::Material() {
 	normalMapStrength = 1.0f;
 
 	//relection texture
-	useReflectionTexture = false;
+	useReflectionTexture = 1;
 	reflectiveness = 1.0f;
 
 }
@@ -148,11 +146,11 @@ float Material::getNormalMapStrength() {
 
 //reflection texture
 void Material::setUseReflectionTexture(int opt) {
-	if (opt && reflectionTexture.getType() != Texture::CUBE_MAP) {
+	if (opt == 1 && reflectionTexture.getType() != Texture::CUBE_MAP) {
 		std::cerr << "ERROR: No Reflection texture loaded" << std::endl;
 		return;
 	}
-	useReflectionTexture = opt;
+	useReflectionTexture = opt + 1;
 }
 void Material::loadReflectionTexture(Texture reflection_texture) {
 
@@ -181,6 +179,7 @@ GLuint Material::getShaderProgram() {
 void Material::applySettings() {
 
 	glUseProgram(shaderProgram);
+
 	//material properties	
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useDiffuse"), useDiffuse);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSpecular"), useSpecular);
@@ -188,7 +187,7 @@ void Material::applySettings() {
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSurfaceColor"), useSurfaceColor);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useSurfaceTexture"), useSurfaceTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "material.useNormalMap"), useNormalMap);
-	glUniform1i(glGetUniformLocation(shaderProgram, "material.useReflectionTexture"), useReflectionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "material.useReflectionTexture"), useReflectionTexture - 1);
 	if (useDiffuse) {
 		glUniform3f(glGetUniformLocation(shaderProgram, "material.diffuse"), diffuse.r, diffuse.g, diffuse.b);
 	}

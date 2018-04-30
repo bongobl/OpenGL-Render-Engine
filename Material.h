@@ -51,7 +51,6 @@ public:
 	//manage statics
 	static void initStatics();
 	static void cleanUpStatics();
-	static Material basic();
 
 	Material();
 	~Material();

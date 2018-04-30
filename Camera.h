@@ -59,7 +59,8 @@ public:
 	float getBlurValue();
 
 	//override
-	void draw(Scene* currScene);
+	void sendThisGeometryToShadowMap();
+	void drawThisSceneObject(Scene* currScene);
 
 private:
 

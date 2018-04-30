@@ -22,7 +22,9 @@ public:
 	SkyBox();
 	~SkyBox();
 
-	void draw(Scene* currScene);
+	//override
+	void sendThisGeometryToShadowMap();
+	void drawThisSceneObject(Scene* currScene);
 
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;

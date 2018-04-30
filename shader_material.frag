@@ -1,25 +1,27 @@
 #version 330 core
-#define DIRECTIONAL_LIGHT	0
-#define POINT_LIGHT			1
 // This is the material fragment shader.
 
+
+#define DIRECTIONAL_LIGHT	0
+#define POINT_LIGHT			1
+#define MAX_LIGHTS			30
+
+//Light struct definition
 struct Light{
 		 
 	vec4 color;					
 	vec4 position;		 
 	vec4 direction;	
+	
 	int type; 
 	float brightness;
-
 	float padding;
 	float padding2;
+
+	mat4 VP;
 };
 
-
-layout (std140) uniform SceneLights {
-	Light allLights[30];
-};
-
+//Material struct definition
 struct Material{
 
 	//DIFFUSE
@@ -55,6 +57,13 @@ struct Material{
 	
 };
 
+layout (std140) uniform SceneLights {
+	Light allLights[MAX_LIGHTS];
+};
+
+uniform sampler2D shadowMaps[MAX_LIGHTS];
+
+
 uniform Material material;
 uniform vec3 camPosition;
 uniform int numLights;
@@ -81,13 +90,14 @@ vec3 world_normal;
 vec3 world_tangent;
 vec3 world_bitangent;
 
+
 //prototype
 void calc_LandC_L(int i);
+
 
 void main()
 {
 	
-
 	//FIND POSITION, NORMAL AND TANGENTS IN WORLD COORDINATES
 	world_position = vec3(toWorldMatrix * vec4(objectSpacePosition,1));
 
@@ -101,7 +111,7 @@ void main()
 	outColor = vec4(1,1,1,1);
 
 	//define variables out here for ambient lighting to use
-	vec4 textureColor = vec4(1,1,1,1);
+	vec4 surfaceTextureColor = vec4(1,1,1,1);
 	vec4 reflectionTextureColor = vec4(1,1,1,1);
 
 	//Textures
@@ -109,16 +119,15 @@ void main()
 		outColor *= vec4(material.surfaceColor,1);
 	}
 	if(material.useSurfaceTexture == 1){
-		textureColor = (1 -  material.surfaceTextureStrength * (1 - texture2D(material.surfaceTexture, uvTexCoord)));
-		outColor *= textureColor;
+		surfaceTextureColor = (1 -  material.surfaceTextureStrength * (1 - texture2D(material.surfaceTexture, uvTexCoord)));
+		outColor *= surfaceTextureColor;
 	}
 	
 	if(material.useNormalMap == 1){
-
 		vec3 normalOffset = normalize(texture2D( material.normalMap, uvTexCoord ).rgb * 2.0 - 1.0);
 		world_normal = normalize(world_normal + normalOffset * material.normalMapStrength);
-
 	}	
+	
 	if(material.useReflectionTexture == 1){
 		vec3 I = normalize(world_position - camPosition);
 		vec3 R = reflect(I, normalize(world_normal));
@@ -128,12 +137,23 @@ void main()
 	
 	
 	vec4 multiplier = vec4(0,0,0,1);
+	float visibility = 1.0f;
 
 	//Lighting Modes
 	if(material.useDiffuse == 1){
 		for(int i = 0; i < numLights; ++i){
 			calc_LandC_L(i);
-			multiplier += vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * allLights[i].color * C_l;
+			if(i == 0){
+				vec4 light0_position = allLights[0].VP * vec4(world_position,1);
+				if (texture( shadowMaps[0], light0_position.xy ).z  <  light0_position.z - 0.005){
+					visibility = 0.5f;
+				}else{
+					visibility = 1.0f;
+				}
+			}else{
+				visibility = 1.0f;
+			}
+			multiplier += visibility * vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * allLights[i].color * C_l;
 		}
 		outColor *= multiplier;
 	}
@@ -149,7 +169,7 @@ void main()
 	if(material.useAmbient == 1){
 		for(int i = 0; i < numLights; ++i){
 			calc_LandC_L(i);
-			outColor += vec4(material.ambient, 0) * textureColor * reflectionTextureColor * allLights[i].color * C_l;
+			outColor += vec4(material.ambient, 0) * surfaceTextureColor * reflectionTextureColor * allLights[i].color * C_l;
 		}
 	}
 

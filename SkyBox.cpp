@@ -47,8 +47,10 @@ SkyBox::~SkyBox()
 
 	glDeleteProgram(shaderProgram);
 }
-
-void SkyBox::draw(Scene* currScene) {
+void SkyBox::sendThisGeometryToShadowMap() {
+	//leave empty
+}
+void SkyBox::drawThisSceneObject(Scene* currScene) {
 
 	glUseProgram(shaderProgram);
 
@@ -72,7 +74,6 @@ void SkyBox::draw(Scene* currScene) {
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 
-	drawAllChildren(currScene);
 }
 
 void SkyBox::loadCubeMapTexture(Texture cube_map_texture) {

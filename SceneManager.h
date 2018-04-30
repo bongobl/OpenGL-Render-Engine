@@ -14,7 +14,7 @@ class SceneManager {
 	//time keeping
 	static float currTime;
 	static float prevTime;
-
+	static float deltaTime;
 	//Scene
 	static Scene* currScene;
 
@@ -53,7 +53,8 @@ public:
 	
 	static bool isWindowOpen();
 
-	static GLuint getBlurShader();
+	//Utilities 
+	static float getDeltaTime();
 
 private:
 

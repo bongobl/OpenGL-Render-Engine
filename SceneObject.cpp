@@ -67,19 +67,28 @@ glm::vec3 SceneObject::getScale(unsigned int coordinate_space) {
 	}
 }
 
-glm::mat4 SceneObject::getToWorld() {
+glm::mat4 SceneObject::getToWorld() const {
 	return toWorld;
 }
 void SceneObject::addChild(SceneObject* newChild) {
 	children.push_back(newChild);
 	newChild->updateParentToWorldMatrix(toWorld);
 }
+
+//Protected, accessible by subclasses
+void SceneObject::setToWorld(glm::mat4 newToWorld) {
+	toWorld = newToWorld;
+	for (unsigned int i = 0; i < children.size(); ++i) {
+		children[i]->updateParentToWorldMatrix(toWorld);
+	}
+}
+//Private Helper
 void SceneObject::updateParentToWorldMatrix(glm::mat4 parent_to_world) {
 	parentToWorld = parent_to_world;
 	updateAllMatrices();
 }
 
-//Private Helper
+
 void SceneObject::updateAllMatrices() {
 
 	toParent = glm::translate(glm::mat4(1.0f), local_position) * local_rotation * glm::scale(glm::mat4(1.0f), local_scale);
@@ -90,7 +99,16 @@ void SceneObject::updateAllMatrices() {
 	}
 }
 
-void SceneObject::drawAllChildren(Scene* currScene) {
+void SceneObject::drawToShadowMap() {
+	sendThisGeometryToShadowMap();
+	for (unsigned int i = 0; i < children.size(); ++i) {
+		children[i]->drawToShadowMap();
+	}
+
+}
+
+void SceneObject::draw(Scene* currScene) {
+	drawThisSceneObject(currScene);
 	for (unsigned int i = 0; i < children.size(); ++i) {
 		children[i]->draw(currScene);
 	}

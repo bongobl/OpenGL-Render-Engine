@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "Material.h"
+#include "ShadowMap.h"
 #include "SceneObject.h"
 class Scene;
 
@@ -39,8 +40,11 @@ public:
 	~Model();
 	void parse(const char* filepath);
 
+	
+
 	//override
-	void draw(Scene* currScene);
+	void sendThisGeometryToShadowMap();
+	void drawThisSceneObject(Scene* currScene);
 
 	void setMaterial(Material m);
 	Material& getMaterial();

@@ -18,7 +18,7 @@ public:
 	unsigned int getType();
 	GLint getID();
 
-	enum Types { EMPTY, STANDARD, CUBE_MAP, PLAIN};
+	enum Types { INVALID, STANDARD, CUBE_MAP, PLAIN};
 private:
 
 	//Helpers

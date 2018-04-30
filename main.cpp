@@ -3,8 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include "SceneManager.h"
-GLFWwindow* window;
+using namespace std;
+
+
 
 void error_callback(int error, const char* description)
 {
@@ -77,6 +80,7 @@ int main(void)
 
 	// Print OpenGL and GLSL versions
 	print_versions();
+
 	// Setup OpenGL settings, including lighting, materials, etc.
 	setup_opengl_settings();
 
@@ -93,6 +97,7 @@ int main(void)
 		SceneManager::update();
 	}
 
+	//dispose all objects and distroy GLFW window
 	SceneManager::dispose();
 
 	// Terminate GLFW

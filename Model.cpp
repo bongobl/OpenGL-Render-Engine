@@ -14,6 +14,7 @@ Model::Model(const char *filepath, Material m)
 	parse(filepath);
 	material = m;
 	
+	centerModelMeshMatrix = glm::mat4(1.0f);
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);	
@@ -113,6 +114,7 @@ Model::~Model() {
 	glDeleteBuffers(1, &VBO_bitangents);
 	glDeleteBuffers(1, &EBO);
 }
+
 void Model::parse(const char *filepath) 
 {
 
@@ -190,7 +192,7 @@ void Model::parse(const char *filepath)
 	meshCenterOffset.x = (highestX + lowestX) / 2.0f;
 	meshCenterOffset.y = (highestY + lowestY) / 2.0f;
 	meshCenterOffset.z = (highestZ + lowestZ) / 2.0f;
-	centerModelMeshMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-meshCenterOffset.x, -meshCenterOffset.y, -meshCenterOffset.z));
+
 	
 	//Calc Tangents and Bitangents
 	for (unsigned int i = 0; i< vertices.size(); i += 3) {
@@ -229,7 +231,19 @@ void Model::parse(const char *filepath)
 	}//END FOR
 }//END PARSE
 
-void Model::draw(Scene* currScene) {
+void Model::sendThisGeometryToShadowMap() {
+
+
+
+	glm::mat4 completeToWorld = toWorld * centerModelMeshMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(ShadowMap::getShaderProgram(), "toWorld"), 1, GL_FALSE, &completeToWorld[0][0]);
+
+	// Now draw this OBJObject. We simply need to bind the VAO associated with it.
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+void Model::drawThisSceneObject(Scene* currScene) {
 
 	glUseProgram(Material::getShaderProgram());
 
@@ -237,6 +251,7 @@ void Model::draw(Scene* currScene) {
 
 	//apply this object's properties
 	this->applySettings();
+	
 	//apply camera properties
 	activeCamera->applySettings(Material::getShaderProgram());
 
@@ -251,8 +266,6 @@ void Model::draw(Scene* currScene) {
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 
-	
-	drawAllChildren(currScene);
 }
 void Model::setMaterial(Material m) {
 	material = m;

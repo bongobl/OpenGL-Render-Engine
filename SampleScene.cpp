@@ -1,43 +1,25 @@
 #include "SampleScene.h"
 
-void SampleScene::initThisScenesObjects() {
+void SampleScene::initThisScene() {
 
 	//init trackball controls
 	isLeftMouseButtonDown = false;
 	isRightMouseButtonDown = false;
 
-	//init cameras & set currActiveCamera
-	camDist = 160.0f;
+	//camera rig
+	camDist = 120;
+	camPos = glm::vec3(0, 0, camDist);
 	camRotationMatrix = glm::mat4(1.0f);
-	mainCam = new Camera(glm::vec3(0, 0, camDist), glm::pi<float>() / 4);
-	camera2 = new Camera(glm::vec3(0, 0, -100), glm::pi<float>() / 4);
-	camera2->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	dullCam = new Camera(glm::vec3(150, 0, 0), glm::pi<float>() / 4);
-	dullCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
-	dullCam->setBlurValue(0.2f);
-	currActiveCamera = mainCam;
+
+	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 1, 1), 0.84f, glm::vec3(0, 30, 50)));
+	allSceneLights[0]->setLocalRotation(glm::rotate(glm::mat4(1.0f), 3 * glm::pi<float>() / 4, glm::vec3(1, 0, 0)));
+	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 1, 0), 5, 3.3333f * glm::vec3(-20, 20, 30)));
+	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 0, 1), 5, 3.3333f * glm::vec3(20, 30, -20)));
 
 
-	allSceneCameras.push_back(mainCam);
-	allSceneCameras.push_back(camera2);
-	allSceneCameras.push_back(dullCam);
-
-
-	//init lights
-	pointLightDist = 20;
-	
-
-	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 0, 0), 1, glm::vec3(20, 70, 0), glm::vec3(-1, 0, 0)));
-	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 1, 0), 30, glm::vec3(pointLightDist, 0, 0), glm::vec3(0, 0, 0)));
-	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 0, 1), 10, glm::vec3(0, 0, -20), glm::vec3(0, 0, 0)));
-	pointLightRotationMatrix = glm::mat4(1.0f);
-
-
-	//init modes
-	currEditMode = SampleScene::EDIT_MODEL;
-	currActiveLight = 0;
-
-	//INIT SCENE OBJECTS
+	//init camera
+	currActiveCamera = new Camera(glm::vec3(0, 0, 120), glm::pi<float>() / 4);
+	allSceneCameras.push_back(currActiveCamera);
 
 	//vector of skybox face names
 	std::vector<std::string> faceNames;
@@ -53,94 +35,47 @@ void SampleScene::initThisScenesObjects() {
 	//init cubemap
 	oceanView.loadCubeMapTexture(oceanViewCubeMap);
 
-	//TEST OBJECT
-	//Load Asteroid Textures
-	asteroidTexture.loadStandardTexture("Textures/AsteroidTexture.ppm");
-	normalMapTexture.loadStandardTexture("Textures/AsteroidNormalMap.ppm");
+	//Create Basic Material
+	Material basicMaterial;
+	basicMaterial.setUseDiffuse(true);
+	basicMaterial.setDiffuseColor(glm::vec3(1,1,1));
+	basicMaterial.setUseAmbient(true);
+	basicMaterial.setAmbientColor(glm::vec3(0.1, 0.1, 0.1));
 
-	//Create Asteroid Material
-	Material asteroidMaterial;
+	wall = new Model("Models/Wall.obj", basicMaterial);
+	wall->setLocalScale(glm::vec3(0.3, 0.3, 0.3));
 
-	///diffuse
-	asteroidMaterial.setDiffuseColor(glm::vec3(1, 1, 1));
-	asteroidMaterial.setUseDiffuse(true);
+	cylinder = new Model("Models/Cylinder.obj", basicMaterial);
+	cylinder->setLocalPosition(glm::vec3(50, 60, 35));
+	cylinder->getMaterial().setDiffuseColor(glm::vec3(1, 0, 0));
+	cylinder->getMaterial().setUseSpecular(true);
+	cylinder->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
 
-	///specular
-	asteroidMaterial.setSpecularColor(glm::vec3(1, 1, 1));
-	asteroidMaterial.setUseSpecular(true);
+	prism = new Model("Models/Prism.obj", basicMaterial);
+	prism->getMaterial().setUseSpecular(true);
+	prism->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
+	prism->setLocalPosition(glm::vec3(-90, 60, -10));
+	prism->getMaterial().loadReflectionTexture(oceanViewCubeMap);
+	prism->getMaterial().setUseReflectionTexture(true);
 
-	///ambient
-	asteroidMaterial.setAmbientColor(glm::vec3(0.06f, 0.06f, 0.06f));
-	asteroidMaterial.setUseAmbient(true);
-
-	///surface color
-	asteroidMaterial.setSurfaceColor(glm::vec3(1, 1, 1));
-	asteroidMaterial.setUseSurfaceColor(true);
-
-	///surface texture
-	asteroidMaterial.loadSurfaceTexture(asteroidTexture);
-	asteroidMaterial.setSurfaceTextureStrength(1.0f);
-	//asteroidMaterial.setUseSurfaceTexture(true);
-
-	///normal map
-	asteroidMaterial.loadNormalMap(normalMapTexture);
-	asteroidMaterial.setNormalMapStrength(0.13f);
-	//asteroidMaterial.setUseNormalMap(true);
-
-	///reflection texture
-	asteroidMaterial.loadReflectionTexture(oceanViewCubeMap);
-	asteroidMaterial.setReflectiveness(1.0f);
-	asteroidMaterial.setUseReflectionTexture(true);
-
-
-	testModel = new Model("Models/filletCube.obj", asteroidMaterial);
-	testModel->setLocalScale(glm::vec3(7, 7, 7));
-
-	childObject = new Model("Models/Asteroid0.obj", asteroidMaterial);
-	testModel->addChild(childObject);
-	childObject->setLocalPosition(glm::vec3(7, 7, 0));
-
-
-	child2 = new Model("Models/Icosahedron.obj", Material::basic());
-	child2->setLocalPosition(glm::vec3(-7, 2, 0));
-	child2->setLocalScale(glm::vec3(0.007f, 0.007f, 0.007f));
-	child2->getMaterial().setDiffuseColor(glm::vec3(1, 1, 0));
-	child2->getMaterial().setUseDiffuse(true);
-	child2->getMaterial().setSpecularColor(glm::vec3(1, 1, 1));
-	child2->getMaterial().setUseSpecular(true);
-	child2->getMaterial().setAmbientColor(glm::vec3(0.06f, 0.06f, 0));
-	child2->getMaterial().setUseAmbient(true);
-	child2->getMaterial().loadReflectionTexture(oceanViewCubeMap);
-	child2->getMaterial().setUseReflectionTexture(true);
-	childObject->addChild(child2);
-
-
-	boundingBox = new BoundingBox(testModel->getVertices());
-
-	//test cam
-	mainCam->setTargetObject(child2);
-	mainCam->setTargetMode(true);
-	childObject->addChild(mainCam);
-	camera2->setTargetObject(childObject);
-	camera2->setTargetMode(true);
-
-
+	//scene hierarchy
+	wall->addChild(cylinder);
+	wall->addChild(prism);
+	wall->addChild(allSceneLights[1]);
+	wall->addChild(allSceneLights[2]);
+	
+	currActiveCamera->setTargetObject(wall);
+	currActiveCamera->setTargetMode(true);
 
 }
-void SampleScene::disposeThisScenesObjects() {
+void SampleScene::disposeThisScene() {
 
 
 	//delete models & cam gizmos
-	delete testModel;
-	delete childObject;
-	delete child2;
-	delete camera2;
-	delete dullCam;
-	delete mainCam;
+	delete wall;
 	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
 		delete allSceneLights[i];
 	}
-
 
 	//dispose textures
 	oceanViewCubeMap.disposeCurrentTexture();
@@ -149,32 +84,34 @@ void SampleScene::disposeThisScenesObjects() {
 
 }
 
-void SampleScene::updateThisScenesObjects(float deltaTime) {
+void SampleScene::updateThisScene() {
 
-	testModel->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 2, glm::vec3(0, 0, 1)) * testModel->getRotation(SceneObject::OBJECT));
-	childObject->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 0, 1)) * childObject->getRotation(SceneObject::OBJECT));
+	wall->setLocalRotation(glm::rotate(glm::mat4(1.0f), SceneManager::getDeltaTime() / 3, glm::vec3(0, 1, 0)) * wall->getRotation(SceneObject::OBJECT));
+
+	//prism->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 3, glm::vec3(0, 1, 0)) * prism->getRotation(SceneObject::OBJECT));
+	//cylinder->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 2, glm::vec3(0, 0, 1)) * cylinder->getRotation(SceneObject::OBJECT));
+
 	oceanView.setLocalPosition(getActiveCamera()->getPosition(SceneObject::WORLD));
-	boundingBox->updateToWorld(testModel->getToWorldWithCenteredMesh());
 
-	//mainCam->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime, glm::vec3(0, 1, 0)) * mainCam->getRotation(SceneObject::OBJECT));
 }
-void SampleScene::drawThisScenesObjects() {
 
+void SampleScene::drawThisSceneToShadowMap() {
 
-	testModel->draw(this);
-	allSceneLights[currActiveLight]->draw(this);
-	boundingBox->draw(this);
-	oceanView.draw(this);
-
+	oceanView.drawToShadowMap();
+	currActiveCamera->drawToShadowMap();
+	wall->drawToShadowMap();
 	
-	mainCam->draw(this);
-	camera2->draw(this);
-	dullCam->draw(this);
+	allSceneLights[0]->drawToShadowMap();
 
-	for (unsigned int i = 0; i < allSceneLights.size(); ++i) {
-		allSceneLights[i]->draw(this);
-	}
+}
+void SampleScene::drawThisScene() {
 
+
+	oceanView.draw(this);
+	currActiveCamera->draw(this);
+	wall->draw(this);
+	allSceneLights[0]->draw(this);
+	
 }
 
 //events from callbacks
@@ -187,35 +124,7 @@ void SampleScene::key_event(int key, int scancode, int action, int mods) {
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(SceneManager::window, GL_TRUE);
 		}
-		if (key == GLFW_KEY_1)
-		{
-			currActiveLight = 0;
-		}
-		if (key == GLFW_KEY_2)
-		{
-			currActiveLight = 1;
-		}
-		if (key == GLFW_KEY_M)
-		{
-			currEditMode = SampleScene::EDIT_MODEL;
-		}
-		if (key == GLFW_KEY_L)
-		{
-			currEditMode = SampleScene::EDIT_LIGHT;
-		}
-		if (key == GLFW_KEY_SPACE) {
-
-			if (currActiveCamera == mainCam) {
-				currActiveCamera = camera2;
-			}
-			else if (currActiveCamera == camera2) {
-				currActiveCamera = dullCam;
-			}
-			else if (currActiveCamera == dullCam) {
-				currActiveCamera = mainCam;
-			}
-
-		}
+		
 
 	}
 }
@@ -262,25 +171,13 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 			if (!isnan(rotAngle)) {
 
 				glm::mat4 deltaTrackBall = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis);
-
-				if (isRightMouseButtonDown) {
+				if (isLeftMouseButtonDown) {
 					camRotationMatrix = deltaTrackBall * camRotationMatrix;
-
-					mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
+					camPos = camRotationMatrix * glm::vec4(0,0,camDist,1);
+					currActiveCamera->setLocalPosition(camPos);
 				}
-				else if (isLeftMouseButtonDown) {
-
-					if (currEditMode == SampleScene::EDIT_MODEL) {
-
-					}
-					else if (currEditMode == SampleScene::EDIT_LIGHT) {
-						if (currActiveLight == 0)
-							allSceneLights[currActiveLight]->setLocalRotation(deltaTrackBall * allSceneLights[currActiveLight]->getRotation(SceneObject::OBJECT));
-						else if (currActiveLight == 1) {
-							pointLightRotationMatrix = deltaTrackBall * pointLightRotationMatrix;
-							allSceneLights[currActiveLight]->setLocalPosition(deltaTrackBall * glm::vec4(allSceneLights[currActiveLight]->getPosition(SceneObject::OBJECT), 1));
-						}
-					}
+				else if (isRightMouseButtonDown) {
+					allSceneLights[0]->setLocalRotation(deltaTrackBall * allSceneLights[0]->getRotation(SceneObject::OBJECT));
 				}
 			}
 		}
@@ -291,16 +188,9 @@ void SampleScene::cursor_position_event(double xpos, double ypos) {
 }
 void SampleScene::mouse_wheel_event(double xoffset, double yoffset) {
 
-	if (currEditMode == SampleScene::EDIT_MODEL) {
-		camDist += -5 * (float)yoffset;
-		mainCam->setLocalPosition(camRotationMatrix * glm::vec4(0, 0, camDist, 0));
-	}
-	else if (currEditMode == SampleScene::EDIT_LIGHT) {
-		if (currActiveLight == SampleScene::POINT_LIGHT) {
-			pointLightDist += 3 * (float)yoffset;
-			allSceneLights[currActiveLight]->setLocalPosition(pointLightRotationMatrix * glm::vec4(pointLightDist, 0, 0, 1));
-		}
-	}
+	camDist +=  5 * (float)yoffset;
+	camPos = camRotationMatrix * glm::vec4(0, 0, camDist, 1);
+	currActiveCamera->setLocalPosition(camPos);
 
 }
 

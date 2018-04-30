@@ -19,7 +19,6 @@ protected:
 
 	glm::mat4 toWorld;			//global coordinates
 
-	void drawAllChildren(Scene* currScene);
 
 public:
 
@@ -32,13 +31,20 @@ public:
 	glm::mat4 getRotation(unsigned int coordinate_space);
 	void setLocalScale(glm::vec3 sca);
 	glm::vec3 getScale(unsigned int coordinate_space);
-	glm::mat4 getToWorld();
+	glm::mat4 getToWorld() const;
 
 	void addChild(SceneObject* newChild);
 	
-	virtual void draw(Scene* currScene) = 0;
+	void drawToShadowMap();
+	void draw(Scene* currScene);
+
+protected:
+	void setToWorld(glm::mat4 newToWorld);
 
 private:
 	void updateParentToWorldMatrix(glm::mat4 parent_to_world);
 	void updateAllMatrices();
+	virtual void sendThisGeometryToShadowMap() = 0;
+	virtual void drawThisSceneObject(Scene* currScene) = 0;
+		
 };

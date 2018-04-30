@@ -26,6 +26,7 @@ void main()
 	}
 
     finalColor =  sumOfColors / 120;
+
 	
 
 }

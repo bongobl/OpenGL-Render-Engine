@@ -1,13 +1,12 @@
 #include "Light.h"
 #include "Scene.h"
 #include <iostream>
-Light::Light(int light_type, glm::vec3 light_color, float light_brightness, glm::vec3 light_position, glm::vec3 light_direction) {
+Light::Light(int light_type, glm::vec3 light_color, float light_brightness, glm::vec3 light_position) {
 
 	type = light_type;
 	color = light_color;
 	brightness = light_brightness;
 	setLocalPosition(light_position);
-	direction = light_direction;
 
 	//for gizmos points math
 	float gizmosSize = 3;
@@ -18,7 +17,10 @@ Light::Light(int light_type, glm::vec3 light_color, float light_brightness, glm:
 	gizmosPoints.push_back(glm::vec3(-gizmosSize, 0, 0));
 	gizmosPoints.push_back(glm::vec3(0, gizmosSize, 0));
 	gizmosPoints.push_back(glm::vec3(0, -gizmosSize, 0));
-	gizmosPoints.push_back(glm::vec3(0, 0, gizmosSize));
+	if(type == Light::DIRECTIONAL)
+		gizmosPoints.push_back(glm::vec3(0, 0, gizmosSize * 10));
+	else
+		gizmosPoints.push_back(glm::vec3(0, 0, gizmosSize));
 	gizmosPoints.push_back(glm::vec3(0, 0, -gizmosSize));
 	gizmosPoints.push_back(glm::vec3(dist, dist, dist));
 	gizmosPoints.push_back(glm::vec3(-dist, -dist, -dist));
@@ -50,7 +52,10 @@ Light::~Light() {
 	glDeleteBuffers(1, &VBO);
 }
 
+void Light::setViewProjectionMatrix(glm::mat4 light_vp_matrix) {
 
+	ViewProjectonMatrix = light_vp_matrix;
+}
 LightStruct Light::getLightStruct() {
 
 	LightStruct working;
@@ -58,12 +63,17 @@ LightStruct Light::getLightStruct() {
 	working.color = glm::vec4(this->color, 1);
 	working.brightness = this->brightness;
 	working.position = parentToWorld * glm::vec4(local_position, 1);
-	working.direction = parentToWorld * local_rotation * glm::vec4(direction, 1);
+	working.direction = toWorld * glm::vec4(0,0,1,0);  //4th component is 0 so no translations applied
+	working.VP = ViewProjectonMatrix;
 
 	return working;
 }
-void Light::draw(Scene* currScene) {
-	drawAllChildren(currScene);
+
+void Light::sendThisGeometryToShadowMap() {
+	//leave empty
+}
+void Light::drawThisSceneObject(Scene* currScene) {
+
 	drawGizmos(currScene);
 }
 
@@ -73,7 +83,13 @@ void Light::drawGizmos(Scene* currScene) {
 
 	Camera* activeCamera = currScene->getActiveCamera();
 
-	glm::mat4 toWorldNoScale = glm::translate(glm::mat4(1.0f), local_position) * local_rotation;
+	//check for negative z scale
+	glm::mat4 rotationCorrector = glm::mat4(1.0f);
+	if(local_scale.z < 0){
+		rotationCorrector = glm::rotate(glm::mat4(1.0f), glm::pi<float>(), glm::vec3(1,0,0));
+	}
+	//calc toWorldNoScale
+	glm::mat4 toWorldNoScale = glm::translate(glm::mat4(1.0f), getPosition(SceneObject::WORLD)) * getRotation(SceneObject::WORLD) * rotationCorrector;
 
 	//apply object properties	
 	glUniformMatrix4fv(glGetUniformLocation(Material::getShaderProgram(), "toWorld"), 1, GL_FALSE, &toWorldNoScale[0][0]);

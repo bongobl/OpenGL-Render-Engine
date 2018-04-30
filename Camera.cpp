@@ -116,8 +116,11 @@ float Camera::getBlurValue() {
 	return blurValue;
 }
 
-void Camera::draw(Scene* currScene) {
-	drawAllChildren(currScene);
+void Camera::sendThisGeometryToShadowMap() {
+	//leave empty
+}
+void Camera::drawThisSceneObject(Scene* currScene) {
+
 	drawGizmos(currScene);
 }
 
@@ -129,8 +132,9 @@ void Camera::updateViewMatrix() {
 
 		glm::vec3 targetWorldPosition = targetObject->getPosition(SceneObject::WORLD);
 
-		ViewMatrix = glm::lookAt(getPosition(SceneObject::WORLD), targetWorldPosition, up);
-		toWorld = glm::inverse(ViewMatrix) * glm::scale(glm::mat4(1.0f), local_scale);
+		ViewMatrix = glm::inverse(glm::scale(glm::mat4(1.0f), local_scale)) * glm::lookAt(getPosition(SceneObject::WORLD), targetWorldPosition, up);
+		setToWorld( glm::inverse(ViewMatrix) );
+		
 	}
 
 	//non target mode

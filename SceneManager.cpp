@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "Scene.h"
 #include "SampleScene.h"
+#include "ShadowMap.h"
 
 //Basic Data
 GLFWwindow* SceneManager::window;
@@ -9,6 +10,7 @@ int SceneManager::windowWidth;
 int SceneManager::windowHeight;
 float SceneManager::currTime;
 float SceneManager::prevTime;
+float SceneManager::deltaTime;
 Scene* SceneManager::currScene = NULL;
 
 
@@ -20,6 +22,7 @@ GLuint SceneManager::renderBufferID;
 GLenum SceneManager::drawBuffers[1];
 GLuint SceneManager::VAO_ScreenQuad;
 GLuint SceneManager::VBO_SceenQuadPositions;
+
 GLfloat SceneManager::screenQuadVertexPositions[] = {
 	-1.0f, -1.0f, 0.0f,
 	1.0f, -1.0f, 0.0f,
@@ -32,10 +35,11 @@ GLuint SceneManager::EB0_ScreenQuad;
 GLuint SceneManager::meshIndices[6] = {0,1,2,3,4,5};
 
 
+
 //don't call any gl functions here, only glfw
 int SceneManager::createWindow(const char* title, int window_width, int window_height) {
 
-	// 4x antialiasing
+	// 8x antialiasing
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	windowWidth = window_width;
@@ -77,7 +81,8 @@ void SceneManager::initObjects() {
 
 	//init statics for classes which need them
 	Material::initStatics();
-	
+	ShadowMap::initStatics();
+
 	prevTime = (float)glfwGetTime();
 	
 	//Init Gaussian Blur buffers and shader
@@ -85,12 +90,11 @@ void SceneManager::initObjects() {
 
 	//create scene
 	currScene = new SampleScene();
-	currScene->initObjects();
+	currScene->init();
 
 
 	// Call the resize callback to make sure things get drawn immediately
 	resize_callback(window, windowWidth, windowHeight);
-
 
 }
 void SceneManager::dispose() {
@@ -105,6 +109,7 @@ void SceneManager::dispose() {
 	glDeleteVertexArrays(1, &VAO_ScreenQuad);
 	glDeleteProgram(blurShaderProgram);
 
+	ShadowMap::cleanUpStatics();
 	Material::cleanUpStatics();
 
 	glfwDestroyWindow(window);
@@ -112,15 +117,19 @@ void SceneManager::dispose() {
 
 void SceneManager::update() {
 	currTime = (float)glfwGetTime();
-	float deltaTime = currTime - prevTime;
+	deltaTime = currTime - prevTime;
 	prevTime = currTime;
 	
 
-	currScene->update(deltaTime);
+	currScene->update();
 }
 void SceneManager::draw() {
 
+	//calc shadow maps before doing any drawing
+	currScene->calcShadowMaps();
 
+	//set display matrix for window screen
+	glViewport(0, 0, SceneManager::windowWidth, SceneManager::windowHeight);
 	//draw scene to frame buffer's screen texture
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -153,6 +162,7 @@ void SceneManager::draw() {
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -201,8 +211,8 @@ bool SceneManager::isWindowOpen() {
 	return !glfwWindowShouldClose(window);
 }
 
-GLuint SceneManager::getBlurShader() {
-	return blurShaderProgram;
+float SceneManager::getDeltaTime(){
+	return deltaTime;
 }
 
 
@@ -273,7 +283,7 @@ void SceneManager::resizeFrameBufferObjects() {
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferID);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferID);
-
+	
 	//FBO config
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.getID(), 0);
 	drawBuffers[0] = { GL_COLOR_ATTACHMENT0 };

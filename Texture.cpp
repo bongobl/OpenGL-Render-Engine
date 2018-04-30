@@ -2,7 +2,7 @@
 
 
 Texture::Texture() {
-	type = Texture::EMPTY;
+	type = Texture::INVALID;
 	id = 0;
 }
 
@@ -20,7 +20,7 @@ void Texture::loadCubeMap(std::vector<std::string> faces) {
 }
 void Texture::disposeCurrentTexture() {
 	glDeleteTextures(1, &id);
-	type = Texture::EMPTY;
+	type = Texture::INVALID;
 	id = 0;
 }
 unsigned int Texture::getType() {
@@ -38,7 +38,9 @@ void Texture::loadImage(const char* filename) {
 
 						   // Load image file
 	tdata = loadPPM(filename, twidth, theight);
-	if (tdata == NULL) return;
+	if (tdata == NULL){
+		return;
+	}
 
 	// Create ID for texture
 	glGenTextures(1, &id);

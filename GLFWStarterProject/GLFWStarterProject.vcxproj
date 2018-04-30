@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ShadowMap.h" />
     <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\SceneObject.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ShadowMap.cpp" />
     <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Camera.cpp" />
     <ClCompile Include="..\Scene.cpp" />
@@ -48,6 +50,8 @@
     <ClCompile Include="..\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Alex%27s Laptop\Desktop\OpenGLPrac\shader_shadow.frag" />
+    <None Include="..\..\..\..\Alex%27s Laptop\Desktop\OpenGLPrac\shader_shadow.vert" />
     <None Include="..\shader_blur.vert" />
     <None Include="..\..\..\..\Alex%27s Laptop\Desktop\OpenGLPrac\shader_blur.frag" />
     <None Include="..\shader_material.frag" />

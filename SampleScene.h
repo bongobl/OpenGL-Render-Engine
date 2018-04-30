@@ -13,22 +13,19 @@ class SampleScene : public Scene {
 
 	//Scene Objects
 	SkyBox oceanView;
-	Model* testModel;
-	Model* childObject;
-	Model* child2;
-	BoundingBox* boundingBox;
+	Model* wall;
+	Model* cylinder;
+	Model* prism;
 
 	//Cameras
 	Camera* currActiveCamera;
-	Camera* mainCam;
-	float camDist;
-	glm::mat4 camRotationMatrix;
-	Camera* camera2;
-	Camera* dullCam;
+	
 
-	//Lights
-	float pointLightDist;
-	glm::mat4 pointLightRotationMatrix;
+	//camera rig
+	glm::mat4 camRotationMatrix;
+	float camDist;
+	glm::vec3 camPos;
+
 
 	//Trackball controls
 	bool isRightMouseButtonDown;
@@ -37,23 +34,12 @@ class SampleScene : public Scene {
 	glm::vec3 currPoint;
 	glm::vec3 lastPoint;
 
-	//modes
-	enum EditMode { EDIT_MODEL, EDIT_LIGHT };
-	enum ActiveLight { DIRECTIONAL_LIGHT, POINT_LIGHT };
-	unsigned int currEditMode;
-	unsigned int currActiveLight;
 
 
-	//frame buffer objs
-	GLuint blurShaderID;
-	GLuint frameTextureID;
-	GLuint RBO;
-	GLuint FBO;
 
-	
-public: 
+public:
 
-	
+
 	//OVERLOADED FROM SCENE CLASS
 
 	Camera * getActiveCamera();
@@ -63,10 +49,11 @@ public:
 	void cursor_position_event(double xpos, double ypos);
 	void mouse_wheel_event(double xoffset, double yoffset);
 
-	void initThisScenesObjects();
-	void disposeThisScenesObjects();
-	void updateThisScenesObjects(float deltaTime);
-	void drawThisScenesObjects();
+	void initThisScene();
+	void disposeThisScene();
+	void updateThisScene();
+	void drawThisSceneToShadowMap();
+	void drawThisScene();
 
 
 private:
