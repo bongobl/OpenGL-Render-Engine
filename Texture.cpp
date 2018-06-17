@@ -19,9 +19,11 @@ void Texture::loadCubeMap(std::vector<std::string> faces) {
 	loadCubeMapTexture(faces);
 }
 void Texture::disposeCurrentTexture() {
-	glDeleteTextures(1, &id);
-	type = Texture::INVALID;
-	id = 0;
+	if (id != 0) {
+		glDeleteTextures(1, &id);
+		type = Texture::INVALID;
+		id = 0;
+	}
 }
 unsigned int Texture::getType() {
 	return type;

@@ -33,8 +33,7 @@ ShadowMap::ShadowMap() {
 	projectionMatrix = glm::ortho<float>(-100, 100, -100, 100, -200, 200);
 }
 ShadowMap::~ShadowMap() {
-	depthTexture.disposeCurrentTexture();
-	glDeleteBuffers(1, &frameBuffer);
+	disposeBufferAndTexture();
 }
 void ShadowMap::initBufferAndTexture() {
 
@@ -64,7 +63,10 @@ void ShadowMap::initBufferAndTexture() {
 void ShadowMap::disposeBufferAndTexture() {
 
 	depthTexture.disposeCurrentTexture();
-	glDeleteBuffers(1, &frameBuffer);
+	if (frameBuffer != -1) {
+		glDeleteBuffers(1, &frameBuffer);
+		frameBuffer = -1;
+	}
 }
 void ShadowMap::applyAttributes(Light* curr_light) {
 

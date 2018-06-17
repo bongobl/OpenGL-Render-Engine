@@ -141,17 +141,17 @@ void main()
 
 	//Lighting Modes
 	if(material.useDiffuse == 1){
+
+		int currShadowMap = 0;
 		for(int i = 0; i < numLights; ++i){
 			calc_LandC_L(i);
-			if(i == 0){
-				vec4 light0_position = allLights[0].VP * vec4(world_position,1);
-				if (texture( shadowMaps[0], light0_position.xy ).z  <  light0_position.z - 0.005){
-					visibility = 0.5f;
-				}else{
-					visibility = 1.0f;
+			visibility = 1.0f;
+			if(allLights[i].type == DIRECTIONAL_LIGHT){
+				vec4 lightSpaceposition = allLights[i].VP * vec4(world_position,1);
+				if (texture(shadowMaps[currShadowMap], lightSpaceposition.xy ).z  <  lightSpaceposition.z - 0.005){
+					visibility = 0;
 				}
-			}else{
-				visibility = 1.0f;
+				++currShadowMap;
 			}
 			multiplier += visibility * vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * allLights[i].color * C_l;
 		}

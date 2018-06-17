@@ -22,9 +22,8 @@ protected:
 	std::vector<LightStruct> allSceneLightStructs;
 	GLuint UBO_Lights;
 
-	//Shadow Map
-	ShadowMap light0ShadowMap;
-
+	//all shadow maps
+	std::vector<ShadowMap> shadowMaps;
 
 public:
 	

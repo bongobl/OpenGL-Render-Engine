@@ -18,7 +18,6 @@ struct LightStruct {
 
 	glm::mat4 VP;
 
-	//LightStruct() {;}
 
 };
 
