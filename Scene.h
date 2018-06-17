@@ -23,7 +23,7 @@ protected:
 	GLuint UBO_Lights;
 
 	//all shadow maps
-	std::vector<ShadowMap> shadowMaps;
+	std::vector<ShadowMap*> shadowMaps;
 
 public:
 	

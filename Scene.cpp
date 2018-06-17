@@ -15,13 +15,17 @@ void Scene::init() {
 
 	initThisScene();
 
+	
 	//init all shadowMaps
+	GLuint currShadowMap = 0;
 	for (GLuint i = 0; i < allSceneLights.size(); ++i) {
 		if (allSceneLights[i]->type == Light::DIRECTIONAL) {
-			shadowMaps.push_back(ShadowMap());
-			shadowMaps[i].initBufferAndTexture();
-		}
+			shadowMaps.push_back(new ShadowMap());
+			shadowMaps[currShadowMap]->initBufferAndTexture();
+			++currShadowMap;
+		}	
 	}
+	
 }
 
 void Scene::dispose() {
@@ -29,7 +33,7 @@ void Scene::dispose() {
 	disposeThisScene();
 
 	for (GLuint i = 0; i < shadowMaps.size(); ++i) {
-		shadowMaps[i].disposeBufferAndTexture();
+		shadowMaps[i]->disposeBufferAndTexture();
 	}
 	glDeleteBuffers(1, &UBO_Lights);
 }
@@ -52,14 +56,17 @@ void Scene::calcShadowMaps() {
 	glUseProgram(ShadowMap::getShaderProgram());	//set active shader
 
 	
+	
 	GLuint currShadowMap = 0;
 	for (GLuint currLight = 0; currLight < allSceneLights.size(); ++currLight) {
 		if (allSceneLights[currLight]->type == Light::DIRECTIONAL) {
-			shadowMaps[currShadowMap].applyAttributes(allSceneLights[currLight]); //also sets Light's VP matrix in biased form
+			shadowMaps[currShadowMap]->applyAttributes(allSceneLights[currLight]); //also sets Light's VP matrix in biased form
 			drawThisSceneToShadowMap();	//draw scene to current shadow map
 			++currShadowMap;
 		}
 	}
+
+
 	
 }
 void Scene::draw() {
@@ -68,12 +75,15 @@ void Scene::draw() {
 	glUseProgram(Material::getShaderProgram());	
 
 	//send shadow maps to material shader, start at 3, since 0-2 used by material textures
+	
+	
 	for (GLuint i = 0; i < shadowMaps.size(); ++i) {
 		std::string location = "shadowMaps[" + std::to_string(i) + "]";
 		glUniform1i(glGetUniformLocation(Material::getShaderProgram(), location.c_str()), i + 3);
 		glActiveTexture(GL_TEXTURE3 + i);
-		glBindTexture(GL_TEXTURE_2D, shadowMaps[0].getDepthTexture().getID());
+		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]->getDepthTexture().getID());
 	}
+
 
 	//apply lights
 	applyAllLights();

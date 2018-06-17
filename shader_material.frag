@@ -145,6 +145,7 @@ void main()
 		int currShadowMap = 0;
 		for(int i = 0; i < numLights; ++i){
 			calc_LandC_L(i);
+			
 			visibility = 1.0f;
 			if(allLights[i].type == DIRECTIONAL_LIGHT){
 				vec4 lightSpaceposition = allLights[i].VP * vec4(world_position,1);
@@ -153,8 +154,10 @@ void main()
 				}
 				++currShadowMap;
 			}
+
 			multiplier += visibility * vec4(material.diffuse,0) * max( dot(world_normal, L), 0) * allLights[i].color * C_l;
 		}
+
 		outColor *= multiplier;
 	}
 	if(material.useSpecular == 1){

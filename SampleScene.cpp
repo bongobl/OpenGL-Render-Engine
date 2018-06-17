@@ -15,7 +15,8 @@ void SampleScene::initThisScene() {
 	allSceneLights[0]->setLocalRotation(glm::rotate(glm::mat4(1.0f), 3 * glm::pi<float>() / 4, glm::vec3(1, 0, 0)));
 	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 1, 0), 5, 3.3333f * glm::vec3(-20, 20, 30)));
 	allSceneLights.push_back(new Light(Light::POINT, glm::vec3(0, 0, 1), 5, 3.3333f * glm::vec3(20, 30, -20)));
-
+	allSceneLights.push_back(new Light(Light::DIRECTIONAL, glm::vec3(1, 1, 1), 0.40f, glm::vec3(0, 50, 30)));
+	allSceneLights[3]->setLocalRotation(glm::rotate(glm::mat4(1.0f), glm::pi<float>() / 8.0f, glm::vec3(0, 1, 0)) *  glm::rotate(glm::mat4(1.0f), 3 * glm::pi<float>() / 4.0f, glm::vec3(1, 0, 0)));
 
 	//init camera
 	currActiveCamera = new Camera(glm::vec3(0, 0, 120), glm::pi<float>() / 4);
@@ -58,6 +59,9 @@ void SampleScene::initThisScene() {
 	prism->getMaterial().loadReflectionTexture(oceanViewCubeMap);
 	prism->getMaterial().setUseReflectionTexture(true);
 
+	
+	
+
 	//scene hierarchy
 	wall->addChild(cylinder);
 	wall->addChild(prism);
@@ -86,8 +90,8 @@ void SampleScene::disposeThisScene() {
 
 void SampleScene::updateThisScene() {
 
-	wall->setLocalRotation(glm::rotate(glm::mat4(1.0f), SceneManager::getDeltaTime() / 3, glm::vec3(0, 1, 0)) * wall->getRotation(SceneObject::OBJECT));
-
+	//wall->setLocalRotation(glm::rotate(glm::mat4(1.0f), SceneManager::getDeltaTime() / 3, glm::vec3(0, 1, 0)) * wall->getRotation(SceneObject::OBJECT));
+	allSceneLights[3]->setLocalRotation(glm::rotate(glm::mat4(1.0f), SceneManager::getDeltaTime() / 3, glm::vec3(0, 1, 0)) * allSceneLights[3]->getRotation(SceneObject::OBJECT));
 	//prism->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime / 3, glm::vec3(0, 1, 0)) * prism->getRotation(SceneObject::OBJECT));
 	//cylinder->setLocalRotation(glm::rotate(glm::mat4(1.0f), deltaTime * 2, glm::vec3(0, 0, 1)) * cylinder->getRotation(SceneObject::OBJECT));
 
@@ -101,7 +105,10 @@ void SampleScene::drawThisSceneToShadowMap() {
 	currActiveCamera->drawToShadowMap();
 	wall->drawToShadowMap();
 	
-	allSceneLights[0]->drawToShadowMap();
+
+	for (GLuint i = 0; i < allSceneLights.size(); ++i) {
+		allSceneLights[i]->drawToShadowMap();
+	}
 
 }
 void SampleScene::drawThisScene() {
@@ -110,7 +117,9 @@ void SampleScene::drawThisScene() {
 	oceanView.draw(this);
 	currActiveCamera->draw(this);
 	wall->draw(this);
-	allSceneLights[0]->draw(this);
+	for (GLuint i = 0; i < allSceneLights.size(); ++i) {
+		allSceneLights[i]->draw(this);
+	}
 	
 }
 

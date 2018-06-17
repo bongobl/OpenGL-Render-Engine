@@ -82,6 +82,7 @@ void ShadowMap::applyAttributes(Light* curr_light) {
 	curr_light->setViewProjectionMatrix(biasMatrix * projectionMatrix * lightViewMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightProjection"), 1, GL_FALSE, &projectionMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightView"), 1, GL_FALSE, &lightViewMatrix[0][0]);
+
 }
 
 

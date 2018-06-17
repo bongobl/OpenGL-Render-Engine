@@ -130,6 +130,7 @@ void SceneManager::draw() {
 
 	//set display matrix for window screen
 	glViewport(0, 0, SceneManager::windowWidth, SceneManager::windowHeight);
+
 	//draw scene to frame buffer's screen texture
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
